@@ -19,7 +19,7 @@ echo "-------- [TEMPLATER BOT] --------" >> "$log"
 echo "" >> "$log"
 echo "    The bot went down at $(date)" >> "$log"
 echo "    Sending email notifice" >> "$log"
-/usr/local/opt/php55/bin/php -f "/Users/arie/Dev/Templater/Scripts/on-bot-disable.php" -- $1 $2 $3
+/usr/local/opt/php55/bin/php -f "/Users/arie/Dev/Templater/Scripts/on-bot-disable.php" -- "$1" "$2" "$3"
 echo "    Done sending email notice" >> "$log"
 echo "" >> "$log"
 
