@@ -1,12 +1,30 @@
-/*
- *
- *  Concatenate jobs from a batch
- *  Copyright (c) Dataclay LLC 2016
- *  MIT License
- *
- *  Concatenate via ffmpeg.
- *
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Concatenate jobs from a batch
+Copyright (c) Dataclay LLC 2016
+MIT License
+
+Concatenate Templater batch output with ffmpeg.
+
+To use this script.  Make sure to have ffmpeg installed and point to
+both the ffmpeg and ffprobe binaries in the code below.  Then, make
+sure that the script's dependencies are installed by entering `npm
+install` in the root of your working directory.
+
+Enter the following command within the "After all jobs" field found
+within the Templater Preferences dialog.  If using the Templater CLI,
+enter the following command in the "post_cmd_batch" property found
+within the templater-options.json file.
+
+     node /Users/arie/Dev/event-scripts/NodeJS/concatenate.js --details $data_batch --outdir $out_dir --outname "finalrender.mov"
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+//Constants
+var ffmpeg_win  = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
+    ffprobe_win = "C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe",
+    ffmpeg_osx  = "/usr/local/bin/ffmpeg",
+    ffprobe_osx = "/usr/local/bin/ffprobe";
 
 //Required Node Modules
 var os     = require('os'),
@@ -16,15 +34,17 @@ var os     = require('os'),
     ffmpeg = require('fluent-ffmpeg'),
     argv   = require('minimist')(process.argv.slice(2));
 
-var batch_details_json  = require(path.resolve(process.argv[2])),
-    sequencer_filename  = 'concat.seq',
-    sequencer_tmp       = path.join(os.tmpdir(), sequencer_filename);
-    sequencer_file      = path.join(process.argv[3], sequencer_filename),
+var batch_details_json  = require(path.resolve(argv.details)),
     ffmpeg_cmd          = ffmpeg(),
-    concat_output       = path.join(process.argv[3], process.argv[4] + '.avi');
+    concat_output       = path.join(argv.outdir, argv.outname);
 
-ffmpeg.setFfmpegPath("C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe");
-ffmpeg.setFfprobePath("C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe");
+if (process.platform == 'win32') {
+    ffmpeg.setFfmpegPath(ffmpeg_win);
+    ffmpeg.setFfprobePath(ffprobe_win);
+} else {
+    ffmpeg.setFfmpegPath(ffmpeg_osx);
+    ffmpeg.setFfprobePath(ffprobe_osx);
+}
 
 console.log("\n\nGathering scenes and sequencing for movie");
 for (var i=0; i < batch_details_json.length; i++) {
@@ -33,8 +53,7 @@ for (var i=0; i < batch_details_json.length; i++) {
      console.log("\n\tscene " + (i + 1));
      console.log("\t" + input_file);
 
-     ffmpeg_cmd.input(path.resolve(input_file))
-               .inputFormat('avi');
+     ffmpeg_cmd.input(path.resolve(input_file));
 
 }
 

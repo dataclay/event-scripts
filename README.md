@@ -1,15 +1,18 @@
 # Event Scripts for Templater
 
-#### What are they?
-Scripts or terminal commands that "hook" into Templater's processes.  Such scripts and commands allow you to extend automation capabilities of Templater.  This repository contains sample scripts intended to be executed when Templater broadcasts specific events.  
+#### What are Event Scripts?
+Event scripts are scripts that listen for events that Templater broadcasts while it executes.  They're scripts or terminal commands that "hook" into Templater's processes thereby allowing you to extend automation capabilities of Templater.  This repository contains sample scripts intended to be executed when Templater broadcasts specific events.
 >**NOTE** </br>Templater Bot must be installed and activated to make use of event scripts.
 
+</br>
 #### Why use them?
 Because you want to seamlessly integrate Templater into your application.  For example, in a production scenario, you might want to [merge](http://github.com/dataclay/event-scripts/), transcode, or compress Templater's output—all of which can be accomplished calling a command line application like [ffmpeg](https://www.ffmpeg.org) within a script.  You also might want to automate publishing output to a specific destination like an FTP site, your [YouTube](https://developers.google.com/youtube/v3/docs/), [Vimeo](https://developer.vimeo.com/api/upload/videos), or [JWPlatform](https://developer.jwplayer.com/jw-platform/reference/v1/#) account.  In addition you could send out various notifications when a batch of renders completes—email, text message, etc.  Ultimately, you gain a great deal of flexibility with Templater by having the ability to hook into its processes.
 
+</br>
 #### How to use them?
-By registering script files or commands to listen for specific events that are broadcast by Templater.  You can do this within the `Templater Preferences` dialog, or the `templater-options.json` file if using the command line interface.  
+By registering script files or commands to listen for specific events that are broadcast by Templater.  You can do this within the `Templater Preferences` dialog, or the `templater-options.json` file if using the command line interface.
 
+</br>
 >###### Registering scripts within the preferences dialog
 Find three fields under the `Bot Settings` group listed under the title `Shell command for bot events`.  Click the `...` button to open a file picker and choose a file that you want to run for that particular event, or simply type an absolute path to the script.  Alternatively, you can input any command as you would if you were in a terminal session.
 
@@ -21,6 +24,7 @@ Set the `post_cmd_job`, `post_cmd_batch`, and `shutdown_cmd` properties within t
 
 >![Register scripts in templater-options.json](http://dataclay.com/images/screenshots/event-scripts-opts.png)
 
+</br>
 #### Which events are broadcast?
 The following table lists event names and when they are broadcast
 
@@ -32,6 +36,15 @@ The following table lists event names and when they are broadcast
 | Post Batch                     | After Effects completes rendering a batch of queue items added by Templater, or when Templater completes a batch replication process. |
 | On Bot Disable              | The Bot is disabled for any reason other than a hard crash.  |
 >
+
+</br>
+#### How to get started with sample event scripts?
+To get started with the sample scripts in the *event-scripts* repository, follow these steps:
+
+1.  Clone or download this repository to a working directory on your local machine.  
+2.  In a new terminal or command line session, change into your newly created working directory 
+3.  Enter `npm install`.  Let all dependencies necessary for the NodeJS scripts install to your working directory
+4.  Adjust absolute paths within the sample script's code for your system environment.
 
 </br>
 ## Passing job details to event scripts

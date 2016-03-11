@@ -1,19 +1,18 @@
-/*
- *
- *  Post-job script for Templater
- *  Copyright (c) Dataclay LLC 2016
- *  MIT License
- *
- *  Concatenate via ffmpeg.  Call this from a Windows Batch File
- *
- *  From templater, use the following command line
- *  to call this script directly after Templater
- *  processes a job
- *
- *  node post_job.js --data $data_job --aedir $aep_dir --outfile $out_file
- *
- *
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Log each Templater versioning job to a file
+Copyright (c) Dataclay LLC 2016
+MIT License
+
+To log information about the most recently completed job, enter the
+following command within the "After each job" field found within the
+Templater Preferences dialog.  If using the Templater CLI, enter it
+into the "post_cmd_job" property found within the
+templater-options.json file.
+
+    node /Users/arie/Dev/event-scripts/NodeJS/post_job.js --outdir $out_dir --aefile $aep --data $data_job --aedir $aep_dir --outfile $out_file -- $title
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 //Required NodeJS Modules
 var os       = require('os'),
