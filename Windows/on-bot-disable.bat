@@ -23,7 +23,7 @@ For /f "tokens=1-2 delims=/:" %%a in ('time /t') do (set mytime=%%a%%b)
 echo -------- [TEMPLATER BOT] -------- >> %log%
 echo     The bot went down on  %mydate% @ %mytime% >> %log%
 echo     Sending email notice >> %log%
-"C:\Program Files (x86)\PHP\php.exe" "L:\Templater\Scripts\on-bot-disable-win.php" %1 %2 %3
+"C:\Program Files (x86)\PHP\php.exe" "L:\event-scripts\Windows\on-bot-disable-win.php" %1 %2 %3
 echo     Done sending email notice >> %log%
 
 

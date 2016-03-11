@@ -1,0 +1,38 @@
+{
+  "name": "event-scripts",
+  "version": "1.0.0",
+  "description": "Node JS event scripts for Templater for Adobe After Effects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ariestav@github.com/dataclay/event-scripts.git"
+  },
+  "keywords": [
+    "dataclay",
+    "after",
+    "effects",
+    "adobe",
+    "variable",
+    "video",
+    "dynamic",
+    "video",
+    "video",
+    "data"
+  ],
+  "author": "Arie Stavchansky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dataclay/event-scripts/issues"
+  },
+  "homepage": "https://github.com/dataclay/event-scripts#readme",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.0.1",
+    "fs-extra": "^0.26.5",
+    "glob": "^7.0.0",
+    "minimist": "^1.2.0",
+    "moment": "^2.11.2"
+  }
+}
