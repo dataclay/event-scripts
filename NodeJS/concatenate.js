@@ -1,10 +1,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-Concatenate jobs from a batch
+Concatenate Templater batch output with ffmpeg.
 Copyright (c) Dataclay LLC 2016
 MIT License
 
-Concatenate Templater batch output with ffmpeg.
+You must enter `npm install` to install all dependency modules used in
+this script.  All modules are listed in the package.json file in the
+root of this repository.
 
 To use this script.  Make sure to have ffmpeg installed and point to
 both the ffmpeg and ffprobe binaries in the code below.  Then, make
@@ -16,7 +18,7 @@ within the Templater Preferences dialog.  If using the Templater CLI,
 enter the following command in the "post_cmd_batch" property found
 within the templater-options.json file.
 
-     node /Users/arie/Dev/event-scripts/NodeJS/concatenate.js --details $data_batch --outdir $out_dir --outname "finalrender.mov"
+     node /path/to/event-scripts/NodeJS/concatenate.js --details $data_batch --outdir $out_dir --outname "finalrender.mov"
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

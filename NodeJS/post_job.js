@@ -4,13 +4,20 @@ Log each Templater versioning job to a file
 Copyright (c) Dataclay LLC 2016
 MIT License
 
+You must enter `npm install` to install all dependency modules used in
+this script.  All modules are listed in the package.json file in the
+root of this repository.
+
 To log information about the most recently completed job, enter the
 following command within the "After each job" field found within the
 Templater Preferences dialog.  If using the Templater CLI, enter it
 into the "post_cmd_job" property found within the
 templater-options.json file.
 
-    node /Users/arie/Dev/event-scripts/NodeJS/post_job.js --outdir $out_dir --aefile $aep --data $data_job --aedir $aep_dir --outfile $out_file -- $title
+    node /path/to/event-scripts/NodeJS/post_job.js --outdir $out_dir --aefile $aep --data $data_job --aedir $aep_dir --outfile $out_file -- $title
+
+NOTE:  The "-- $title" part of the command assumes that your data
+source has a column header, or property key, named "title"
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
