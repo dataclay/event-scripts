@@ -106,7 +106,7 @@ archive_output.on('close', function() {
     }
 
     //Copy the archive to its repository
-    fse.renameSync(archive_file, path.resolve(repo_dir, archive_filename));
+    fse.copySync(archive_file, path.resolve(repo_dir, archive_filename));
 
 });
 
