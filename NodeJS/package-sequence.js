@@ -8,14 +8,9 @@ You must enter `npm install` to install all dependency modules used in
 this script.  All modules are listed in the package.json file in the
 root of this repository.
 
-To use this script.  Make sure to have ffmpeg installed and point to
-both the ffmpeg and ffprobe binaries in the code below.  Then, make
-sure that the script's dependencies are installed by entering `npm
-install` in the root of your working directory.
-
 Enter the following command within the "After all jobs" field found
 within the Templater Preferences dialog.  If using the Templater CLI,
-enter the following command in the "post_cmd_batch" property found
+enter the following command in the "post_cmd_job" property found
 within the templater-options.json file.
 
      node /path/to/event-scripts/NodeJS/package-sequence.js --outdir $out_dir --outname $id --aefile $aep --aedir $aep_dir --repo "/path/to/archive/repository" --extension "zip"
