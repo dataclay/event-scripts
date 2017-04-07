@@ -40,7 +40,7 @@ The following table lists event names and when they are broadcast
 &nbsp;
 ### How to get started with the sample event scripts?
 
-## To get started with the Windows or OSX sample scripts, follow these steps:
+#### To get started with the Windows or OSX sample scripts, follow these steps:
 
 1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
 2.  In After Effects, in the *Templater Preferences* panel, in the *Shell commands for bot events* section, use the file selector *...* to choose the file location for a sample event script. For a script that should run after each individual job, input the file location into the *After each job* field. For a script that should run after a batch, input the file location into the *After all jobs* field.  For a script that should run when The Bot has been disabled for some reason, input the file location into the *On disable* field.
@@ -48,7 +48,7 @@ The following table lists event names and when they are broadcast
 4.  You can now render or replicate and ensure that the event script executes as intended.
 
 &nbsp;
-## To get started with the **NodeJS** example event scripts, follow these steps:
+#### To get started with the **NodeJS** example event scripts, follow these steps:
 
 1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
 2.  In a new terminal or command line session, change into your newly created working directory.
