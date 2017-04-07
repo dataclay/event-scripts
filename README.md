@@ -4,7 +4,7 @@
 Event scripts are scripts that are listening for events that Templater broadcasts while it executes.  These scripts, or any command for that matter, "hook" into Templater's processes allowing you to extend its automation capability.  This repository contains sample scripts intended to be executed when Templater broadcasts specific events.
 >**NOTE** </br>Templater Bot must be installed and activated to make use of event scripts.
 
-
+<br><br>
 #### Why use them?
 Use event scripts when you want to seamlessly integrate Templater into your existing application.  For example, in a production scenario, you can [merge](http://github.com/dataclay/event-scripts/), transcode, or compress Templater's output—all of which can be accomplished calling a command line application like [ffmpeg](https://www.ffmpeg.org) within a script.  You can also automate publishing output to a specific destination like an FTP site, or your [YouTube](https://developers.google.com/youtube/v3/docs/), [Vimeo](https://developer.vimeo.com/api/upload/videos), or [JWPlatform](https://developer.jwplayer.com/jw-platform/reference/v1/#) account.  In addition you can send out various notifications when a batch of renders completes—email, text message, etc.  Ultimately, you gain a great deal of flexibility with Templater by having the ability to hook into its processes.
 
