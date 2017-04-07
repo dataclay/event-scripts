@@ -14,13 +14,13 @@ Register script files or commands to listen for specific events that are broadca
 
 &nbsp;
 >###### Registering scripts within the preferences dialog
-Find three fields under the `Bot Settings` group listed under the title `Shell command for bot events`.  Click the `...` button to open a file picker and choose a file that you want to run for that particular event, or simply type an absolute path to the script.  Alternatively, you can input any command as you would if you were in a terminal session.
+>Find three fields under the `Bot Settings` group listed under the title `Shell command for bot events`.  Click the `...` button to open a file picker and choose a file that you want to run for that >particular event, or simply type an absolute path to the script.  Alternatively, you can input any command as you would if you were in a terminal session.
 
 >![Register scripts in Templater Preferences dialog](http://dataclay.com/images/screenshots/event-scripts-prefs.png)
 
 &nbsp;
 >###### Registering scripts within the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file
-Set the `post_cmd_job`, `post_cmd_batch`, and `shutdown_cmd` properties within the `bot` object to the absolute path of the file you want to run for that particular event.  Alternatively, you can input any command line incantation as you would if you were in a terminal session.
+>Set the `post_cmd_job`, `post_cmd_batch`, and `shutdown_cmd` properties within the `bot` object to the absolute path of the file you want to run for that particular event.  Alternatively, you can input any command line incantation as you would if you were in a terminal session.
 
 >![Register scripts in templater-options.json](http://dataclay.com/images/screenshots/event-scripts-opts.png)
 
@@ -31,10 +31,10 @@ The following table lists event names and when they are broadcast
 >Events as of Templater version 2.0.0
 >
 >| Event Name                 |             Broadcast when...              |
-|:--------------------------------|:-------------------------------------|
-| Post Job                        | After Effects completes rendering a queue item that was added by Templater, or Templater completes a single replication of a target composition. |
-| Post Batch                     | After Effects completes rendering a batch of queue items added by Templater, or Templater completes a batch replication process. |
-| On Bot Disable              | The Bot is disabled for any reason other than a hard crash.  |
+>|:--------------------------------|:-------------------------------------|
+>| Post Job                        | After Effects completes rendering a queue item that was added by Templater, or Templater completes a single replication of a target composition. |
+>| Post Batch                     | After Effects completes rendering a batch of queue items added by Templater, or Templater completes a batch replication process. |
+>| On Bot Disable              | The Bot is disabled for any reason other than a hard crash.  |
 >
 
 &nbsp;
