@@ -1,4 +1,4 @@
-# Event Scripts for Templater
+﻿# Event Scripts for Templater
 
 #### What are Event Scripts?
 Event scripts are scripts that are listening for events that Templater broadcasts while it executes.  These scripts, or any command for that matter, "hook" into Templater's processes allowing you to extend its automation capability.  This repository contains sample scripts intended to be executed when Templater broadcasts specific events.
