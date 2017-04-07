@@ -40,25 +40,25 @@ The following table lists event names and when they are broadcast
 &nbsp;
 ### How to get started with the sample event scripts?
 
-#### To get started with the Windows or OSX sample scripts, follow these steps:
-
-1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
-2.  In After Effects, in the *Templater Preferences* panel, in the *Shell commands for bot events* section, use the file selector *...* to choose the file location for a sample event script. For a script that should run after each individual job, input the file location into the *After each job* field. For a script that should run after a batch, input the file location into the *After all jobs* field.  For a script that should run when The Bot has been disabled for some reason, input the file location into the *On disable* field.
-3.  Tick the *For all commands, use job details as arguments* check box to pass job information to the script. Click *OK*.
-4.  You can now render or replicate and ensure that the event script executes as intended.
-
-&nbsp;
-#### To get started with the **NodeJS** example event scripts, follow these steps:
-
-1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
-2.  In a new terminal or command line session, change into your newly created working directory.
-3.  Enter `npm install` and wait for all dependencies to install into your working directory.
-4.  Change any absolute paths within the sample code to fit your system environment.
-5.  Open the script you want to run and find the complete command line to use for registering with Templater's event.  Copy the command line incantation, and paste it into the appropriate field 
-6.  You can now render or replicate and ensure that the event script executes as intended.
+>#### To get started with the Windows or OSX sample scripts, follow these steps:
+>
+>1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
+>2.  In After Effects, in the *Templater Preferences* panel, in the *Shell commands for bot events* section, use the file selector *...* to choose the file location for a sample event script. For a script that should run after each individual job, input the file location into the *After each job* field. For a script that should run after a batch, input the file location into the *After all jobs* field.  For a script that should run when The Bot has been disabled for some reason, input the file location into the *On disable* field.
+>3.  Tick the *For all commands, use job details as arguments* check box to pass job information to the script. Click *OK*.
+>4.  You can now render or replicate and ensure that the event script executes as intended.
 
 &nbsp;
-### Passing job details to event scripts
+>#### To get started with the **NodeJS** example event scripts, follow these steps:
+>
+>1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
+>2.  In a new terminal or command line session, change into your newly created working directory.
+>3.  Enter `npm install` and wait for all dependencies to install into your working directory.
+>4.  Change any absolute paths within the sample code to fit your system environment.
+>5.  Open the script you want to run and find the complete command line to use for registering with Templater's event.  Copy the command line incantation, and paste it into the appropriate field 
+>6.  You can now render or replicate and ensure that the event script executes as intended.
+
+&nbsp;
+## Passing job details to event scripts
 When Templater broadcasts events, you can pass versioning data to a registered event script or command by using variables with names prefixed with the dollar symbol `$`.  
 
 For example, consider that `C:\compress.bat` is registered with Templater's Post Job event, and that Templater processed a job with the following versioning data.
