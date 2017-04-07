@@ -8,23 +8,23 @@ Event scripts are scripts that are listening for events that Templater broadcast
 #### Why use them?
 Use event scripts when you want to seamlessly integrate Templater into your existing application.  For example, in a production scenario, you can [merge](http://github.com/dataclay/event-scripts/), transcode, or compress Templater's output—all of which can be accomplished calling a command line application like [ffmpeg](https://www.ffmpeg.org) within a script.  You can also automate publishing output to a specific destination like an FTP site, or your [YouTube](https://developers.google.com/youtube/v3/docs/), [Vimeo](https://developer.vimeo.com/api/upload/videos), or [JWPlatform](https://developer.jwplayer.com/jw-platform/reference/v1/#) account.  In addition you can send out various notifications when a batch of renders completes—email, text message, etc.  Ultimately, you gain a great deal of flexibility with Templater by having the ability to hook into its processes.
 
-<br>
+&nbsp;
 #### How do I use event scripts?
 Register script files or commands to listen for specific events that are broadcast by Templater.  You can do this within the `Templater Preferences` dialog or the `templater-options.json` file if using the command line interface.
 
-<br>
+&nbsp;
 >###### Registering scripts within the preferences dialog
 Find three fields under the `Bot Settings` group listed under the title `Shell command for bot events`.  Click the `...` button to open a file picker and choose a file that you want to run for that particular event, or simply type an absolute path to the script.  Alternatively, you can input any command as you would if you were in a terminal session.
 
 >![Register scripts in Templater Preferences dialog](http://dataclay.com/images/screenshots/event-scripts-prefs.png)
 
-<br>
+&nbsp;
 >###### Registering scripts within the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file
 Set the `post_cmd_job`, `post_cmd_batch`, and `shutdown_cmd` properties within the `bot` object to the absolute path of the file you want to run for that particular event.  Alternatively, you can input any command line incantation as you would if you were in a terminal session.
 
 >![Register scripts in templater-options.json](http://dataclay.com/images/screenshots/event-scripts-opts.png)
 
-<br>
+&nbsp;
 #### Which events does Templater broadcast?
 The following table lists event names and when they are broadcast
 
@@ -37,7 +37,7 @@ The following table lists event names and when they are broadcast
 | On Bot Disable              | The Bot is disabled for any reason other than a hard crash.  |
 >
 
-<br>
+&nbsp;
 #### How to get started with the sample event scripts?
 
 To get started with the Windows or OSX sample scripts, follow these steps:
@@ -56,7 +56,7 @@ To get started with the **NodeJS** example event scripts, follow these steps:
 5.  Open the script you want to run and find the complete command line to use for registering with Templater's event.  Copy the command line incantation, and paste it into the appropriate field 
 6.  You can now render or replicate and ensure that the event script executes as intended.
 
-<br>
+&nbsp;
 ## Passing job details to event scripts
 When Templater broadcasts events, you can pass versioning data to a registered event script or command by using variables with names prefixed with the dollar symbol `$`.  
 
@@ -102,7 +102,7 @@ The following lists show variables that can be used as arguments for your event 
 | `$out_dir`          | Path to the job's output directory |
 | `$out_file`         | Path to the final rendered output if it was rendered successfully; `null` if the target composition was replicated.           |
 
-<br>
+&nbsp;
 > Available arguments for **Post Batch** event script or command
 >
 >| Argument | Expands To |
@@ -113,7 +113,7 @@ The following lists show variables that can be used as arguments for your event 
 | `$data_batch`    | Path to a json formatted text file file containing versioning data for all jobs within batch           |
 | `$out_dir`           | Path to the job's output directory            |
 
-<br>
+&nbsp;
 > Available arguments for **On Bot Disable** event script or command
 >
 >| Argument | Expands To |
@@ -122,7 +122,7 @@ The following lists show variables that can be used as arguments for your event 
 | `$aep`                | Path to the processed AE project file           |
 | `$aep_dir`          | Path to the directory containing the processed AE project file            |
 
-<br>
+&nbsp;
 You can register any command line incantation as if you were entering it in a terminal session like so
 
 	node C:\dev\event-scripts-master\OSX\concatenate.js $aep $out_dir $id $title
