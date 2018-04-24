@@ -65,7 +65,7 @@ Register script files or commands to listen for specific events that are broadca
 >  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See Argument Macros below for more information.
 >  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.  Refer to the table under Argument Macros for more information on what pre-existing information is available.
 ><br>
-![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
+>![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
 > 6. To add additional shell scripts for other Templater events, repeat steps 2 through 6.
 > 7. When you are finished adding script information, click **OK**.  The scripts or commands are registered to Templater events.
 
@@ -75,12 +75,12 @@ Register script files or commands to listen for specific events that are broadca
 >
 > 2. To pass arguments to the registered shell scripts, do one of the following
 >  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the integer **512** and string **08-24-2018** passed as arguments to the `setup-folder.bat` script
-	```
-	{ "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 120 'initialization'"} }
-	```
->      + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See _____ below for more information.
+```
+{ "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 120 'initialization'"} }
+```
+>  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See _____ below for more information.
 >
->      + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
+>  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
 
 
 
