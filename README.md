@@ -61,9 +61,19 @@ Register script files or commands to listen for specific events that are broadca
 `node /Users/home/event-scripts/my-node-script.js`
 >
 > 5. If passing arguments to the script is required, do one or more of the following
->  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field.
->  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See Argument Macros below for more information.
->  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.  Refer to the table under Argument Macros for more information on what pre-existing information is available.
+>  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
+>  ```
+> C:\Users\dev\event-scripts\setup-folder.bat 512 '08-24-2018'
+>  ```
+>  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script path or full command.  See Argument Macros below for more information.  The following example shows the `album-name` and `release-date` values from Templater's connected data source passed to the Windows Batch script `setup-folder.bat`.
+>  ```
+>  "C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date"
+>  ```
+>  + For passing pre-existing information to the script, select a different item from the Append drop down menu, then click **Append**.  Templater will append a corresponding macro to the entire command in the event field.  Refer to the table under Argument Macros and append one or more of them that as an argument to the path to the script 
+>  ```
+>  C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date"
+>  ```
+
 ><br><br>
 ![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
 >
@@ -75,19 +85,18 @@ Register script files or commands to listen for specific events that are broadca
 > 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of  an executable script file or enter a full command.  Refer to the following table of property keys, found within the `bot` object, of which you can register shell scripts or commands.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
 > 2. To pass arguments to the registered shell scripts, do one of the following
->  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the integer **512** and string **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
+>  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
 >  ```
-> { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 520 'initialization'"} }
+> { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'"} }
 >  ```
->  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See _____ below for more information.
-   ```
-   { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
-   ```
->
->  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
-   ```
-   { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
-   ```
+>  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script path or full command.  See Argument Macros below for more information.
+>  ```
+>  { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
+>  ```
+>  + For passing pre-existing information to the script, refer to the table under Argument Macros and append that as an argument to the path to the script select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
+>  ```
+>  { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
+>  ```
 
 
 
