@@ -76,9 +76,9 @@ Register script files or commands to listen for specific events that are broadca
 >
 > 2. To pass arguments to the registered shell scripts, do one of the following
 >  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the integer **512** and string **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
-   ```
-   { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 520 'initialization'"} }
-   ```
+     ```
+     { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 520 'initialization'"} }
+     ```
 >  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See _____ below for more information.
    ```
    { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
