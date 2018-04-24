@@ -17,7 +17,7 @@ A script is a file consisting of commands, written in a scripting language, to b
 
 &nbsp;
 >**WARNING** Possible breaking changes!<br>
-As of Templater 2.7 the **"For all commands, use job details as arguments"** preference found in earlier versions is deprecated. If your application currently makes use of that preference, your registered event scripts will fail when you upgrade Templater to version 2.7. _You must now explicitly append arguments to shell scripts if they are necessary_. Verify that you are explicitly passing arguments to your scripts, especially if you dsare using Templater’s command line interface. In the `templater-options.json` file, you can no longer use the `“job_detail_args”` property inside the `“bot”` object within the `“prefs”` object.
+As of Templater 2.7 the **"For all commands, use job details as arguments"** preference found in earlier versions is deprecated. If your application currently makes use of that preference, your registered event scripts will fail when you upgrade Templater to version 2.7. _You must now explicitly append arguments to shell scripts if they are necessary_. Verify that you are explicitly passing arguments to your scripts, especially if you are using Templater’s command line interface. In the `templater-options.json` file, you can no longer use the `“job_detail_args”` property inside the `“bot”` object within the `“prefs”` object.
 
 &nbsp;
 # FAQs about Event Scripts
@@ -78,7 +78,7 @@ Register script files or commands to listen for specific events that are broadca
 ```
 { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 520 'initialization'"} }
 ```
-> 3. This is a contiation
+> 3. THis a 
 >  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See _____ below for more information.
 >
 >  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
