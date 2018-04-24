@@ -61,7 +61,7 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 >  node /Users/home/event-scripts/my-node-script.js
 >  ```
-![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
+> ![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
 > 5. If passing arguments to the script is required, do one or more of the following
 >  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the Windows Batch script `timestamp.bat`.
 >  ```
