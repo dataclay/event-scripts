@@ -55,19 +55,19 @@ Register script files or commands to listen for specific events that are broadca
 >
 > 3. Select either a Before event or After event. To enable an script to execute when a specific event is broadcast, you must select the event checkbox. If the checkbox is deselected, the script is disabled.
 > 4. In the event field, enter the absolute path to the script or a full command.
->	+ For a script executable by the operating system, such as a Bash script (macOS) or Batch script (Windows), simply enter the absolute path to the script.
+>  + For a script executable by the operating system, such as a Bash script (macOS) or Batch script (Windows), simply enter the absolute path to the script.
 
->     + As a shortcut to enter the absolute path to the script, click **Choose script...** and navigate to the location of the script.  The path appears in the event field.
+>  + As a shortcut to enter the absolute path to the script, click **Choose script...** and navigate to the location of the script.  The path appears in the event field.
 
->	+ For a script requiring an interpreter such as *node* or *python*, use the full command syntax appropriate to the language used to write the script.  For example, for a script created in NodeJS, enter <br>
+>  + For a script requiring an interpreter such as *node* or *python*, use the full command syntax appropriate to the language used to write the script.  For example, for a script created in NodeJS, enter <br>
 `node /Users/home/event-scripts/my-node-script.js`
 >
 > 5. If passing arguments to the script is required, do one or more of the following
->      + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field.
+>  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field.
 
->      + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See Argument Macros below for more information.
+>  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See Argument Macros below for more information.
 
->      + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.  Refer to the table under Argument Macros for more information on what pre-existing information is available.
+>  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.  Refer to the table under Argument Macros for more information on what pre-existing information is available.
 ><br><br>
 ![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
 > 6. To add additional shell scripts for other Templater events, repeat steps 2 through 6.
