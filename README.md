@@ -75,14 +75,19 @@ Register script files or commands to listen for specific events that are broadca
 > 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of  an executable script file or enter a full command.  Refer to the following table of property keys, found within the `bot` object, of which you can register shell scripts or commands.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
 > 2. To pass arguments to the registered shell scripts, do one of the following
->  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the integer **512** and string **08-24-2018** passed as arguments to the `setup-folder.bat` script
+>  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the integer **512** and string **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
 ```
 { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 520 'initialization'"} }
 ```
-> 3. THis a 
 >  + For passing information from Templater's data source, enter the column name or property key, prefixed with a `$` symbol, after the script path in the event field.  See _____ below for more information.
+```
+{ "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
+````
 >
 >  + For passing pre-existing information to the script, select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
+```
+{ "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
+````
 
 
 
