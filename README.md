@@ -57,26 +57,25 @@ Register script files or commands to listen for specific events that are broadca
 > 4. In the event field, enter the absolute path to the script or a full command.
 >  + For a script executable by the operating system, such as a Bash script (macOS) or Batch script (Windows), simply enter the absolute path to the script.
 >  + As a shortcut to enter the absolute path to the script, click **Choose script...** and navigate to the location of the script.  The path appears in the event field.
->  + For a script requiring an interpreter such as *node* or *python*, use the full command syntax appropriate to the language used to write the script.  For example, for a script created in NodeJS, enter <br>
-`node /Users/home/event-scripts/my-node-script.js`
->
-> 5. If passing arguments to the script is required, do one or more of the following
->  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
+>  + For a script requiring an interpreter such as *node*, *python*, or *php*, use the full command syntax appropriate to the language used to write the script.  For example, for a script created in NodeJS, enter
 >  ```
-> C:\Users\dev\event-scripts\setup-folder.bat 512 '08-24-2018'
+>  node /Users/home/event-scripts/my-node-script.js
+>  ```
+><br><br>
+![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
+> 5. If passing arguments to the script is required, do one or more of the following
+>  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the Windows Batch script `timestamp.bat`.
+>  ```
+> C:\Users\dev\event-scripts\timestamp.bat 512 '08-24-2018'
 >  ```
 >  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script path or full command.  See Argument Macros below for more information.  The following example shows the `album-name` and `release-date` values from Templater's connected data source passed to the Windows Batch script `setup-folder.bat`.
 >  ```
->  "C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date"
+>  C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date
 >  ```
->  + For passing pre-existing information to the script, select a different item from the Append drop down menu, then click **Append**.  Templater will append a corresponding macro to the entire command in the event field.  Refer to the table under Argument Macros and append one or more of them that as an argument to the path to the script 
+>  + For passing pre-existing information to the script, select a different item from the Append drop down menu, then click **Append**.  Templater will append a corresponding argument macro to the entire command in the event field.  Refer to the table under Argument Macros for descriptions of each available macro.  The following example shows three pre-existing pieces of information passed to the NodeJS script `update-job.js`: (1) the path to the currently processed After Effect project file (`$aep`), (2) the full URI to Templater's connected data source (`$data_uri`), and (3) the host machine's current time (`$now`).
 >  ```
->  C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date"
+>  node C:\Users\dev\event-scripts\update-job.js $aep $data_uri $now
 >  ```
-
-><br><br>
-![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
->
 > 6. To add additional shell scripts for other Templater events, repeat steps 2 through 6.
 > 7. When you are finished adding script information, click **OK**.  The scripts or commands are registered to Templater events.
 
