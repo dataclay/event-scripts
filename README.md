@@ -47,20 +47,20 @@ The following table lists event names and a short description of each event.  Se
 
 >*Tempalter Events as of Templater version 2.7.0*
 >
->| Event Name    | Description                                      |
->|:--------------|:-------------------------------------------------|
->| Before Data   | Broadcast before Templater retrieves data        |
->| After Data    | Broadcast after Templater retrieves data         |
->| Before Batch  | Broadcast before Templater's main iteration loop |
->| After Batch   | Broadcast after Templater's main iteration loop  |
->| Before Job    | Broadcast before processing a single job         |
->| After Job     | Broadcast after processing a single job          |
->| Before Update | Broadcast before updating any layers             |
->| After Update  | Broadcast after updating any layers              |
->| Before Output | Broadcast before rendering any output            |
->| After Output  | Broadcast after rendering any output             |
->| Bot Enabled   | Broadcast when Bot is enabled                    |
->| Bot Disabled  | Broadcast when Bot is disabled                   |
+>| Event Name    | Broadcast...                              |
+>|:--------------|:------------------------------------------|
+>| Before Data   | ...before Templater retrieves data        |
+>| After Data    | ...after Templater retrieves data         |
+>| Before Batch  | ...before Templater's main iteration loop |
+>| After Batch   | ...after Templater's main iteration loop  |
+>| Before Job    | ...before processing a single job         |
+>| After Job     | ...after processing a single job          |
+>| Before Update | ...before updating any layers             |
+>| After Update  | ...after updating any layers              |
+>| Before Output | ...before rendering any output            |
+>| After Output  | ...after rendering any output             |
+>| Bot Enabled   | ...when Bot is enabled                    |
+>| Bot Disabled  | ...when Bot is disabled                   |
 
 
 
@@ -69,7 +69,7 @@ Register script files or commands to listen for specific events that are broadca
 
 
 ### Registering Shell Scripts
-##### Registering scripts within the *Templater Preferences* dialog
+##### Registering shell scripts within the *Templater Preferences* dialog
 > 1. In the *Templater Preferences* dialog, in the *Bot Settings* group, click **Setup Shell Commands**.
 > 2. In the *Register Shell Scripts with Events* dialog that opens, select a Templater event group to show available events associated with that group.
 ><br><br>
@@ -90,7 +90,7 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 > C:\Users\dev\event-scripts\timestamp.bat 512 '08-24-2018'
 >  ```
->  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the table under Argument Macros for a listing of all available pre-existing argument macros.  The following example shows how you would pass three pre-existing pieces of information to a registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
+>  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the table under Argument Macros for a listing of all available pre-existing argument macros.  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
 >  ```
 >  node C:\Users\dev\event-scripts\update-job.js $aep $data_uri $now
 >  ```
@@ -102,34 +102,38 @@ Register script files or commands to listen for specific events that are broadca
 > 7. When you are finished adding script information, click **OK**.  The scripts or commands are registered to Templater events.
 
 &nbsp;
-##### Registering scripts within the CLI options file
-> 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or a full command as you would enter it in a terminal session or command prompt.  Refer to the following table of property keys, found within the `bot` object, of which you can register shell scripts or commands.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
+##### Registering shell scripts within the CLI options file
+> 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or enter a full command as you would within a terminal session or command prompt.  Refer to the following table of property keys, found within the `bot` object, of which you can register shell scripts or commands.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
->  | Property in `bot` object  |  Description                        |
->  |:----------------------------|:------------------------------------|
->  | `"pre_cmd_data"`            | Before data is retrieved            |
->  | `"post_cmd_data"`           | After data is retrieved             |
->  | `"pre_cmd_batch"`           | Before main iteration loop starts   |
->  | `"post_cmd_batch"`          | After main iteration loop completes |
->  | `"pre_cmd_job"`             | Before job processing starts        |
->  | `"post_cmd_job"`            | After job processing completes      |
->  | `"pre_cmd_update"`          | Before layer updating starts        |
->  | `"post_cmd_update"`         | After layer updating completes      |
->  | `"pre_cmd_output"`          | Before rendering process starts     |
->  | `"post_cmd_output"`         | After rendering process completes   |
->  | `"enable_cmd"`              | When Bot is enabled                 |
->  | `"shutdown_cmd"`            | When Bot is disabled                |
+>  | Property in `bot` object    | Event Name    | Broadcast...                           |
+>  |:----------------------------|:--------------|:---------------------------------------|
+>  | `"pre_cmd_data"`            | Before Data   | ...before data is retrieved            |
+>  | `"post_cmd_data"`           | After Data    | ...after data is retrieved             |
+>  | `"pre_cmd_batch"`           | Before Batch  | ...before main iteration loop starts   |
+>  | `"post_cmd_batch"`          | After Batch   | ...after main iteration loop completes |
+>  | `"pre_cmd_job"`             | Before Job    | ...before job processing starts        |
+>  | `"post_cmd_job"`            | After Job     | ...after job processing completes      |
+>  | `"pre_cmd_update"`          | Before Update | ...before layer updating starts        |
+>  | `"post_cmd_update"`         | After Update  | ...after layer updating completes      |
+>  | `"pre_cmd_output"`          | Before Output | ...before rendering process starts     |
+>  | `"post_cmd_output"`         | After Output  | ...after rendering process completes   |
+>  | `"enable_cmd"`              | Bot Enabled   | ...when Bot is enabled                 |
+>  | `"shutdown_cmd"`            | Bot Disabled  | ...when Bot is disabled                |
 >&nbsp;
 > 2. To pass arguments to the registered shell scripts, do one of the following
->  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
+>  + For passing explicit values, append each value, separated by spaces, to the value of the event property. The following example shows how you would pass Integer **512** and String **08-24-2018** as arguments to the registered Windows Batch script `timestamp.bat`. Note that backslashes and other special characters must be escaped with a backslash on Windows operating systems.
 >  ```
-> { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'"} }
+> { 
+>    "prefs" : {
+>                "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'" } 
+>              }
+> }
 >  ```
->  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script path or full command.  See Argument Macros below for more information.
+>  + For passing pre-existing information to the script, refer to the table under Argument Macros and append that as an argument to the path to the script select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
 >  ```
 >  { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
 >  ```
->  + For passing pre-existing information to the script, refer to the table under Argument Macros and append that as an argument to the path to the script select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
+>  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script path or full command.  See Argument Macros below for more information.
 >  ```
 >  { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
 >  ```
