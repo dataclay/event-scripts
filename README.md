@@ -119,8 +119,8 @@ Register script files or commands to listen for specific events that are broadca
 >  | `"post_cmd_output"`         | After rendering process completes   |
 >  | `"enable_cmd"`              | When Bot is enabled                 |
 >  | `"shutdown_cmd"`            | When Bot is disabled                |
-
-> 1. To pass arguments to the registered shell scripts, do one of the following
+>&nbsp;
+> 2. To pass arguments to the registered shell scripts, do one of the following
 >  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
 >  ```
 > { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'"} }
