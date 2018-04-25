@@ -125,9 +125,9 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 > { 
 >    "prefs" : {
->                "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'" } 
+>                 "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'" }
 >              }
-> }
+>  }
 >  ```
 >  + For passing pre-existing information to the script, refer to the table under Argument Macros and append that as an argument to the path to the script select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
 >  ```
