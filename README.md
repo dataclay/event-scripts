@@ -105,20 +105,20 @@ Register script files or commands to listen for specific events that are broadca
 ##### Registering scripts within the CLI options file
 > 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or a full command as you would enter it in a terminal session or command prompt.  Refer to the following table of property keys, found within the `bot` object, of which you can register shell scripts or commands.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
- | Property in `bot` object  |  Description                        |
- |:----------------------------|:------------------------------------|
- | `"pre_cmd_data"`            | Before data is retrieved            |
- | `"post_cmd_data"`           | After data is retrieved             |
- | `"pre_cmd_batch"`           | Before main iteration loop starts   |
- | `"post_cmd_batch"`          | After main iteration loop completes |
- | `"pre_cmd_job"`             | Before job processing starts        |
- | `"post_cmd_job"`            | After job processing completes      |
- | `"pre_cmd_update"`          | Before layer updating starts        |
- | `"post_cmd_update"`         | After layer updating completes      |
- | `"pre_cmd_output"`          | Before rendering process starts     |
- | `"post_cmd_output"`         | After rendering process completes   |
- | `"enable_cmd"`              | When Bot is enabled                 |
- | `"shutdown_cmd"`            | When Bot is disabled                |
+>  | Property in `bot` object  |  Description                        |
+>  |:----------------------------|:------------------------------------|
+>  | `"pre_cmd_data"`            | Before data is retrieved            |
+>  | `"post_cmd_data"`           | After data is retrieved             |
+>  | `"pre_cmd_batch"`           | Before main iteration loop starts   |
+>  | `"post_cmd_batch"`          | After main iteration loop completes |
+>  | `"pre_cmd_job"`             | Before job processing starts        |
+>  | `"post_cmd_job"`            | After job processing completes      |
+>  | `"pre_cmd_update"`          | Before layer updating starts        |
+>  | `"post_cmd_update"`         | After layer updating completes      |
+>  | `"pre_cmd_output"`          | Before rendering process starts     |
+>  | `"post_cmd_output"`         | After rendering process completes   |
+>  | `"enable_cmd"`              | When Bot is enabled                 |
+>  | `"shutdown_cmd"`            | When Bot is disabled                |
 
 > 1. To pass arguments to the registered shell scripts, do one of the following
 >  + For passing an explicit values, enter each value, separated by spaces, after the full command in the event field. The following example, shows the Integer **512** and String **08-24-2018** passed as arguments to the `setup-folder.bat` Windows Batch script.
