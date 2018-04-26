@@ -65,10 +65,11 @@ The following table lists event names and a short description of each event.  Se
 
 
 # Registering scripts with events
-Register script files or commands to listen for specific events that are broadcast by Templater.  You can [do this within the *Templater Preferences* dialog](#Registering-shell-within-the-Templater-Preferences-dialog) or [via the command line interface](#Registering-shell-scripts-within-the-CLI-options-file) within the `templater-options.json` file.
+Register script files or commands to listen for specific events that are broadcast by Templater.  You can [do this within the *Templater Preferences* dialog](#reg-shell-scripts-dialog) or [via the command line interface](#Registering-shell-scripts-within-the-CLI-options-file) within the `templater-options.json` file.
 
 
 ### Registering Shell Scripts
+<a name="reg-shell-scripts-dialog"></a>
 ##### Registering shell scripts within the *Templater Preferences* dialog
 > 1. In the *Templater Preferences* dialog, in the *Bot Settings* group, click **Setup Shell Commands**.
 > 2. In the *Register Shell Scripts with Events* dialog that opens, select a Templater event group to show available events associated with that group.
