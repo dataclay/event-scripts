@@ -65,7 +65,7 @@ The following table lists event names and a short description of each event.  Se
 
 
 # Registering scripts with events
-Register script files or commands to listen for specific events that are broadcast by Templater.  You can [do this within the *Templater Preferences* dialog](#reg-shell-scripts-dialog) or [via the command line interface](#Registering-shell-scripts-within-the-CLI-options-file) within the `templater-options.json` file.
+Register script files or commands to listen for specific events that are broadcast by Templater.  You can [do this within the *Templater Preferences* dialog](#reg-shell-scripts-dialog) or [via the command line interface](#reg-shell-scripts-cli) within the `templater-options.json` file.
 
 
 ### Registering Shell Scripts
@@ -103,6 +103,7 @@ Register script files or commands to listen for specific events that are broadca
 > 7. When you are finished adding script information, click **OK**.  The scripts or commands are registered to Templater events.
 
 &nbsp;
+<a name="reg-shell-scripts-cli"></a>
 ##### Registering shell scripts within the CLI options file
 > 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or enter a full command as you would within a terminal session or command prompt.  The following table shows the event property keys that shell scripts can be register to.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
@@ -132,7 +133,7 @@ Register script files or commands to listen for specific events that are broadca
 >              }
 >  }
 >  ```
->  + For passing pre-existing information to the script, refer to the table under Argument Macros and append the corresponding arguments to script's absolute path.  Appended argument macros should be separated with spaces.  The following exmaple 
+>  + For passing pre-existing information to the script, refer to the table under Argument Macros and append the corresponding arguments to script's absolute path.  Appended argument macros should be separated with spaces. The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock. 
 >  ```
 > { 
 >    "prefs" : {
@@ -140,7 +141,7 @@ Register script files or commands to listen for specific events that are broadca
 >              }
 >  }
 >  ```
->  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script's absolute path or full command.  See [Passing job details to event scripts]() below for more information. The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
+>  + For passing information from Templater's data source, enter a [custom argument macro]() by prefixing a column name or property key with a `$` symbol, and append that macro to the script's absolute path or full command.  See [Passing job details to event scripts]() below for more information. The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
 >  ```
 > { 
 >    "prefs" : {
