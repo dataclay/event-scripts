@@ -45,7 +45,7 @@ Shell scripts do not log to a file by default, but from within the script, you c
 # Events Broadcast by Templater
 The following table lists event names and a short description of each event.  See [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base for more detailed information
 
->*Tempalter Events as of Templater version 2.7.0*
+>*Events broadcast by Templater in version 2.7.0 and later*
 >
 >| Event Name    | Broadcast...                              |
 >|:--------------|:------------------------------------------|
@@ -65,7 +65,7 @@ The following table lists event names and a short description of each event.  Se
 
 
 # Registering scripts with events
-Register script files or commands to listen for specific events that are broadcast by Templater.  You can do this within the *Templater Preferences* dialog or the `templater-options.json` file if using the command line interface.
+Register script files or commands to listen for specific events that are broadcast by Templater.  You can [do this within the *Templater Preferences* dialog](#Registering-shell-within-the-Templater-Preferences-dialog) or [via the command line interface](#Registering-shell-scripts-within-the-CLI-options-file) within the `templater-options.json` file.
 
 
 ### Registering Shell Scripts
@@ -75,7 +75,7 @@ Register script files or commands to listen for specific events that are broadca
 ><br><br>
 ![Register Shell Scripts with Events dialog ](http://support.dataclay.com/content/resources/images/register-shell-scripts-closed.png)
 >
-> 3. Select either a Before event or After event. To enable an script to execute when a specific event is broadcast, you must select the event checkbox. If the checkbox is deselected, the script is disabled.
+> 3. Select either a Before event or After event. To enable a script to execute when a specific event is broadcast, you must select the event checkbox. If the checkbox is deselected, the script is disabled, and the event field is disabled from editing.
 > 4. In the event field, enter the absolute path to the script or a full command.
 >  + For a script executable by the operating system, such as a Bash script (macOS) or Batch script (Windows), simply enter the absolute path to the script.
 >  + As a shortcut to enter the absolute path to the script, click **Choose script...** and navigate to the location of the script.  The path appears in the event field.
@@ -85,16 +85,16 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 > ![Append arguments when registering shell scripts](http://support.dataclay.com/content/resources/images/register-shell-scripts-open.png)
 >
-> 5. If passing arguments to the script is required, do one or more of the following
+> 5. If passing arguments to the script is required, do one or more of the following.
 >  + For passing explicit values, enter each value, separated by spaces, after the path or command within the event field. The following example, shows how you would pass Integer **512** and String **08-24-2018** as arguments to the registered Windows Batch script `timestamp.bat`.
 >  ```
 > C:\Users\dev\event-scripts\timestamp.bat 512 '08-24-2018'
 >  ```
->  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the table under Argument Macros for a listing of all available pre-existing argument macros.  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
+>  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the [table]() under [Argument Macros]() for a listing of all available pre-existing argument macros.  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
 >  ```
 >  node C:\Users\dev\event-scripts\update-job.js $aep $data_uri $now
 >  ```
->  + For passing values from Templater's data source, create custom argument macros by prefixing column names or property keys with the `$` symbol, and append those macros to the script path or full command within the event field.  Learn more about Argument Macros below.  The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
+>  + For passing values from Templater's data source, create custom argument macros by prefixing column names or property keys with the `$` symbol, and append those macros to the script path or full command within the event field.  Learn more about [Argument Macros]() and [Passing job details to event scripts]() below.  The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
 >  ```
 >  C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date
 >  ```
@@ -103,7 +103,9 @@ Register script files or commands to listen for specific events that are broadca
 
 &nbsp;
 ##### Registering shell scripts within the CLI options file
-> 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or enter a full command as you would within a terminal session or command prompt.  Refer to the following table of property keys, found within the `bot` object, of which you can register shell scripts or commands.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
+> 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or enter a full command as you would within a terminal session or command prompt.  The following table shows the event property keys that shell scripts can be register to.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
+>
+>  *Event property keys for registering _shell scripts_ in Templater 2.7.0 and later*
 >
 >  | Property in `bot` object    | Event Name    | Broadcast...                           |
 >  |:----------------------------|:--------------|:---------------------------------------|
@@ -120,32 +122,31 @@ Register script files or commands to listen for specific events that are broadca
 >  | `"enable_cmd"`              | Bot Enabled   | ...when Bot is enabled                 |
 >  | `"shutdown_cmd"`            | Bot Disabled  | ...when Bot is disabled                |
 >&nbsp;
-> 2. To pass arguments to the registered shell scripts, do one of the following
->  + For passing explicit values, append each value, separated by spaces, to the value of the event property. The following example shows how you would pass Integer **512** and String **08-24-2018** as arguments to the registered Windows Batch script `timestamp.bat`. Note that backslashes and other special characters must be escaped with a backslash on Windows operating systems.
+> 2. To pass arguments to registered shell scripts in the `templater-options.json` file, do one or more of the following.
+>  + For passing explicit values, append each value, separated by spaces, to the value of the event property. The following example shows how you would pass Integer **512** and String **08-24-2018** as arguments to the registered Windows Batch script `timestamp.bat`.  Note that within the `templater-options.json` file on Windows backslashes and other special characters must be escaped with a backslash.
 >  ```
 > { 
 >    "prefs" : {
->                 "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat 512 '08-24-2018'" }
+>                 "bot" : { "pre_cmd_data" : "C:\\Users\\dev\\event-scripts\\setup-folder.bat 512 '08-24-2018'" }
 >              }
 >  }
 >  ```
->  + For passing pre-existing information to the script, refer to the table under Argument Macros and append that as an argument to the path to the script select a different item from the Append drop down menu.  Click **Append**.  Templater will append a corresponding macro to the entire command in the event field.
+>  + For passing pre-existing information to the script, refer to the table under Argument Macros and append the corresponding arguments to script's absolute path.  Appended argument macros should be separated with spaces.  The following exmaple 
 >  ```
->  { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
+> { 
+>    "prefs" : {
+>                 "bot" : { "post_cmd_job" : "node C:\\Users\\dev\\event-scripts\\update-job.js $aep $data_uri $now" }
+>              }
+>  }
 >  ```
->  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script path or full command.  See Argument Macros below for more information.
+>  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script's absolute path or full command.  See [Passing job details to event scripts]() below for more information. The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
 >  ```
->  { "bot" : { "pre_cmd_data" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date"} }
+> { 
+>    "prefs" : {
+>                 "bot" : { "pre_cmd_batch" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date" }
+>              }
+>  }
 >  ```
-
-
-
-
-
-
-
-### Registering ExtendScripts
-&nbsp;
 
 &nbsp;
 ### How to get started with the sample event scripts?
