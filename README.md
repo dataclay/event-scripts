@@ -31,21 +31,23 @@ With **ExtendScripts**, you can manipulate objects within the project file, enab
 You should use **shell scripts** when you need to do something with Templater's output or have Templater's functions integrate with an existing automated workflow. You should use **ExtendScripts** when you want to extend Templater’s feature set to meet your business needs or workflow goals.
 
 ### What information from Templater can my scripts make use of? 
-You can pass information from Templater and After Effects to event scripts. To pass information to **shell scripts**, you append arguments when you register the script with a Templater event. Use [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to pass information to **ExtendScripts**.
+You can pass information from Templater and After Effects to event scripts. To pass information to **shell scripts**, you append arguments when you register the script with a Templater event.  Read [Argument Macros]() and [Passing job details to event scripts]() to learn more.
+
+Use [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to pass information to **ExtendScripts**.  Read about [Passing job details to event scripts]() learn more.
 
 ### What languages can I write event scripts in? 
-You can write shell scripts in any language available in your system's environment. You must write ExtendScripts using [the ExendScript scripting language](https://www.adobe.com/devnet/scripting/estk.html) and toolkit along with the [Templater ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm).
+You can write **shell scripts** in any language available in your system's environment. You must write **ExtendScripts** using [the ExendScript scripting language](https://www.adobe.com/devnet/scripting/estk.html) and toolkit, and you have the option of using the [Templater ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm).
 
 ### Can I use event scripts with Templater Rig or Pro editions? 
 Event scripts are only supported in Templater Bot.
 
 ### Do event scripts write to log files? 
-Shell scripts do not log to a file by default, but from within the script, you can write code to redirect the standard output (stdout) and standard error (stderr) to a log file. Use the $D.log() method in [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to log messages and errors to Templater’s log files including `templater.log` and `templater.err`.
+**Shell scripts** do not log to a file by default, but from within the script, you can write code to redirect the standard output (stdout) and standard error (stderr) to a log file. Within **ExtendScripts**, use the `$D.log()` method in [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to log messages and errors to Templater’s log files including `templater.log` and `templater.err`.
 
 # Events Broadcast by Templater
 The following table lists event names and a short description of each event.  See [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base for more detailed information
 
->*Events broadcast by Templater in version 2.7.0 and later*
+>***Events broadcast by Templater in version 2.7.0 and later***
 >
 >| Event Name    | Broadcast...                              |
 >|:--------------|:------------------------------------------|
@@ -65,10 +67,12 @@ The following table lists event names and a short description of each event.  Se
 
 
 # Registering scripts with events
-Register script files or commands to listen for specific events that are broadcast by Templater.  You can [do this within the *Templater Preferences* dialog](#reg-shell-scripts-dialog) or [via the command line interface](#reg-shell-scripts-cli) within the `templater-options.json` file.
-
-
+Register script files or commands to listen for specific events that are broadcast by Templater.  Read below to learn the the methods for [registering Shell Scripts](#reg-shell-scripts) and [for registering ExtendScripts](#reg-extend-scripts) to specific events that Templater broadcasts.
+<a name="reg-shell-scripts"></a>
 ### Registering Shell Scripts
++ [Register shell scripts within the *Templater Preferences* dialog](#reg-shell-scripts-dialog)
++ [Register shell scripts within the CLI options file](#reg-shell-scripts-cli)
+
 <a name="reg-shell-scripts-dialog"></a>
 ##### Registering shell scripts within the *Templater Preferences* dialog
 > 1. In the *Templater Preferences* dialog, in the *Bot Settings* group, click **Setup Shell Commands**.
@@ -91,7 +95,7 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 > C:\Users\dev\event-scripts\timestamp.bat 512 '08-24-2018'
 >  ```
->  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the [table]() under [Argument Macros]() for a listing of all available pre-existing argument macros.  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
+>  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the table under [Argument Macros]() for a listing of [all available pre-existing argument macros]().  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
 >  ```
 >  node C:\Users\dev\event-scripts\update-job.js $aep $data_uri $now
 >  ```
@@ -105,9 +109,9 @@ Register script files or commands to listen for specific events that are broadca
 &nbsp;
 <a name="reg-shell-scripts-cli"></a>
 ##### Registering shell scripts within the CLI options file
-> 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or enter a full command as you would within a terminal session or command prompt.  The following table shows the event property keys that shell scripts can be register to.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
+> 1. In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an executable script file or enter a full command as you would within a terminal session or command prompt.  The following table shows the event property keys that shell scripts can be registered to.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
->  *Event property keys for registering _shell scripts_ in Templater 2.7.0 and later*
+>  ***Event property keys for registering _shell scripts_ in Templater 2.7.0 and later***
 >
 >  | Property in `bot` object    | Event Name    | Broadcast...                           |
 >  |:----------------------------|:--------------|:---------------------------------------|
@@ -123,9 +127,9 @@ Register script files or commands to listen for specific events that are broadca
 >  | `"post_cmd_output"`         | After Output  | ...after rendering process completes   |
 >  | `"enable_cmd"`              | Bot Enabled   | ...when Bot is enabled                 |
 >  | `"shutdown_cmd"`            | Bot Disabled  | ...when Bot is disabled                |
->&nbsp;
+>
 > 2. To pass arguments to registered shell scripts in the `templater-options.json` file, do one or more of the following.
->  + For passing explicit values, append each value, separated by spaces, to the value of the event property. The following example shows how you would pass Integer **512** and String **08-24-2018** as arguments to the registered Windows Batch script `timestamp.bat`.  Note that within the `templater-options.json` file on Windows backslashes and other special characters must be escaped with a backslash.
+>  + For passing explicit values, append each value, separated by spaces, to the script's absolute path or full command. The following example shows how you would pass Integer **512** and String **08-24-2018** as arguments to the registered Windows Batch script `timestamp.bat`.  Note that within the `templater-options.json` file on Windows backslashes and other special characters must be escaped with a backslash.
 >  ```
 > { 
 >    "prefs" : {
@@ -133,7 +137,7 @@ Register script files or commands to listen for specific events that are broadca
 >              }
 >  }
 >  ```
->  + For passing pre-existing information to the script, refer to the table under Argument Macros and append the corresponding arguments to script's absolute path.  Appended argument macros should be separated with spaces. The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock. 
+>  + For passing pre-existing information to the script, refer to [the table under Argument Macros]() and append the corresponding arguments to script's absolute path or full command.  Appended argument macros should be separated with spaces. The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock. 
 >  ```
 > { 
 >    "prefs" : {
@@ -145,30 +149,61 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 > { 
 >    "prefs" : {
->                 "bot" : { "pre_cmd_batch" : "C:\\Users\dev\event-scripts\\setup-folder.bat $album-name $release-date" }
+>                 "bot" : { "pre_cmd_batch" : "C:\\Users\\dev\\event-scripts\\setup-folder.bat $album-name $release-date" }
 >              }
 >  }
 >  ```
 
 &nbsp;
-### How to get started with the sample event scripts?
+<a name="reg-extend-scripts"></a>
+### Registering ExtendScripts
++ [Register ExtendScripts within the *Templater Preferences* dialog](#reg-extend-scripts-dialog")
++ [Register ExtendScripts within the CLI options file](#reg-extend-scripts-cli)
 
->#### To get started with the Windows or OSX sample scripts, follow these steps:
+<a name="reg-extend-scripts-dialog"></a>
+##### Registering ExtendScripts within the *Templater Preferences* dialog
+> 1. In the *Templater Preferences* dialog, in the *Bot Settings* group, click **Setup ExtendScripts**.
+> 2. In the *Register ExtendScripts with Events* dialog that opens, select a Templater event group to show available events associated with that group.
+><br><br>
+![Register ExtendScripts with Events dialog ](http://support.dataclay.com/content/resources/images/register-extendscripts.png)
 >
->1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
->2.  In After Effects, in the *Templater Preferences* panel, in the *Shell commands for bot events* section, use the file selector *...* to choose the file location for a sample event script. For a script that should run after each individual job, input the file location into the *After each job* field. For a script that should run after a batch, input the file location into the *After all jobs* field.  For a script that should run when The Bot has been disabled for some reason, input the file location into the *On disable* field.
->3.  Tick the *For all commands, use job details as arguments* check box to pass job information to the script. Click *OK*.
->4.  You can now render or replicate and ensure that the event script executes as intended.
+> 3. Select either a Before event or After event. To enable a script to execute when a specific event is broadcast, you must select the event checkbox. If the checkbox is deselected, the script is disabled, and the event field is disabled from editing.
+> 4. Click **Choose Script...** and select an ExtendScript file that you want to run for that particular event. Alternatively, enter an absolute path to the script into the event field.
+> 5. To add additional shell scripts for other Templater events, repeat steps 2 through 4.
+> 6. When you are finished adding script information, click **OK**.  The scripts or commands are registered to Templater events.
 
 &nbsp;
->#### To get started with the **NodeJS** example event scripts, follow these steps:
+<a name="reg-extend-scripts-cli"></a>
+##### Registering ExtendScripts within the CLI options file
+>In the [`templater-options.json`](https://github.com/dataclay/cli-tools/blob/master/Windows/templater-options.json) file, in the `bot` object, set the value of a specific event property to the absolute path of an ExtendScript file.  The following table shows the event property keys that ExtendScripts can be registered to.  For detailed descriptions of each event, see [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base.
 >
->1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
->2.  In a new terminal or command line session, change into your newly created working directory.
->3.  Enter `npm install` and wait for all dependencies to install into your working directory.
->4.  Change any absolute paths within the sample code to fit your system environment.
->5.  Open the script you want to run and find the complete command line to use for registering with Templater's event.  Copy the command line incantation, and paste it into the appropriate field 
->6.  You can now render or replicate and ensure that the event script executes as intended.
+>The following example shows the `set-workarea.jsx` ExtendScript registered to the *Before Output* event.
+>  ```
+> { 
+>    "prefs" : {
+>                 "bot" : { "pre_jsx_output" : "C:\\Users\\dev\\event-scripts\\set-workarea.jsx" }
+>              }
+>  }
+>  ```
+>
+>***Event property keys for registering _ExtendScripts_ in Templater 2.7.0 and later***
+>
+>| Property in `bot` object    | Event Name    | Broadcast...                           |
+>|:----------------------------|:--------------|:---------------------------------------|
+>| `"pre_jsx_data"`            | Before Data   | ...before data is retrieved            |
+>| `"post_jsx_data"`           | After Data    | ...after data is retrieved             |
+>| `"pre_jsx_batch"`           | Before Batch  | ...before main iteration loop starts   |
+>| `"post_jsx_batch"`          | After Batch   | ...after main iteration loop completes |
+>| `"pre_jsx_job"`             | Before Job    | ...before job processing starts        |
+>| `"post_jsx_job"`            | After Job     | ...after job processing completes      |
+>| `"pre_jsx_update"`          | Before Update | ...before layer updating starts        |
+>| `"post_jsx_update"`         | After Update  | ...after layer updating completes      |
+>| `"pre_jsx_output"`          | Before Output | ...before rendering process starts     |
+>| `"post_jsx_output"`         | After Output  | ...after rendering process completes   |
+>| `"enable_jsx"`              | Bot Enabled   | ...when Bot is enabled                 |
+>| `"shutdown_jsx"`            | Bot Disabled  | ...when Bot is disabled                |
+
+
 
 &nbsp;
 ## Passing job details to event scripts
@@ -199,6 +234,37 @@ You can also use as many arguments as needed
 Additionally, you can use predefined variables to pass information about a processed job.  For example, if your script needs the path to the file that After Effects rendered, the job's id, and the path to the processed After Effects file, you can use
 
 	C:\compress.bat $id $out_file $aep
+
+
+&nbsp;
+# Argument Macros
+An argument macro is a short, singular, text-based word that is substituted by another string of text when Templater executes a script or command registered to any of its broadcast events.  You use argument macros when registering scripts or full commands to a Templater event.  Templater ships with a pre-defined set of argument macros, but you can create your own custom macros.
+
+###Pre-defined argument macros
+
+
+
+
+&nbsp;
+### How to get started with the sample event scripts?
+
+>#### To get started with the Windows or OSX sample scripts, follow these steps:
+>
+>1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
+>2.  In After Effects, in the *Templater Preferences* panel, in the *Shell commands for bot events* section, use the file selector *...* to choose the file location for a sample event script. For a script that should run after each individual job, input the file location into the *After each job* field. For a script that should run after a batch, input the file location into the *After all jobs* field.  For a script that should run when The Bot has been disabled for some reason, input the file location into the *On disable* field.
+>3.  Tick the *For all commands, use job details as arguments* check box to pass job information to the script. Click *OK*.
+>4.  You can now render or replicate and ensure that the event script executes as intended.
+
+&nbsp;
+>#### To get started with the **NodeJS** example event scripts, follow these steps:
+>
+>1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
+>2.  In a new terminal or command line session, change into your newly created working directory.
+>3.  Enter `npm install` and wait for all dependencies to install into your working directory.
+>4.  Change any absolute paths within the sample code to fit your system environment.
+>5.  Open the script you want to run and find the complete command line to use for registering with Templater's event.  Copy the command line incantation, and paste it into the appropriate field 
+>6.  You can now render or replicate and ensure that the event script executes as intended.
+
 	
 The following lists show variables that can be used as arguments for your event scripts or commands.
 
