@@ -64,8 +64,7 @@ The following table lists event names and a short description of each event.  Se
 >| Bot Enabled   | ...when Bot is enabled                    |
 >| Bot Disabled  | ...when Bot is disabled                   |
 
-
-
+&nbsp;
 # Registering scripts with events
 Register script files or commands to listen for specific events that are broadcast by Templater.  Read below to learn the the methods for [registering Shell Scripts](#reg-shell-scripts) and [for registering ExtendScripts](#reg-extend-scripts) to specific events that Templater broadcasts.
 <a name="reg-shell-scripts"></a>
@@ -206,10 +205,12 @@ Register script files or commands to listen for specific events that are broadca
 
 
 &nbsp;
-## Passing job details to event scripts
-When Templater broadcasts events, you can pass versioning data to a registered event script or command by using variables with names prefixed with the dollar symbol `$`.  
+# Using job details in event scripts
 
-For example, consider that `C:\compress.bat` is registered with Templater's Post Job event, and that Templater processed a job with the following versioning data.
+#### Shell Scripts using job details
+You can pass versioning data to a registered **shell script** by making use of **argument macros**.  An argument macro is essentially a word, prefixed with a `$` symbol that is substituted by another string of text when Templater broadcasts an event. Templater ships with a pre-defined set of argument macros, but you can create your own custom macros.
+
+For example, consider that `C:\compress.bat` is registered with Templater's *After Job* event, and that Templater processed a job with the following versioning data.
 
 	[
 		{
@@ -223,7 +224,7 @@ For example, consider that `C:\compress.bat` is registered with Templater's Post
 		}
 	]
 	
-In this case, you can register the following command with Templater's Post Job event to send the `title` property value, *Create Targeted Video Ads*, to the Batch file as an argument in the following manner.
+In this case, you can register the following command with Templater's *After Job* event to send the `title` property value, *Create Targeted Video Ads*, to the Batch file as an argument in the following manner.
 
 	C:\compress.bat $title
 	
@@ -231,110 +232,119 @@ You can also use as many arguments as needed
 	
 	C:\compress.bat $title $caption-1 $caption-2 $tint
 	
-Additionally, you can use predefined variables to pass information about a processed job.  For example, if your script needs the path to the file that After Effects rendered, the job's id, and the path to the processed After Effects file, you can use
+Additionally, you can use pre-defined argument macros to pass information about a processed job.  For example, if your script needs the path to the file that After Effects rendered, the job's id, and the path to the processed After Effects file, you can use
 
 	C:\compress.bat $id $out_file $aep
 
+<a name="argument_macros"></a>
+### Pre-defined argument macros
+Templater ships with a number of pre-defined argument macros that you can pass as arguments into your registered shell scripts.  The following table lists available argument macros for shell scripts.
+
+>**NOTE**<br>
+> Some argument macros are not available to scripts registered to specific events and might cause Templater to error.  For example, if you pass the `$id` argument macro into a script registered to the *Before Data* event Templater will log an error.
 
 &nbsp;
-# Argument Macros
-An argument macro is a short, singular, text-based word that is substituted by another string of text when Templater executes a script or command registered to any of its broadcast events.  You use argument macros when registering scripts or full commands to a Templater event.  Templater ships with a pre-defined set of argument macros, but you can create your own custom macros.
-
-###Pre-defined argument macros
-
-
-
-
-&nbsp;
-### How to get started with the sample event scripts?
-
->#### To get started with the Windows or OSX sample scripts, follow these steps:
+>***Pre-defined argument macros available in Templater 2.7.0 and later***
 >
->1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
->2.  In After Effects, in the *Templater Preferences* panel, in the *Shell commands for bot events* section, use the file selector *...* to choose the file location for a sample event script. For a script that should run after each individual job, input the file location into the *After each job* field. For a script that should run after a batch, input the file location into the *After all jobs* field.  For a script that should run when The Bot has been disabled for some reason, input the file location into the *On disable* field.
->3.  Tick the *For all commands, use job details as arguments* check box to pass job information to the script. Click *OK*.
->4.  You can now render or replicate and ensure that the event script executes as intended.
+>| Argument macro  | Description                                                    |
+>|:----------------|:---------------------------------------------------------------|
+>| `$log`          | Path to the `templater.log` file                               |
+>| `$log_dir`      | Path to where the `templater.log` file exists                  |
+>| `$aep`          | Path to the processed template file                            |
+>| `$aep_dir`      | Path to where the processed template file exists               |
+>| `$sources`      | Path to the footage source directory                           |
+>| `$out_dir`      | Path to the output directory                                   |
+>| `$data_uri`     | Path or URL to the versioning data                             |
+>| `$data_start`   | Start index used in data retrieval                             |
+>| `$data_end`     | End index used in data retrieval                               |
+>| `$data_batch`   | Path to a JSON file with versioning data for the batch process |
+>| `$data_job`     | Path to a JSON file with versioning data for the job process   |
+>| `$id`           | Value of the 'id' column or property for the job               |
+>| `$idx`          | Ordinal position of the job within the batch                   |
+>| `$out_name`     | Name of the job's output                                       |
+>| `$out_file`     | Path to the job's output file                                  |
+>| `$bot_name`     | Name of the Bot                                                |
+>| `$machine_name` | Name of the host machine                                       |
+>| `$user_name`    | Name of the user running After Effects                         |
+>| `$now`          | Current time as on the machine's clock                         |
+>| `$event`        | String identifier of the most recently broadcast event         |
 
 &nbsp;
->#### To get started with the **NodeJS** example event scripts, follow these steps:
->
->1.  Clone or download the *event-scripts* repository to a working directory on your local machine.  
->2.  In a new terminal or command line session, change into your newly created working directory.
->3.  Enter `npm install` and wait for all dependencies to install into your working directory.
->4.  Change any absolute paths within the sample code to fit your system environment.
->5.  Open the script you want to run and find the complete command line to use for registering with Templater's event.  Copy the command line incantation, and paste it into the appropriate field 
->6.  You can now render or replicate and ensure that the event script executes as intended.
+#### ExtendScripts using job details
+Use the [Templater ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to use job details within ExtendScript code.  When creating a script using the Templater ExtendScript API, use the `$D` object to access and manipulate Templater’s internal memory.  
 
-	
-The following lists show variables that can be used as arguments for your event scripts or commands.
+>**NOTE**<br>
+> Some of the `$D` object methods may return unexpected values or errors depending on which event the ExtendScript is registered to.
 
-> Available arguments for **Post Job** event script or command
+For example, assume you want to change the target composition's work area for each job that Templater will process in a batch.  You would make use of the `$D.target()` method to access the target composition and manipulate the start and work area.  Follow the steps below to accomplish this:
+
+>1.  Add two columns or properties to your data source named `workarea-start` and `workarea-end`.
+>2. In your data source, for each job's `workarea-start` value, enter the frame number where you want the work area in the target composition to begin.  Then, for each job's `workarea-end` value, enter the frame number where you want the work area in the target composition to end.
+>3. Create a new ExtendScript file and save it as `adjust-target-workarea.jsx`.
+>4. Enter the following code into the `adjust-target-workarea.jsx` file and save it:
 >
->| Argument | Expands To |
->|:----------------------|:------------|
->| `${data label}`               | The value of the column or property key specified by {data label} for the most recently processed job. For example, the variable `$headline` expands to the value of the `headline` column header for the most recently processed job              |
->| `$aep`               | Path to the processed AE project file            |
->| `$aep_dir`         | Path to the directory containing the processed AE project file           |
->| `$data_job`       | Path to a json formatted text file file containing job's versioning data            |
->| `$id`                  | The value of the job's `id` column or property, if defined           |
->| `$idx`                | The job's ordinal position within a batch; `null` if a batch operation is initiated by The Bot.           |
->| `$out_name`     | The job's devised output name            |
->| `$out_dir`          | Path to the job's output directory |
->| `$out_file`         | Path to the final rendered output if it was rendered successfully; `null` if the target composition was replicated.           |
+>  ```
+>  var targetComp = $D.target();
+>
+>  targetComp.workAreaStart = $D.job.get("workarea-start");
+>  targetComp.workAreaEnd   = $D.job.get("workarea-end");
+>  ```
+>
+>5. Register the `adjust-target-workarea.jsx` file with the ***After Update*** event.
+>6. Run a batch render job with Templater with rows or objects that have different `workarea-start` and `workarea-end` values.  The output corresponding to each row or object has a different work area.
+
+As another example, you might want to truncate a text string and append it with an ellipses (three dots) before it is injected into a dynamic layer.  To do this, follow these steps:
+
+>1. Add a column or property to your data source named `headline`.  Map the `headline` values to a Text Layer within an After Effects composition using the Templater Settings effect.
+>2. In your data source, for each job's `headline` value, enter a text string that contains more than ten characters.  You can enter strings less than ten characters long, but these will not be truncated as per the following ExtendScript code.
+>3. Create a new ExtendScript file and save it as `truncate-long-string.jsx`.
+>4. Enter the following code into the `truncate-long-string.jsx` file and save it:
+>
+>  ```
+>  function truncate(word){
+>
+>  	 var truncated_word;
+>    var max_characters = 10;
+>
+>    truncated_word = (word.length > max_characters) ? word.slice(0, max_characters) + '...' : word;
+>
+>    return truncated_word;
+>
+>  }
+>  
+>  $D.job.set("headline", truncate($D.job.get("headline")));
+>  ```
+>
+>5. Register the `truncate-long-string.jsx` file with the ***Before Update*** event.
+>6. Using Templater, iterate through a set of rows or objects that have different `headline` values — some shorter than ten characters, and some longer.  Notice that long text strings within the `headline` layer are post-fixed with `...`.
 
 &nbsp;
-> Available arguments for **Post Batch** event script or command
->
->| Argument | Expands To |
->|:----------------------|:------------|
->| `${data label}`    | The first value of the column or property within a batch of jobs specified by {data label}.  For example, `$headline` expands to the first value of the `headline` column in the most recently processed batch of jobs.               |
->| `$aep`                | Path to the processed AE project file           |
->| `$aep_dir`          | Path to the directory containing the processed AE project file            |
->| `$data_batch`    | Path to a json formatted text file file containing versioning data for all jobs within batch           |
->| `$out_dir`           | Path to the job's output directory            |
-
-&nbsp;
-> Available arguments for **On Bot Disable** event script or command
->
->| Argument | Expands To |
->|:----------------------|:------------|
->| `$bot_name`      | The name of the Bot as found in the Templater Preferences dialog or the `name` property in the`bot` object in `templater-options.json`          |
->| `$aep`                | Path to the processed AE project file           |
->| `$aep_dir`          | Path to the directory containing the processed AE project file            |
-
-&nbsp;
-You can register any command line incantation as if you were entering it in a terminal session like so
-
-	node C:\dev\event-scripts-master\OSX\concatenate.js $aep $out_dir $id $title
-
-In the above example, `concatenate.js` will be executed via the `node` interpreter when the Post Batch event is broadcast, and it will have access to the values of the arguments.
-
-If you choose to register a script file to listen to an event without appending any arguments, you can easily send all available, predefined variables by enabling the *For all commands, use job details as arguments* checkbox within the Templater Preferences dialog, or by setting the `job_details_args` property key in the `templater-options.json` file to `true`.  For example, if `C:\compress.bat` is registered with the Post Job event, then checking the the *For all commands, use job details as arguments* checkbox effectively appends the predefined variables as arguments in the following order:
-
-	C:\compress.bat $id $rowidx $out_name $out_file $out_dir $aep $aep_dir $data_job
-
-Here is the order of the arguments for the **Post Batch** event:
-
-	C:\concatenate.bat $data_batch $aep $aep_dir $out_dir
-	
-Here is the order of the arguments for the **On Bot Disable** event:
-
-	C:\notify.bat $bot_name $aep $aep_dir
-
-## Troubleshooting Event Scripts
-Use the following suggestions to help you troubleshoot your event scripts if they do not execute as expected.  
+# Troubleshooting Event Scripts
+Use the following suggestions to help you troubleshoot your event scripts if Templater hangs during operation, or if they do not execute as expected.
 
 ### Log script output to a file
-1. Inside your script file, log output messages to a text file.
+1. Inside your script file, log output messages to a text file.  The code to log to a file differs depending on the language you are writing your script in.  For example take a look at the following code for various scripting languages:
+  + Logging to file `debug.txt` on the user's desktop in a Bash script on macOS:
+    ```
+    printf "Troubleshooting my event script" >> ~/Desktop/debug.txt
+    ```
+  + Logging to file `debug.txt` on the user's desktop in a Batch Script on Windows:
+    ```
+	echo Troubleshooting my event script >> %USERPROFILE%\Desktop\debug.txt
+    ```
+  + Logging to Templater's own `templater.log` file in ExtendScript:
+    ```
+    $D.log.msg('EVENT SCRIPT DEBUG', "Troubleshooting my event script");
+    ```
 2. After Templater finishes its tasks, inspect the log file to see if your script generated expected results.
 
 ### Verify the full command line incantation that Templater uses
-1.  Open the `templater.log` file and search the text file for the phrases `POST JOB SCRIPT`, `POST BATCH SCRIPT`, or `BOT SHUTDOWN` depending on which event script you are troubleshooting.  
+1.  Open the `templater.log` file and search the text file for the phrases `EVENT SCRIPT ERROR `, `EXEC SHELL SCRIPT`, or the string used in the first parameter of [the `$D.log.msg()` method](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm).  
 2.  Locate the log line that shows a statement starting with "Full command line ... ", highlight only the full command line as reported by Templater, and copy it to the system clipboard.
 3.  Start a new command line session and paste the full command line at the prompt.  Press enter.
 4.  Verify that your script executes as expected.
 
 ### Verify permissions of script files
 1.  Verify the script file is executable by the user who is running After Effects.  
-2.  If the user does not have permission to execute the script file, a user with administrator privileges should set them for the script file.  For example, on OSX, you can enter `chmod u+x myPostJob.sh` to make it executable for the current user.  On Windows, use the "Security" tab in the script file's "Properties" dialog.
+2.  If the user does not have permission to execute the script file, a user with administrator privileges should set them for the script file.  For example, on macOS, you can enter `chmod u+x myPostJob.sh` to make it executable for the current user.  On Windows, use the "Security" tab in the script file's "Properties" dialog.
 
