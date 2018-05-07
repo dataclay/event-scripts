@@ -207,7 +207,7 @@ Register script files or commands to listen for specific events that are broadca
 &nbsp;
 # Using job details in event scripts
 
-#### Shell Scripts using job details
+### Shell Scripts using job details
 You can pass versioning data to a registered **shell script** by making use of **argument macros**.  An argument macro is essentially a word, prefixed with a `$` symbol that is substituted by another string of text when Templater broadcasts an event. Templater ships with a pre-defined set of argument macros, but you can create your own custom macros.
 
 For example, consider that `C:\compress.bat` is registered with Templater's *After Job* event, and that Templater processed a job with the following versioning data.
@@ -270,7 +270,7 @@ Templater ships with a number of pre-defined argument macros that you can pass a
 >| `$event`        | String identifier of the most recently broadcast event         |
 
 &nbsp;
-#### ExtendScripts using job details
+### ExtendScripts using job details
 Use the [Templater ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to use job details within ExtendScript code.  When creating a script using the Templater ExtendScript API, use the `$D` object to access and manipulate Templater’s internal memory.  
 
 >**NOTE**<br>
