@@ -1,3 +1,19 @@
+# Table of Contents
+
++ [Event scripts for Templater](#event-scripts-for-templater)
++ [FAQs about event scripts](#faqs-about-event-scripts)
++ [Events broadcast by Templater](#events-broadcast-by-templater)
++ [Registering scripts with events](#registering-scripts-with-events)
+  + [Registering shell scripts](#reg-shell-scripts)
+  + [Registering ExtendScripts](#reg-extend-scripts)
++ [Using job details in event scripts](#use-details-in-scripts)
+  + [Shell scripts using job details](#shell-scripts-job-details)
+  + [Pre-defined argument macros](#argument-macros)
+  + [Accessing argument values within shell scripts](#accessing-argument-values)
+  + [ExtendScripts using job details](#extendscripts-job-details)
++ [Troubleshooting event scripts](#troubleshooting)
+
+<a name="event-scripts-for-templater"></a>
 # Event Scripts for Templater
 
 ### What are Event Scripts?
@@ -20,7 +36,8 @@ A script is a file consisting of commands, written in a scripting language, to b
 As of Templater 2.7 the **"For all commands, use job details as arguments"** preference found in earlier versions is deprecated. If your application currently makes use of that preference, your registered event scripts will fail when you upgrade Templater to version 2.7. _You must now explicitly append arguments to shell scripts if they are necessary_. Verify that you are explicitly passing arguments to your scripts, especially if you are using Templater’s command line interface. In the `templater-options.json` file, you can no longer use the `“job_detail_args”` property inside the `“bot”` object within the `“prefs”` object.
 
 &nbsp;
-# FAQs about Event Scripts
+<a name="faqs-about-event-scripts"></a>
+# FAQs about event scripts
 
 ### Why register scripts with Templater events?
 **Shell scripts** are useful when you want to seamlessly integrate Templater into your existing application. For example, in a production scenario, you can [merge](http://github.com/dataclay/event-scripts/), transcode, or compress Templater's output—all of which can be accomplished calling a command line application like [ffmpeg](https://www.ffmpeg.org) within a script.  You can also automate publishing output to a specific destination like an FTP site, or your [YouTube](https://developers.google.com/youtube/v3/docs/), [Vimeo](https://developer.vimeo.com/api/upload/videos), or [JWPlatform](https://developer.jwplayer.com/jw-platform/reference/v1/#) account.  You could also script notifications for when a batch of renders completes—email, text message, etc.
@@ -44,6 +61,7 @@ Event scripts are only supported in Templater Bot.
 ### Do event scripts write to log files? 
 **Shell scripts** do not log to a file by default, but from within the script, you can write code to redirect the standard output (stdout) and standard error (stderr) to a log file. Within **ExtendScripts**, use the `$D.log()` method in [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to log messages and errors to Templater’s log files including `templater.log` and `templater.err`.
 
+<a name="events-broadcast-by-templater"></a>
 # Events Broadcast by Templater
 The following table lists event names and a short description of each event.  See [Templater Events](http://support.dataclay.com/content/concepts/bot/templater_events.htm) in Dataclay's knowledge base for more detailed information
 
@@ -65,6 +83,7 @@ The following table lists event names and a short description of each event.  Se
 >| Bot Disabled  | ...when Bot is disabled                   |
 
 &nbsp;
+<a name="registering-scripts-with-events"></a>
 # Registering scripts with events
 Register script files or commands to listen for specific events that are broadcast by Templater.  Read below to learn the the methods for [registering Shell Scripts](#reg-shell-scripts) and [for registering ExtendScripts](#reg-extend-scripts) to specific events that Templater broadcasts.
 <a name="reg-shell-scripts"></a>
@@ -205,9 +224,11 @@ Register script files or commands to listen for specific events that are broadca
 
 
 &nbsp;
+<a name="use-details-in-scripts"></a>
 # Using job details in event scripts
 
-### Shell Scripts using job details
+<a name="shell-scripts-job-details"></a>
+### Shell scripts using job details
 You can pass versioning data to a registered **shell script** by making use of **argument macros**.  An argument macro is essentially a word, prefixed with a `$` symbol that is substituted by another string of text when Templater broadcasts an event. Templater ships with a pre-defined set of argument macros, but you can create your own custom macros.
 
 For example, consider that `C:\compress.bat` is registered with Templater's *After Job* event, and that Templater processed a job with the following versioning data.
@@ -236,7 +257,7 @@ Additionally, you can use pre-defined argument macros to pass information about 
 
 	C:\compress.bat $id $out_file $aep
 
-<a name="argument_macros"></a>
+<a name="argument-macros"></a>
 ### Pre-defined argument macros
 Templater ships with a number of pre-defined argument macros that you can pass as arguments into your registered shell scripts.  The following table lists available argument macros for shell scripts.
 
@@ -270,6 +291,75 @@ Templater ships with a number of pre-defined argument macros that you can pass a
 >| `$event`        | String identifier of the most recently broadcast event         |
 
 &nbsp;
+<a name="accessing-argument-values"></a>
+### Accessing argument values within shell scripts
+When passing arguments to your registered scripts, your code will need to access their values.  The way you access an argument's value within a script depends on the language you are coding in.  In general, however, you always use the ordinal position of the argument to access its value in the script it is passed to.
+
+##### Accessing arguments in Bash on macOS
+Assume the following is registered to an event in Templater: `/Users/me/Dev/upload.sh $aep $data_uri $now $out_file`
+
+>To access the any of the argument values within the `upload.sh` script, use the ordinal position of the argument like with a `$` sign like so:
+> 
+> ```
+> ae_project_file=$1
+> templater_data_source=$2
+> current_timestamp=$3
+> templater_output=$4
+> ```
+>
+> If you have more than nine arguments in a Bash script, you need to enclose its position number within braces like so
+>
+> ```
+> tenth_arg_val=${10}
+> eleventh_arg_val=${11}
+> twelfth_arg_val=${12}
+> ```
+
+&nbsp;
+##### Accessing argument values in Batch Script on Windows
+Assume the following is registered to an event in Templater: `C:\Users\me\Dev\upload.bat $aep $data_uri $now $out_file`
+
+> To access any of the argument values within the `upload.bat` script, use the ordinal position of the argument like so:
+> 
+> ```
+> ae_project_file=%1
+> templater_data_source=%2
+> current_timestamp=%3
+> templater_output=%4
+> ```
+
+If you have more than nine arguments passed to a Batch script, it becomes more involved to access them.  Refer to [this documentation](https://ss64.com/nt/syntax-args.html) on the topic of passing arguments to Batch scripts.  Using Batch scripts for complex scripting tasks is not recommended.
+
+&nbsp;
+##### Access argument value in NodeJS
+Assume the following is registered to an event in Templater: `node /Users/me/Dev/upload.js $aep $data_uri $now $out_file`
+
+>To access any of the argument values within the `upload.js` script use the ordinal position of the argument ***plus two*** in the index of `process.argv` array like so:
+> 
+> ```
+> var ae_project_file = process.argv[3],
+>     templater_data_source=process.argv[4],
+>     current_timestamp=process.argv[5],
+>     templater_output=process.argv[6]
+> ```
+
+The reason you add one to the argument's position is that the `process.argv` array holds the term `node` in position `0` and the script name `upload.js` in position `1`.  Therefore, it's recommended to use [the minimist pacakge](https://www.npmjs.com/package/minimist) in your own scripts to read arguments.
+
+##### Access argument values in PHP
+Assume the following is registered to an even in Templater: `php C:\Users\me\Dev\upload.php $aep $data_uri $now $out_file`
+
+To access any of the argument values within the `upload.php` script use the ordinal position of the argument the index of the `$argv` array like so:
+>
+> ```
+> $ae_project_file = $argv[1]
+> $templater_data_source = $argv[2]
+> $current_timestamp = $argv[3]
+> $templater_output = $argv[4]
+> ```
+>
+
+&nbsp;
+<a name="extendscripts-job-details"></a>
 ### ExtendScripts using job details
 Use the [Templater ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to use job details within ExtendScript code.  When creating a script using the Templater ExtendScript API, use the `$D` object to access and manipulate Templater’s internal memory.  
 
@@ -284,16 +374,19 @@ For example, assume you want to change the target composition's work area for ea
 >4. Enter the following code into the `adjust-target-workarea.jsx` file and save it:
 >
 >  ```
->  var targetComp = $D.target();
+>  var targetComp = $D.target(),
+>      comp_fps   = targetComp.frameRate,
+>      f_start    = parseInt($D.job.get("workarea-start")),
+>      f_end      = parseInt($D.job.get("workarea-end"));
 >
->  targetComp.workAreaStart = $D.job.get("workarea-start");
->  targetComp.workAreaEnd   = $D.job.get("workarea-end");
+>  targetComp.workAreaStart    = (f_start / comp_fps);
+>  targetComp.workAreaDuration = (f_end / comp_fps) - targetComp.workAreaStart;
 >  ```
 >
 >5. Register the `adjust-target-workarea.jsx` file with the ***After Update*** event.
 >6. Run a batch render job with Templater with rows or objects that have different `workarea-start` and `workarea-end` values.  The output corresponding to each row or object has a different work area.
 
-As another example, you might want to truncate a text string and append it with an ellipses (three dots) before it is injected into a dynamic layer.  To do this, follow these steps:
+As another example, you might want to truncate a text string and append it with an ellipsis before it is injected into a dynamic layer.  To do this, follow these steps:
 
 >1. Add a column or property to your data source named `headline`.  Map the `headline` values to a Text Layer within an After Effects composition using the Templater Settings effect.
 >2. In your data source, for each job's `headline` value, enter a text string that contains more than ten characters.  You can enter strings less than ten characters long, but these will not be truncated as per the following ExtendScript code.
@@ -303,7 +396,7 @@ As another example, you might want to truncate a text string and append it with 
 >  ```
 >  function truncate(word){
 >
->  	 var truncated_word;
+>    var truncated_word;
 >    var max_characters = 10;
 >
 >    truncated_word = (word.length > max_characters) ? word.slice(0, max_characters) + '...' : word;
@@ -319,23 +412,30 @@ As another example, you might want to truncate a text string and append it with 
 >6. Using Templater, iterate through a set of rows or objects that have different `headline` values — some shorter than ten characters, and some longer.  Notice that long text strings within the `headline` layer are post-fixed with `...`.
 
 &nbsp;
+<a name="troubleshooting"></a>
 # Troubleshooting Event Scripts
 Use the following suggestions to help you troubleshoot your event scripts if Templater hangs during operation, or if they do not execute as expected.
 
 ### Log script output to a file
 1. Inside your script file, log output messages to a text file.  The code to log to a file differs depending on the language you are writing your script in.  For example take a look at the following code for various scripting languages:
   + Logging to file `debug.txt` on the user's desktop in a Bash script on macOS:
+
     ```
     printf "Troubleshooting my event script" >> ~/Desktop/debug.txt
     ```
+
   + Logging to file `debug.txt` on the user's desktop in a Batch Script on Windows:
+
     ```
 	echo Troubleshooting my event script >> %USERPROFILE%\Desktop\debug.txt
     ```
+
   + Logging to Templater's own `templater.log` file in ExtendScript:
+
     ```
     $D.log.msg('EVENT SCRIPT DEBUG', "Troubleshooting my event script");
     ```
+
 2. After Templater finishes its tasks, inspect the log file to see if your script generated expected results.
 
 ### Verify the full command line incantation that Templater uses
