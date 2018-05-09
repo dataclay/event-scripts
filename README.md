@@ -40,7 +40,7 @@ As of Templater 2.7 the **"For all commands, use job details as arguments"** pre
 # FAQs about event scripts
 
 ### Why register scripts with Templater events?
-**Shell scripts** are useful when you want to seamlessly integrate Templater into your existing application. For example, in a production scenario, you can [merge](http://github.com/dataclay/event-scripts/), transcode, or compress Templater's output—all of which can be accomplished calling a command line application like [ffmpeg](https://www.ffmpeg.org) within a script.  You can also automate publishing output to a specific destination like an FTP site, or your [YouTube](https://developers.google.com/youtube/v3/docs/), [Vimeo](https://developer.vimeo.com/api/upload/videos), or [JWPlatform](https://developer.jwplayer.com/jw-platform/reference/v1/#) account.  You could also script notifications for when a batch of renders completes—email, text message, etc.
+**Shell scripts** are useful when you want to seamlessly integrate Templater into your existing application. For example, in a production scenario, you can [merge](https://github.com/dataclay/event-scripts/blob/master/NodeJS/concatenate.js), transcode, or compress Templater's output—all of which can be accomplished calling a command line application like [ffmpeg](https://www.ffmpeg.org) within a script.  You can also automate publishing output to a specific destination like an FTP site, or your [YouTube](https://developers.google.com/youtube/v3/docs/), [Vimeo](https://developer.vimeo.com/api/upload/videos), or [JWPlatform](https://developer.jwplayer.com/jw-platform/reference/v1/#) account.  You could also script notifications for when a batch of renders completes—email, text message, etc.
 
 With **ExtendScripts**, you can manipulate objects within the project file, enabling you to extend Templater's functionality with features that you need and want.  Ultimately, you gain a great deal of flexibility with Templater by having the ability to hook into its processes.
 
@@ -48,9 +48,9 @@ With **ExtendScripts**, you can manipulate objects within the project file, enab
 You should use **shell scripts** when you need to do something with Templater's output or have Templater's functions integrate with an existing automated workflow. You should use **ExtendScripts** when you want to extend Templater’s feature set to meet your business needs or workflow goals.
 
 ### What information from Templater can my scripts make use of? 
-You can pass information from Templater and After Effects to event scripts. To pass information to **shell scripts**, you append arguments when you register the script with a Templater event.  Read [Argument Macros]() and [Passing job details to event scripts]() to learn more.
+You can pass information from Templater and After Effects to event scripts. To pass information to **shell scripts**, you append arguments when you register the script with a Templater event.  Read [Pre-defined argument macros](#argument-macros) and [Using job details to event scripts](#use-details-in-scripts) to learn more.
 
-Use [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to pass information to **ExtendScripts**.  Read about [Passing job details to event scripts]() learn more.
+Use [Templater’s ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm) to pass information to **ExtendScripts**.  Read about [Using job details to event scripts](#use-details-in-scripts) learn more.
 
 ### What languages can I write event scripts in? 
 You can write **shell scripts** in any language available in your system's environment. You must write **ExtendScripts** using [the ExendScript scripting language](https://www.adobe.com/devnet/scripting/estk.html) and toolkit, and you have the option of using the [Templater ExtendScript API](http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm).
@@ -113,11 +113,11 @@ Register script files or commands to listen for specific events that are broadca
 >  ```
 > C:\Users\dev\event-scripts\timestamp.bat 512 '08-24-2018'
 >  ```
->  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the table under [Argument Macros]() for a listing of [all available pre-existing argument macros]().  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
+>  + For passing pre-existing information, select a different item from the Append drop down menu, then click **Append**.  Templater appends a corresponding, pre-existing, argument macro to the contents within the event field.  Refer to the table under [Pre-defined argument macros](#argument-macros) for a listing of all available pre-existing argument macros.  The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock.
 >  ```
 >  node C:\Users\dev\event-scripts\update-job.js $aep $data_uri $now
 >  ```
->  + For passing values from Templater's data source, create custom argument macros by prefixing column names or property keys with the `$` symbol, and append those macros to the script path or full command within the event field.  Learn more about [Argument Macros]() and [Passing job details to event scripts]() below.  The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
+>  + For passing values from Templater's data source, create custom argument macros by prefixing column names or property keys with the `$` symbol, and append those macros to the script path or full command within the event field.  Learn more about [Pre-defined argument macros](#argument-macros) and [Using job details to event scripts](#use-details-in-scripts) below.  The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
 >  ```
 >  C:\Users\dev\event-scripts\setup-folder.bat $album-name $release-date
 >  ```
@@ -155,7 +155,7 @@ Register script files or commands to listen for specific events that are broadca
 >              }
 >  }
 >  ```
->  + For passing pre-existing information to the script, refer to [the table under Argument Macros]() and append the corresponding arguments to script's absolute path or full command.  Appended argument macros should be separated with spaces. The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock. 
+>  + For passing pre-existing information to the script, refer to the table under [Pre-defined argument macros](#argument-macros) and append the corresponding arguments to script's absolute path or full command.  Appended argument macros should be separated with spaces. The following example shows how you would pass three pre-existing pieces of information as arguments to the registered NodeJS script `update-job.js`: (1) `$aep` — the path to the currently processed After Effect project file, (2) `$data_uri` — the full URL or absolute path to Templater's connected data source, and (3) `$now` — a timestamp derived from the host machine's internal clock. 
 >  ```
 > { 
 >    "prefs" : {
@@ -163,7 +163,7 @@ Register script files or commands to listen for specific events that are broadca
 >              }
 >  }
 >  ```
->  + For passing information from Templater's data source, enter a [custom argument macro]() by prefixing a column name or property key with a `$` symbol, and append that macro to the script's absolute path or full command.  See [Passing job details to event scripts]() below for more information. The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
+>  + For passing information from Templater's data source, enter a custom argument macro by prefixing a column name or property key with a `$` symbol, and append that macro to the script's absolute path or full command.  See [Using job details to event scripts]() below for more information. The following example shows how you would pass the values of the `album-name` and `release-date` columns from Templater's connected spreadsheet to the registered Windows Batch script `setup-folder.bat`.
 >  ```
 > { 
 >    "prefs" : {
