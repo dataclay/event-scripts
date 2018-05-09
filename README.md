@@ -82,6 +82,12 @@ The following table lists event names and a short description of each event.  Se
 >| Bot Enabled   | ...when Bot is enabled                    |
 >| Bot Disabled  | ...when Bot is disabled                   |
 
+&nbsp;<br/>
+The following illustration shows when each event is broadcast in the context of Templater iterative algorithm
+&nbsp;<br/>
+
+> ![Templater's iterative re-versioning process flow](http://support.dataclay.com/content/resources/images/templater-reversioning-flow.png)
+
 &nbsp;
 <a name="registering-scripts-with-events"></a>
 # Registering scripts with events
