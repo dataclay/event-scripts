@@ -307,18 +307,18 @@ Assume the following is registered to an event in Templater: `/Users/me/Dev/uplo
 >To access the any of the argument values within the `upload.sh` script, use the ordinal position of the argument like with a `$` sign like so:
 > 
 > ```
-> ae_project_file=$1
-> templater_data_source=$2
-> current_timestamp=$3
-> templater_output=$4
+> ae_project_file="$1"
+> templater_data_source="$2"
+> current_timestamp="$3"
+> templater_output="$4"
 > ```
 >
 > If you have more than nine arguments in a Bash script, you need to enclose its position number within braces like so
 >
 > ```
-> tenth_arg_val=${10}
-> eleventh_arg_val=${11}
-> twelfth_arg_val=${12}
+> tenth_arg_val="${10}"
+> eleventh_arg_val="${11}"
+> twelfth_arg_val="${12}"
 > ```
 
 &nbsp;
