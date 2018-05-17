@@ -18,7 +18,7 @@ within the Templater Preferences dialog.  If using the Templater CLI,
 enter the following command in the "post_cmd_batch" property found
 within the templater-options.json file.
 
-     node /path/to/event-scripts/NodeJS/transcode-after-job.js --input $out_file --outdir $out_dir --outname $out_name
+         node /path/to/event-scripts/NodeJS/transcode-after-job.js --input $out_file --outdir $out_dir --outname $out_name
 
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,39 +34,50 @@ var os     = require('os'),
     fs     = require('fs'),
     glob   = require('glob'),
     ffmpeg = require('fluent-ffmpeg'),
+    logln  = require('single-line-log').stdout,
     argv   = require('minimist')(process.argv.slice(2));
 
 var ffmpeg_cmd  = ffmpeg(),
     input_file  = path.resolve(argv.input),
-    output      = path.resolve(path.join(argv.outdir, argv.outname));
+    output      = path.resolve(path.join(argv.outdir, argv.outname)),
+    dest_loc    = path.resolve(argv.dest)
 
 if (process.platform == 'win32') {
-    ffmpeg.setFfmpegPath(ffmpeg_win);
-    ffmpeg.setFfprobePath(ffprobe_win);
+        ffmpeg.setFfmpegPath(ffmpeg_win);
+        ffmpeg.setFfprobePath(ffprobe_win);
 } else {
-    ffmpeg.setFfmpegPath(ffmpeg_osx);
-    ffmpeg.setFfprobePath(ffprobe_osx);
+        ffmpeg.setFfmpegPath(ffmpeg_osx);
+        ffmpeg.setFfprobePath(ffprobe_osx);
 }
+
 
 console.log("\n\nSetting input file to " + input_file);
 ffmpeg_cmd.input(input_file);
 
 ffmpeg_cmd.on('start', (command) => {
-  console.log('\n\nStarting transcode process:\n\n\t' + command);
+    console.log('\n\nStarting transcode process:\n\n\t' + command);
 });
 
 ffmpeg_cmd.on('error', (err, stdout, stderr) => {
-    console.log("\nError: " + err.message);
-    console.log(err.stack);
+        console.log("\nError: " + err.message);
+        console.log(err.stack);
 });
 
 ffmpeg_cmd.on('end', (stdout, err) => {
-    console.log("\n\nFinal transcoded output");
-    console.log("\n\t" + output);
-    //possibly delete input to save space.  or run as a service / cron job?
+        console.log("\n\nCopying transcoded output to destination");
+        console.log("\n\t" + output + ".mp4");
+        //possibly delete input to save space.  or run as a service / cron job?
+        fs.copyFile(output + '.mp4', destination + output + '.mp4', (err) => {
+
+        });
 });
 
-ffmpeg_cmd.videoBitrate(8000)
+ffmpeg_cmd.on('progress', function(progress) {
+    logln('\n\nProcessing...\n\n\tTarget Size =>\t\t' + (progress.targetSize/1000) + ' MB\n\tTotal Frames =>\t\t' + progress.frames + '\n\tPercent Complete =>\t' + Math.floor(progress.percent) + '%');
+});
+
+                    //
+ffmpeg_cmd.videoBitrate(2048)
           // set target codec
           .videoCodec('libx264')
           // set audio bitrate
@@ -76,5 +87,6 @@ ffmpeg_cmd.videoBitrate(8000)
           // set pixel format
           .outputOption('-pix_fmt yuv420p')
           // set output format to force
-          //.format('mp4');
-          .save(output);
+          .outputFormat('mp4')
+          // save to output
+          .save(output + ".mp4");
