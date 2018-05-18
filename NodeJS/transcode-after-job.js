@@ -25,7 +25,10 @@
 |                                                                    |
 +--------------------------------------------------------------------+
 
-Transcode output from Templater after a job completes.
+|||||||| Description
+
+Transcode render output from After Effects after a Templater job
+completes.
 
 |||||||| Requirements
 
