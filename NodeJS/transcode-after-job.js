@@ -1,26 +1,84 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/*
++--------------------------------------------------------------------+
+|               ____        __             __                        |
+|              / __ \____ _/ /_____ ______/ /___ ___  __             |
+|             / / / / __ `/ __/ __ `/ ___/ / __ `/ / / /             |
+|            / /_/ / /_/ / /_/ /_/ / /__/ / /_/ / /_/ /              |
+|           /_____/\__,_/\__/\__,_/\___/_/\__,_/\__, /               |
+|           Automating Digital Production      /____/                |
+|                                                                    |
+|                                                                    |
+|   We believe that leveraging data in the design process should     |
+|   be a playful and rewarding art. Our products make this           |
+|   possible for digital content creators.                           |
+|                                                                    |
+|   |email                      |web                  |twitter       |
+|   |support@dataclay.com       |dataclay.com         |@dataclay     |
+|                                                                    |
+|   This code is provided to you for your personal or commercial     |
+|   use.  However, you must abide by the terms of the MIT            |
+|   License: https://opensource.org/licenses/MIT                     |
+|                                                                    |
+|                                                                    |
+|                Copyright 2013-2018 Dataclay, LLC                   |
+|                  Licensed under the MIT License                    |
+|                                                                    |
++--------------------------------------------------------------------+
 
-Concatenate Templater batch output with ffmpeg.
-Copyright (c) Dataclay LLC 2016
-MIT License
+Transcode output from Templater after a job completes.
 
-You must enter `npm install` to install all dependency modules used in
-this script.  All modules are listed in the package.json file in the
-root of this repository.
+|||||||| Requirements
 
-To use this script.  Make sure to have ffmpeg installed and point to
-both the ffmpeg and ffprobe binaries in the code below.  Then, make
-sure that the script's dependencies are installed by entering `npm
-install` in the root of your working directory.
+FFmpeg must be installed on the machine running this code. Point the
+code below to the appropriate ffmpeg and ffprobe binaries, then
+install the script's dependencies by entering `npm install` in the root
+of your working directory for this code repository.
 
-Enter the following command within the "After all jobs" field found
-within the Templater Preferences dialog.  If using the Templater CLI,
-enter the following command in the "post_cmd_batch" property found
-within the templater-options.json file.
+|||||||| Usage
 
-         node /path/to/event-scripts/NodeJS/transcode-after-job.js --input $out_file --outdir $out_dir --outname $out_name
+1.  Enter the following command within the "After Job" field of the
+    "Register Shell Scripts with Events" dialog that opens when the
+    "Setup Shell Commands" button is clicked from within the "Templater
+    Preferences"dialog. If using Templater's command line interface, set
+    the value of the "post_cmd_job" property key within the
+    `templater-options.json` file to the command below:
 
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+      node transcode-after-job.js --input $out_file --outdir $out_dir --outname $out_name --dest "C:\final\destination\folder"
+
+2.  Start a batch render operation.  Each output is transcoded according
+    to the argument settings or its defaults.
+
+3.  To modify the transcode settings, you can set some argument values. 
+    Below is a list of arguments and their defaults
+
+    --vcodec        The type of encoder you want to use
+                    Type: String, Default: 'libx264'
+
+    --vbit          The bitrate for the transcoded output
+                    Type: Integer, Default: 2048
+
+    --acodec        The audio encoder you want to use
+                    Type: String, Default: 'ac3'
+
+    --abit          The bitrate of the audio 
+                    Type: String, Default: '128k'
+
+    --file_ext      The file extension to be used for transcoded output
+                    Type: String, Default: '.mp4'
+
+    --vcontainer    The file format container of transcoded output
+                    Type: String, Default: 'mp4'
+
+    --pixformat     The pixel format for the transcoded output. 
+                    Type: String, Default: 'yuv420p'
+                    
+                    For a list of pixel formats, visit the following URL: 
+                    https://ffmpeg.org/doxygen/trunk/pixfmt_8h_source.html
+
+    --cleanup       Remove original files after transcode
+                    Type: Boolean, Default: true
+
+*/
 
 //Constants
 var ffmpeg_win  = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
@@ -40,53 +98,91 @@ var os     = require('os'),
 var ffmpeg_cmd  = ffmpeg(),
     input_file  = path.resolve(argv.input),
     output      = path.resolve(path.join(argv.outdir, argv.outname)),
-    dest_loc    = path.resolve(argv.dest)
+    dest_loc    = path.resolve(argv.dest),
+    remove_orig = (argv.cleanup        || true),
+    vcodec      = (argv.vcodec         || 'libx264'),
+    vbit        = (parseInt(argv.vbit) || 2048),
+    acodec      = (argv.acodec         || 'ac3'),
+    abit        = (argv.abit           || '128k'),
+    file_ext    = (argv.file_ext       || '.mp4')
+    vcontainer  = (argv.container      || 'mp4'),
+    pixformat   = (argv.pixformat      || 'yuv420p');
+
 
 if (process.platform == 'win32') {
-        ffmpeg.setFfmpegPath(ffmpeg_win);
-        ffmpeg.setFfprobePath(ffprobe_win);
+    ffmpeg.setFfmpegPath(ffmpeg_win);
+    ffmpeg.setFfprobePath(ffprobe_win);
 } else {
-        ffmpeg.setFfmpegPath(ffmpeg_osx);
-        ffmpeg.setFfprobePath(ffprobe_osx);
+    ffmpeg.setFfmpegPath(ffmpeg_osx);
+    ffmpeg.setFfprobePath(ffprobe_osx);
 }
-
 
 console.log("\n\nSetting input file to " + input_file);
 ffmpeg_cmd.input(input_file);
+
+//FFmpeg parameters
+ffmpeg_cmd.videoBitrate(vbit)
+          // set target codec
+          .videoCodec(vcodec)
+          // set audio bitrate
+          .audioBitrate(abit)
+          // set audio codec
+          .audioCodec(acodec)
+          // set pixel format
+          .outputOption('-pix_fmt ' + pixformat)
+          // set output format to force
+          .outputFormat(vcontainer)
+          // save to output
+          .save(output + file_ext);
 
 ffmpeg_cmd.on('start', (command) => {
     console.log('\n\nStarting transcode process:\n\n\t' + command);
 });
 
 ffmpeg_cmd.on('error', (err, stdout, stderr) => {
-        console.log("\nError: " + err.message);
-        console.log(err.stack);
+        
+        if (err) {
+          console.log("\nError: " + err.message);
+          console.log(err.stack);
+        }
 });
 
 ffmpeg_cmd.on('end', (stdout, err) => {
-        console.log("\n\nCopying transcoded output to destination");
-        console.log("\n\t" + output + ".mp4");
+        console.log("\n\nCopying transcoded output to destination location.");
         //possibly delete input to save space.  or run as a service / cron job?
-        fs.copyFile(output + '.mp4', destination + output + '.mp4', (err) => {
 
+        fs.copyFile(output + '.mp4', path.resolve(dest_loc, (argv.outname + '.mp4')), (err) => {
+          
+          if (err) {
+            
+            console.log("\n\tAn error ocurred when moving the output file to final destination: " + err);
+            return;
+
+          } else {
+
+            console.log("\n\t" + path.resolve(dest_loc, (argv.outname + ".mp4")));
+            
+            if (JSON.parse(remove_orig)) {
+            
+              console.log("\n\nDeleting original After Effects output file " + input_file);
+              
+              fs.unlink(input_file, (err) => {
+                if (err) throw err;
+                console.log(input_file + ' was deleted.');
+              });
+
+              fs.unlink(output + '.mp4', (err) => {
+                if (err) throw err;
+                console.log(output + ' was deleted.');
+              });
+
+            }
+            
+          }
+          
         });
 });
 
 ffmpeg_cmd.on('progress', function(progress) {
     logln('\n\nProcessing...\n\n\tTarget Size =>\t\t' + (progress.targetSize/1000) + ' MB\n\tTotal Frames =>\t\t' + progress.frames + '\n\tPercent Complete =>\t' + Math.floor(progress.percent) + '%');
 });
-
-                    //
-ffmpeg_cmd.videoBitrate(2048)
-          // set target codec
-          .videoCodec('libx264')
-          // set audio bitrate
-          .audioBitrate('128k')
-          // set audio codec
-          .audioCodec('ac3')
-          // set pixel format
-          .outputOption('-pix_fmt yuv420p')
-          // set output format to force
-          .outputFormat('mp4')
-          // save to output
-          .save(output + ".mp4");
