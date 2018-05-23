@@ -102,13 +102,13 @@ var ffmpeg_cmd  = ffmpeg(),
     input_file  = path.resolve(argv.input),
     output      = path.resolve(path.join(argv.outdir, argv.outname)),
     dest_loc    = path.resolve(argv.dest),
-    remove_orig = (argv.cleanup        || true),
+    remove_orig = (argv.cleanup        || true     ),
     vcodec      = (argv.vcodec         || 'libx264'),
-    vbit        = (parseInt(argv.vbit) || 2048),
-    acodec      = (argv.acodec         || 'ac3'),
-    abit        = (argv.abit           || '128k'),
-    file_ext    = (argv.file_ext       || '.mp4')
-    vcontainer  = (argv.container      || 'mp4'),
+    vbit        = (parseInt(argv.vbit) || 2048     ),
+    acodec      = (argv.acodec         || 'ac3'    ),
+    abit        = (argv.abit           || '128k'   ),
+    file_ext    = (argv.file_ext       || '.mp4'   ),
+    vcontainer  = (argv.container      || 'mp4'    ),
     pixformat   = (argv.pixformat      || 'yuv420p');
 
 
