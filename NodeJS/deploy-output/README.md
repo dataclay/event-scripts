@@ -57,7 +57,7 @@ Fill in or replace the credential files for specific vendor services.  You can f
 		|		|A                     |B                 | C                   |
 		|:------|:---------------------|:-----------------|:--------------------|
 		|1		|Preview Domain        |Preview Route     | Player Key          |
-		|2		|playback.dataclay.com |video             | zEnsQmBy            | 
+		|2		|playback.dataclay.com |video             | qEngXmKl            | 
 
 
 	+ Take note as to the cell reference for each of the cells above.  For example, you can refer to the *Preview Domain* value in row 2 of a worksheet named `streaming_globals` is the following `streaming_globals!A2`.  You will use these referents in the command line arguments.
@@ -98,7 +98,7 @@ node app.js --gcreds_file '/Users/me/Dev/credentials/google-service-account-cred
             --s3_folder 'test'\
             --start_row 2\
             --end_row 2\
-            --asset_loc '/Users/me/Dropbox/DataClay/Evangelism/Projects/Bare Essentials/output'\
+            --asset_loc '/Users/me/Dropbox/Dataclay/templater-output'\
             --poster_frame 6\
             --asset_ext 'mov'
 ```
