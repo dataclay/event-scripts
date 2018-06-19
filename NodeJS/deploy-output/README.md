@@ -85,7 +85,7 @@ The main application file is `app.js` within the `deploy-output` subfolder found
 node app.js --gcreds_file '/Users/me/Dev/credentials/google-service-account-creds.json.json'\
             --awscreds_file '/Users/me/Dev/credentials/aws-credentials.json'\
             --jwcreds_file '/Users/me/Dev/credentials/jwplatform-credentials.json'\
-            --sheet_key '1lIIUFgzELVvpA75JNv3QnX7VmIYVyPjVZjuTRjAAgXw'\
+            --sheet_key '1pITUFgzELVvpA75LXv3QnXpVmIYMyQiVZjdTRjAAgXw'\
             --worksheet 'streaming'\
             --domain_cell 'streaming_globals!B2'\
             --route_cell 'streaming_globals!B3'\
