@@ -150,6 +150,10 @@ ffmpeg_cmd.on('error', (err, stdout, stderr) => {
         }
 });
 
+ffmpeg_cmd.on('progress', function(progress) {
+    logln('\n\nProcessing...\n\n\tTarget Size =>\t\t' + (progress.targetSize/1000) + ' MB\n\tTotal Frames =>\t\t' + progress.frames + '\n\tPercent Complete =>\t' + progress.percent + '%');
+});
+
 ffmpeg_cmd.on('end', (stdout, err) => {
         console.log("\n\nCopying transcoded output to destination location.");
         //possibly delete input to save space.  or run as a service / cron job?
@@ -184,8 +188,4 @@ ffmpeg_cmd.on('end', (stdout, err) => {
           }
           
         });
-});
-
-ffmpeg_cmd.on('progress', function(progress) {
-    logln('\n\nProcessing...\n\n\tTarget Size =>\t\t' + (progress.targetSize/1000) + ' MB\n\tTotal Frames =>\t\t' + progress.frames + '\n\tPercent Complete =>\t' + Math.floor(progress.percent) + '%');
 });
