@@ -73,7 +73,9 @@ Fill in or replace the credential files for specific vendor services.  You can f
 
 5.  Decide on a batch of rows from your Google Sheet data source that Templater will begin to process.  Then enter the start row and end row into the `Render row _____ through _____` interface fields in Templater's main panel, or in the `row_start` and `row_end` properties in the `templater-options.json` file if using the Templater CLI.
 
-6.  Executes a batch **rendering** process.  This script will only work properly when rendering directly out of After Effects as opposed to using the **replication** method of output.
+6.  Execute a batch **rendering** process.  This script will only work properly when rendering directly out of After Effects as opposed to using the **replication** method of output.
+
+7.  Watch the magic happen.  Templater will render output then, upload its output asset to S3, call JWPlatform, and then update the Google Spreadsheet with data from both AWS and JWPlatform.
 
 # Command line incantation
 
