@@ -1,5 +1,5 @@
 module.exports = Object.freeze({
-    
+
     jw : { 
 
         status : {
@@ -18,15 +18,19 @@ module.exports = Object.freeze({
 
     video : {
 
-        status : {
+          services : {
+                         YOUTUBE      : "YT"
+                       , JWPLATFORM   : "JW"
+                       , VIMEO        : "VIMEO"
+                     }
 
-                     READY        : "ready"
-                   , QUEUED       : "queued"
-                   , PROCESSING   : "processing"
-                   , DONE         : "done"
-                   , FAIL         : "fail"
-
-                 }
+        , status : {
+                         READY        : "ready"
+                       , QUEUED       : "queued"
+                       , PROCESSING   : "processing"
+                       , DONE         : "done"
+                       , FAIL         : "fail"
+                   }
 
     },
 
@@ -77,11 +81,25 @@ module.exports = Object.freeze({
 
     },
 
+    storage : {
+
+      types : {
+
+          NONE    : null
+        , S3      : "S3"
+        , DROPBOX : "Dropbox"
+        , GDRIVE  : "GDrive"
+
+      }
+
+    },
+
     errors : {
 
         absent_gcreds_file   : "No Google Services Account credential file found at: %s.  You may need to create a service account in the Google API console.  Please see this article for more information about Google Service accounts: https://cloud.google.com/iam/docs/understanding-service-accounts"
       , absent_awscreds_file : "No AWS credential file found at: %s.  You need to store your AWS IAM Access Key ID, and Secret Access Key in a file to use this app.  Please see this article retreiving your IAM keys from AWS: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html"
       , absent_jwcreds_file  : "No JWPlatform credential file found at: %s.  You need to store your JW Platform user name, API key, and key secret in a file to use this app.  Refer to your account page on JWPlatform."
+      , absent_ytcreds_file  : "No YouTube credential file found at: %s.  You need to download your credential file from the API Console for Google Cloud Platform."
       , json_read_err        : "There was an error reading the JSON from file %s.  It may be malformed, please inspect it and try again."
 
     }

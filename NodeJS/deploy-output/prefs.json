@@ -1,0 +1,10 @@
+{
+    "oauth" : {
+                      "youtube" : {
+                          "access_token" : ""
+                        , "refresh_token" : ""
+                      }
+
+                    , "vimeo"   : { }
+              }
+}

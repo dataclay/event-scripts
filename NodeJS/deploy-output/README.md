@@ -87,6 +87,8 @@ The main application file is `app.js` within the `deploy-output` subfolder found
 node app.js --gcreds_file '/Users/me/Dev/credentials/google-service-account-creds.json.json'\
             --awscreds_file '/Users/me/Dev/credentials/aws-credentials.json'\
             --jwcreds_file '/Users/me/Dev/credentials/jwplatform-credentials.json'\
+            --ytcreds_file '/Users/me/Dev/credentials/templater-uploader-youtube.json'\
+            --stream_service "YT"
             --sheet_key '1pITUFgzELVvpA75LXv3QnXpVmIYMyQiVZjdTRjAAgXw'\
             --worksheet 'streaming'\
             --domain_cell 'streaming_globals!B2'\
@@ -112,6 +114,9 @@ node app.js --gcreds_file '/Users/me/Dev/credentials/google-service-account-cred
 |--gcreds_file    |string     |Absolute path to file holding Google Service Account credentials                                            |
 |--awscreds_file  |string     |Absolute path to file holding AWS IAM user credentials                                                      |
 |--jwcreds_file   |string     |Absolute path to file holding JWPlatform API Key, Secret, and user                                          |
+|--ytcreds_file   |string     |Absolute path to file holding YouTube API credentials                                                       |
+|--stream_service |string     |The third-party streaming provider you want to use.  Current supports only JWPlatform and YouTube           |
+|--storage_service|string     |The third-part storage provider you want to use.  Currently supports only AWS S3                            |
 |--sheet_key      |string     |Unique string ID for the Google Sheet document found in the Sheet's URL as displayed in a browser window    |
 |--worksheet      |string     |The name of the tab in the Google Sheet you are using as Templater's data source                            | 
 |--domain_cell    |string     |The cell reference for a domain that you are hosting an online video player                                 | 

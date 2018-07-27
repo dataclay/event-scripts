@@ -7,7 +7,8 @@ var enums             = require('./constants')
     Q                 = require('q'),
     config            = require('./config'),
     pad               = require('pad'),
-    jw                = require('./jwplatform');
+    jw                = require('./jwplatform'),
+    aws               = require('./aws');
 
 var gsheet = {
 
@@ -38,14 +39,24 @@ var gsheet = {
         ,'return-empty' : true
       }, function(err, cells){
 
-        s3_url = 'https://' + (enums.aws.regions[p.storage.region]).endpoint + '/' + p.storage.bucket + '/' + p.storage.folder + '/' + path.parse(video_file).base;
+        var dl_link = null,
+            c       = cells[0];
 
-        console.log('\n\t' + emoji.get('floppy_disk') + '\tDownload @ ' + s3_url);
+        if (p.storage.type == enums.storage.types.S3) {
 
-        var c = cells[0];
-        gsheet.row.s3_url = s3_url;
-        c.setValue(s3_url, step);
+          var dl_link  = 'https://' + (enums.aws.regions[p.storage.region]).endpoint + '/' + p.storage.bucket + '/' + p.storage.folder + '/' + path.parse(aws.asset).base;
+          console.log('\n\t' + emoji.get('floppy_disk') + '\tDownload @ ' + dl_link);          
+            
+        } else {
 
+          dl_link = "Unavailable";
+
+        }
+            
+        gsheet.row.s3_url = dl_link;
+
+        c.setValue(dl_link, step);
+        
       });
 
   },
@@ -137,7 +148,7 @@ var gsheet = {
                           c.setValue(enums.jw.status.CREATED, function() {
                             console.log("\n\t" + emoji.get('key') + "\tJW Platform Stream Key [ " + jw.video.key + " ]");
                             console.log("\n\t" + emoji.get('studio_microphone') + "\tBroadcast Status [ " + enums.jw.status.CREATED + " ]");
-                            console.log("\n\t" + emoji.get('timer_clock') + "\t[ " + path.parse(video_file).base + " ] staged to streaming provider [ JW Platform ]");
+                            console.log("\n\t" + emoji.get('timer_clock') + "\t[ " + gsheet.row[config.params.fields.output.name] + " ] staged to streaming provider [ JW Platform ]");
                             step();
                           });
 
@@ -162,6 +173,7 @@ var gsheet = {
   print_col : function(col) {
     console.log(pad(("  [ " + col.name + " ]"), 25) + " : " + col.pos + " (" + col.letter + ")");
     return;
+  
   },
 
   get_col_positions : function(step) {
@@ -283,6 +295,20 @@ var gsheet = {
 
     });
 
+  },
+
+  update_single_row : function(step) {
+
+    var p = config.params;
+
+    gsheet.row[p.fields.download.name ] = aws.S3_download_url || 'Unavailable';
+    gsheet.row[p.fields.bcast.name    ] = enums.jw.status.CREATED;
+    gsheet.row[p.fields.stream.name   ] = jw.video.key;
+    gsheet.row[p.fields.preview.name  ] = '=CONCATENATE("http://",' + p.video.preview.domain + ', "#",'  + p.video.preview.route + ', "=", "' + jw.video.key + '")';
+    gsheet.row[p.fields.embed.name    ] = '=CONCATENATE("<script src=\'//content.jwplatform.com/players/", "' + jw.video.key + '", "-", "' + p.video.preview.player_key + '", "\'></script>")';
+
+    console.log("Saving single row");
+    gsheet.row.save(step);
 
   },
 

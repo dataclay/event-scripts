@@ -50,9 +50,12 @@ var enums             = require('./constants'),
     moment            = require('moment'),
     emoji             = require('node-emoji'),
     config            = require('./config'),
-    jw                = require('./jwplatform')
+    jw                = require('./jwplatform'),
     gsheet            = require('./gsheet'),
-    aws               = require('./aws');
+    aws               = require('./aws'),
+    yt                = require('./youtube'),
+    deploy            = require('./deploy'),
+    pad               = require('pad'),
     argv              = require('minimist')(process.argv.slice(2));
 
 async.series([
@@ -63,25 +66,29 @@ async.series([
                     gcreds          : argv.gcreds_file
                   , jwcreds         : argv.jwcreds_file
                   , awscreds        : argv.awscreds_file
+                  , ytcreds         : argv.ytcreds_file
+                  , stream_service  : argv.stream_service
                   , data_type       : enums.data.types.GOOGLE
                   , user            : argv.author
                   , data_collection : argv.worksheet
-                  , data_key        : argv.sheet_key
+                  , sheet_key       : argv.sheet_key
                   , data_uri        : argv.data_uri
-                  , data_index      : argv.idx
+                  , data_index      : argv.data_index
+                  , data_key        : argv.data_key
                   , start_row       : argv.start_row
                   , end_row         : argv.end_row
                   , asset_loc       : argv.asset_loc
                   , poster_frame    : argv.poster_frame
                   , asset_ext       : argv.asset_ext
                   , preview_info    : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
-                  , storage_type    : "S3"
+                  , storage_type    : (argv.storage_service || enums.storage.types.NONE)
                   , storage_region  : argv.s3_region
                   , storage_bucket  : argv.s3_bucket
                   , storage_folder  : argv.s3_folder
                   , broadcast       : argv.broadcast
                   , title           : argv.title
                   , desc            : argv.desc
+                  , bot_enabled     : argv.bot_enabled
                 };
 
     config.get(conf); 
@@ -90,28 +97,68 @@ async.series([
 
   },
 
-  jw.get,
+  config.read_prefs,
+
+  function choose_stream_service(step) {
+      
+      if (config.params.video.service == enums.video.services.JWPLATFORM) {
+        //console.log(pad("Streaming Service", 25) + " : JWPlatform" );
+        jw.get(step)
+      } else if (config.params.video.service == enums.video.services.YOUTUBE) {
+        //console.log(pad("Streaming Service", 25) + " : YouTube" );
+        yt.get(step)
+      }
+      
+  },
+
   gsheet.get,
   
   function process_video(step) {
     
-      var p = config.params;
-      
-      // google provides some query options 
-      gsheet.worksheet.getRows({
+      var p           = config.params,
+          sheet_query = null,
+          sql         = null;
 
-        offset  : (p.batch.start-1),
-        limit   : ((p.batch.end) - (p.batch.start))+1,
-        orderby : p.fields.index
+      //Processed rows discontiguous (Templater Bot is on) 
+      if (p.fields.index   &&
+          p.data.key       &&
+          !(p.batch.start) &&
+          !(p.batch.end))
+      {
 
-      }, function( err, rows ){
+          deploy.is_batch = false;
+          sql = p.fields.index + '=' + p.data.key;
+          
+          sheet_query = { 
+              'offset' : 1
+            , 'limit'  : 1
+            , 'query'  : sql
+          };
+
+      //Processed rows are contiguous (Batch process)
+      } else {
+
+        deploy.is_batch = true;
+        sheet_query = {
+          offset  : (p.batch.start-1),
+          limit   : ((p.batch.end) - (p.batch.start))+1,
+          orderby : p.fields.index
+        }
+
+      }
+
+      //Retrieve the rows needed to process
+      gsheet.worksheet.getRows(sheet_query, function( err, rows ){
 
           if (err) {
             throw err;
           }
 
-          console.log("Processing video rendered from data in row " + rows);
-          aws.upload_batch(rows, step);
+          if (deploy.is_batch) {
+            deploy.batch(rows, step);
+          } else {
+            deploy.single(rows[0], step);
+          }
 
       });
   }

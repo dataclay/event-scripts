@@ -25,4 +25,4 @@ echo -------- [TEMPLATER JOB] -------- >> %log%
 echo    Job completed on %mydate% @ %mytime% >> %log%
 echo    Rendered job with ID %2 to %4 >> %log%
 echo    Job details as JSON are found in file %8 >> %log%
-@echo     >> %log%
+echo( >> %log%
