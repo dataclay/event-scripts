@@ -4,6 +4,7 @@ var enums           = require('./constants'),
     moment          = require('moment'),
     request         = require('request'),
     jwPlatform      = require('jwplatform-api'),
+    stream          = require('./stream')
     fs              = require('fs'),
     emoji           = require('node-emoji'),
     jwLogger        = null,
@@ -72,7 +73,7 @@ var jw = {
                     if (err) {
                         console.log(err) 
                     } else {
-                        jw.video.key = results.video.key;
+                        stream.key = results.video.key;
                         step();
                     }
 
@@ -80,7 +81,7 @@ var jw = {
 
             } else if (config.params.storage.type == enums.storage.types.NONE) {
 
-                var form_data  = { file : fs.createReadStream(jw.video.asset) };
+                var form_data  = { file : fs.createReadStream(stream.upload) };
 
                 async.series([
 
@@ -88,14 +89,14 @@ var jw = {
 
                     function(step) {
 
-                        console.log("\n\t" + emoji.get('clapper') + "\tSending [ " + path.parse(jw.video.asset).base + " ] to JWPlatform...  " + emoji.get('rocket'));
+                        console.log("\n\t" + emoji.get('clapper') + "\tSending [ " + path.parse(stream.upload).base + " ] to JWPlatform...  " + emoji.get('rocket'));
 
                         request.post({uri: jw.video.upload_obj.uploadUrl, formData: form_data}, function(err, resp, body){
                             if (err) return console.error('Upload failed', err);
 
                             //The upload finished, but now we have to set that video's attributes.
-                            jw.video.key = JSON.parse(body).media.key;
-                            vid_options.video_key = jw.video.key;
+                            stream.key = JSON.parse(body).media.key;
+                            vid_options.video_key = stream.key;
                             api.post('/v1/videos/update', vid_options, null, function(err, results) {
                                console.log("\n\t" + emoji.get('memo') + "\tFinished updating the video's properties.");
                                after_create();

@@ -54,6 +54,7 @@ var enums             = require('./constants'),
     gsheet            = require('./gsheet'),
     aws               = require('./aws'),
     yt                = require('./youtube'),
+    vmo               = require('./vimeo'),
     deploy            = require('./deploy'),
     pad               = require('pad'),
     argv              = require('minimist')(process.argv.slice(2));
@@ -67,8 +68,13 @@ async.series([
                   , jwcreds         : argv.jwcreds_file
                   , awscreds        : argv.awscreds_file
                   , ytcreds         : argv.ytcreds_file
+                  , vmocreds        : argv.vmocreds_file
                   , stream_service  : argv.stream_service
-                  , data_type       : enums.data.types.GOOGLE
+                  , stream_group    : argv.stream_group
+                  , stream_privacy  : argv.stream_privacy
+                  , stream_comments : argv.stream_comments
+                  , stream_download : argv.stream_download
+                  , data_type       : argv.data_type || enums.data.types.GOOGLE
                   , user            : argv.author
                   , data_collection : argv.worksheet
                   , sheet_key       : argv.sheet_key
@@ -94,7 +100,6 @@ async.series([
     config.get(conf); 
     config.display();
     step();
-
   },
 
   config.read_prefs,
@@ -102,11 +107,11 @@ async.series([
   function choose_stream_service(step) {
       
       if (config.params.video.service == enums.video.services.JWPLATFORM) {
-        //console.log(pad("Streaming Service", 25) + " : JWPlatform" );
         jw.get(step)
       } else if (config.params.video.service == enums.video.services.YOUTUBE) {
-        //console.log(pad("Streaming Service", 25) + " : YouTube" );
         yt.get(step)
+      } else if (config.params.video.service == enums.video.services.VIMEO) {
+        vmo.get(step)
       }
       
   },
@@ -120,13 +125,9 @@ async.series([
           sql         = null;
 
       //Processed rows discontiguous (Templater Bot is on) 
-      if (p.fields.index   &&
-          p.data.key       &&
-          !(p.batch.start) &&
-          !(p.batch.end))
+      if (!config.is_batch())
       {
 
-          deploy.is_batch = false;
           sql = p.fields.index + '=' + p.data.key;
           
           sheet_query = { 
@@ -154,7 +155,7 @@ async.series([
             throw err;
           }
 
-          if (deploy.is_batch) {
+          if (config.is_batch()) {
             deploy.batch(rows, step);
           } else {
             deploy.single(rows[0], step);

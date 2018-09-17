@@ -19,9 +19,9 @@ module.exports = Object.freeze({
     video : {
 
           services : {
-                         YOUTUBE      : "YT"
-                       , JWPLATFORM   : "JW"
-                       , VIMEO        : "VIMEO"
+                         YOUTUBE      : "YouTube"
+                       , JWPLATFORM   : "JW Platform"
+                       , VIMEO        : "Vimeo"
                      }
 
         , status : {
@@ -30,6 +30,14 @@ module.exports = Object.freeze({
                        , PROCESSING   : "processing"
                        , DONE         : "done"
                        , FAIL         : "fail"
+                   }
+
+    },
+
+    stream : {
+
+          status : {
+                        CREATED       : "created"
                    }
 
     },
@@ -64,7 +72,9 @@ module.exports = Object.freeze({
 
         types  : {
 
-            GOOGLE : "google"
+              GOOGLE    : "google"
+            , JSON_FILE : "json_file"
+            , JSON_URL  : "json_url"
 
         }
 
@@ -76,6 +86,12 @@ module.exports = Object.freeze({
            , BCAST   : "broadcast-status"
            , EMBED   : "embed-script"
            , PREV    : "broadcast-preview"
+
+        }
+
+        , tokens : {
+
+          GSHEET_DOMAIN : "docs.google.com"
 
         }
 
@@ -96,11 +112,15 @@ module.exports = Object.freeze({
 
     errors : {
 
-        absent_gcreds_file   : "No Google Services Account credential file found at: %s.  You may need to create a service account in the Google API console.  Please see this article for more information about Google Service accounts: https://cloud.google.com/iam/docs/understanding-service-accounts"
-      , absent_awscreds_file : "No AWS credential file found at: %s.  You need to store your AWS IAM Access Key ID, and Secret Access Key in a file to use this app.  Please see this article retreiving your IAM keys from AWS: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html"
-      , absent_jwcreds_file  : "No JWPlatform credential file found at: %s.  You need to store your JW Platform user name, API key, and key secret in a file to use this app.  Refer to your account page on JWPlatform."
-      , absent_ytcreds_file  : "No YouTube credential file found at: %s.  You need to download your credential file from the API Console for Google Cloud Platform."
-      , json_read_err        : "There was an error reading the JSON from file %s.  It may be malformed, please inspect it and try again."
+        absent_gcreds_file    : "No Google Services Account credential file found at: %s.  You may need to create a service account in the Google API console.  Please see this article for more information about Google Service accounts: https://cloud.google.com/iam/docs/understanding-service-accounts"
+      , absent_awscreds_file  : "No AWS credential file found at: %s.  You need to store your AWS IAM Access Key ID, and Secret Access Key in a file to use this app.  Please see this article retreiving your IAM keys from AWS: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html"
+      , absent_jwcreds_file   : "No JWPlatform credential file found at: %s.  You need to store your JW Platform user name, API key, and key secret in a file to use this app.  Refer to your account page on JWPlatform."
+      , absent_ytcreds_file   : "No YouTube credential file found at: %s.  You need to download your credential file from the API Console for Google Cloud Platform."
+      , absent_vmocreds_file  : "No Vimeo credential file found at: %s.  You need to create your Vimeo credential file based on authentication data supplied by Vimeo."
+      , absent_stream_service : "It appears no video streaming service was selected.  Please specify one using the --stream_service argument and try again."
+      , incorrect_vmo_state   : "There was a problem authorizing this application to use your Vimeo account.  Please try again."
+      , json_read_err         : "There was an error reading the JSON from file %s.  It may be malformed, please inspect it and try again."
+      , absent_collection     : "There was no data collection, or worksheet, found.  Please use the --worksheet argument to specify which collection of data you want project to read and write to."
 
     }
 

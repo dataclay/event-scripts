@@ -24,7 +24,7 @@ var yt = {
         })
 
         //TODO:  Check if there is an existing access token saved to file.  If not then open browser and prompt for access code.
-        if (!config.params.prefs.oauth.youtube.refresh_token) {
+        if (!config.params.prefs.oauth.youtube || !config.params.prefs.oauth.youtube.refresh_token) {
 
             opn(oauth.generateAuthUrl({
               access_type: "offline"
@@ -39,21 +39,15 @@ var yt = {
                     throw err;
                 }
 
-                config.params.prefs.oauth.youtube = tokens
-
-                console.log(config.params.prefs.oauth.youtube);
-                
-                //TODO Write them to the preferences file
-
+                config.params.prefs.oauth.youtube = tokens;
+                config.write_prefs(config.params.prefs);
                 step();
 
             });
 
-            console.log(auth_code);
-
         } else {
 
-            console.log("Trying to retreive access token with refresh token.  Please wait....");
+            console.log("\nAttempting to retreive access token using refresh token.  Please wait....");
             step();
 
         }

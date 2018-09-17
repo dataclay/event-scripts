@@ -1,18 +1,19 @@
 
 //Building Blocks — Legos
-var enums    = require('./constants'),
-    Q        = require('q'),
-    extend   = require('extend'),
-    readjson = require('r-json'),
-    rline    = require('readline'),
-    rl       = rline.createInterface({
-                 input   : process.stdin,
-                 output  : process.stdout
-              }),
-    fs       = require('fs'),
-    path     = require('path'),
-    sprintf  = require('sprintf-js').sprintf;
-    pad      = require('pad');
+var enums     = require('./constants'),
+    Q         = require('q'),
+    extend    = require('extend'),
+    readjson  = require('r-json'),
+    writejson = require('write-json'),
+    rline     = require('readline'),
+    rl        = rline.createInterface({
+                  input   : process.stdin,
+                  output  : process.stdout
+                }),
+    fs        = require('fs'),
+    path      = require('path'),
+    sprintf   = require('sprintf-js').sprintf,
+    pad       = require('pad');
 
 
 //Configuration
@@ -24,7 +25,7 @@ var configuration = {
 
           auth   : {
                           google : {   
-                                          cred              : null
+                                          creds             : null
                                    }
                         , jw     : {   
                                           key               : null
@@ -35,7 +36,12 @@ var configuration = {
                                         , secretAccessKey   : null
                                    }
                         , yt     : {
-                                          cred              : null
+                                          creds             : null
+                                        , oauth_access_tk   : null
+                                        , oauth_refresh_tk  : null
+                                   }
+                        , vmo    : {
+                                          creds             : null
                                         , oauth_access_tk   : null
                                         , oauth_refresh_tk  : null
                                    }
@@ -76,11 +82,11 @@ var configuration = {
                     },
 
           storage : {
-                          type    : null
-                        , region  : null
-                        , bucket  : null
-                        , folder  : null
-                        , accessID : "hello"
+                          type     : null
+                        , region   : null
+                        , bucket   : null
+                        , folder   : null
+                        , accessID : null
                     }
     },
 
@@ -172,18 +178,22 @@ var configuration = {
 
             var p = configuration.params;
 
-            console.log("\n\nGathered user data...\n");
+            console.log("\n\nGathered user configuration...\n");
             console.log(pad("Data",  25)                    + " : " + p.data.url                   );
-            console.log(pad("Google Credentials", 25)       + " : " + p.auth.google.cred           );
+            console.log(pad("Google Credentials", 25)       + " : " + p.auth.google.creds          );
             console.log(pad("Storage Credentials", 25)      + " : " + p.storage.creds              );
-            console.log(pad("Streaming Credentials", 25)    + " : " + p.video.creds                );
             console.log(pad("Storage Service", 25)          + " : " + p.storage.type               );
             console.log(pad("Storage Access ID", 25)        + " : " + p.storage.accessID           );
-            console.log(pad("Stoage Secret", 25)            + " : " + p.storage.secret             );
-            console.log(pad("Streaming Service", 25)        + " : " + p.video.service              );
-            console.log(pad("Streaming API Key", 25)        + " : " + p.video.key                  );
-            console.log(pad("Streaming API Secret", 25)     + " : " + p.video.secret               );
-            console.log(pad("Streaming API user", 25)       + " : " + p.video.user                 );
+            console.log(pad("Storage Secret", 25)           + " : " + p.storage.secret             );
+            console.log(pad("Stream Credentials", 25)       + " : " + p.video.creds                );
+            console.log(pad("Stream Service", 25)           + " : " + p.video.service              );
+            console.log(pad("Stream Group", 25)             + " : " + p.video.group                );
+            console.log(pad("Stream Privacy", 25)           + " : " + p.video.privacy              );
+            console.log(pad("Stream Commenting", 25)        + " : " + p.video.comments             );
+            console.log(pad("Stream Downloadable", 25)      + " : " + p.video.downloadable         );
+            console.log(pad("Stream API Key", 25)           + " : " + p.video.key                  );
+            console.log(pad("Stream API Secret", 25)        + " : " + p.video.secret               );
+            console.log(pad("Stream API user", 25)          + " : " + p.video.user                 );
             console.log(pad("Data Collection", 25)          + " : " + p.data.collection            );
             console.log(pad("Data Index", 25)               + " : " + (p.fields.index || "default"));
             console.log(pad("Data Key", 25)                 + " : " + p.data.key                   );
@@ -203,7 +213,7 @@ var configuration = {
     read_prefs : function(step) {
 
         let prefs_file = `${__dirname}/prefs.json`;
-        let prefs      = readjson(prefs_file);
+        let prefs      = readjson(prefs_file); 
 
         configuration.params.prefs = prefs;
 
@@ -211,17 +221,11 @@ var configuration = {
 
     },
 
-    write_prefs : function(preference, value) {
+    write_prefs : function(prefs) {
 
         //First read the file and place into memory
         let prefs_file = `${__dirname}/prefs.json`;
-        let prefs      = readjson(prefs_file);
-
-        prefs[preference] = value;
-
-
-        //Manipulate the item that was passed
-        //Write the manipulated memory object back to file
+        writejson.sync(prefs_file, prefs, null, 4)
 
     },
 
@@ -233,30 +237,40 @@ var configuration = {
             jwcreds_contents  = null,
             jwcreds           = null,
             ytcreds_contents  = null,
-            ytcreds           = null;
+            ytcreds           = null,
+            vmocreds_contents = null,
+            vmocreds          = null;
         
-        //Required for all configs 
-        //Get Google Service Account credentials 
-        if (!fs.existsSync(args.gcreds)) {
-            throw new Error(sprintf(enums.errors.absent_gcreds_file, args.gcreds));
-        } else {
-            p.auth.google.cred = args.gcreds;    
+        //Required for Google Sheet data sources
+        //Get Google Service Account credentials
+        if (configuration.detect_datasource(args.data_uri) === enums.data.types.GOOGLE) {
+
+            if (!fs.existsSync(args.gcreds)) {
+                throw new Error(sprintf(enums.errors.absent_gcreds_file, args.gcreds));
+            } else {
+                p.auth.google.creds = args.gcreds;    
+            }
+
         }
 
         //Get AWS credentials
         //Optional if user wants to use S3
-        if (!fs.existsSync(args.awscreds)) {
-            throw new Error(sprintf(enums.errors.absent_awscreds_file, args.awscreds));
-        } else {
+        if (args.storage_service && (args.storage_service == enums.storage.types.S3)) {
 
-            try {
-                awscreds_contents  = fs.readFileSync(args.awscreds);
-                awscreds           = JSON.parse(awscreds_contents);
-                p.storage.creds    = args.awscreds;
-                p.storage.accessID = awscreds.accessKeyID;
-                p.storage.secret   = awscreds.secretAccessKey;
-            } catch (e) {
-                throw new Error(sprintf(enums.errors.json_read_err, args.awscreds));
+            if (!fs.existsSync(args.awscreds)) {
+                throw new Error(sprintf(enums.errors.absent_awscreds_file, args.awscreds));
+            } else {
+
+                try {
+                    awscreds_contents  = fs.readFileSync(args.awscreds);
+                    awscreds           = JSON.parse(awscreds_contents);
+                    p.storage.creds    = args.awscreds;
+                    p.storage.accessID = awscreds.accessKeyID;
+                    p.storage.secret   = awscreds.secretAccessKey;
+                } catch (e) {
+                    throw new Error(sprintf(enums.errors.json_read_err, args.awscreds));
+                }
+
             }
 
         }
@@ -307,45 +321,115 @@ var configuration = {
 
         }
 
+        //Get Vimeo credentials
+        if (args.stream_service && (args.stream_service == enums.video.services.VIMEO)) {
 
-        p.user.name        = args.user || "Unknown";
+            if (!fs.existsSync(args.vmocreds)) {
+                throw new Error(sprintf(enums.errors.absent_vmocreds_file, args.vmocreds));
+            } else {
+                vmocreds_contents = fs.readFileSync(args.vmocreds);
 
-        p.data.type        = enums.data.types.GOOGLE;
-        p.data.url         = (p.data.type == enums.data.types.GOOGLE) ? "https://docs.google.com/spreadsheets/d/" + args.sheet_key + "/" : args.data_uri;
-        p.data.collection  = args.data_collection;
-        p.data.sheet_key   = args.sheet_key;
-        p.data.bot_enabled = args.bot_enabled;
-        p.data.key         = args.data_key;
+                try {
+                    vmocreds           = JSON.parse(vmocreds_contents);
+                    p.auth.vmo.creds   = vmocreds;
+                    p.video.creds      = args.vmocreds;
+                    p.video.user       = vmocreds.user;
+                    p.video.key        = vmocreds.client_id;
+                    p.video.secret     = vmocreds.client_secret;
+                    p.video.redirect   = vmocreds.redirect_url;
+                } catch(e) {
+                    throw new Error(sprintf(enums.errors.json_read_err, args.vmocreds));
+                }
+                
+            }
+
+        }
+
+
+        p.user.name          = args.user || "Unknown";
+
+        p.data.type          = args.data_type || enums.data.types.GOOGLE;
+        p.data.url           = args.data_uri;
+        p.data.collection    = args.data_collection;
+        p.data.sheet_key     = args.sheet_key;
+        p.data.bot_enabled   = args.bot_enabled;
+        p.data.key           = args.data_key;
         
-        p.fields.index     = args.data_index || null;
-        p.fields.output    = { name : enums.data.fields.OUTPUT,  pos : null, letter: null };
-        p.fields.download  = { name : enums.data.fields.S3_LINK, pos : null, letter: null };
-        p.fields.stream    = { name : enums.data.fields.STREAM,  pos : null, letter: null };
-        p.fields.bcast     = { name : enums.data.fields.BCAST,   pos : null, letter: null };
-        p.fields.embed     = { name : enums.data.fields.EMBED,   pos : null, letter: null };
-        p.fields.preview   = { name : enums.data.fields.PREV,    pos : null, letter: null };
+        p.fields.index       = args.data_index || null;
+        p.fields.output      = { name : enums.data.fields.OUTPUT,  pos : null, letter: null };
+        p.fields.download    = { name : enums.data.fields.S3_LINK, pos : null, letter: null };
+        p.fields.stream      = { name : enums.data.fields.STREAM,  pos : null, letter: null };
+        p.fields.bcast       = { name : enums.data.fields.BCAST,   pos : null, letter: null };
+        p.fields.embed       = { name : enums.data.fields.EMBED,   pos : null, letter: null };
+        p.fields.preview     = { name : enums.data.fields.PREV,    pos : null, letter: null };
         
-        p.batch.start      = args.start_row;
-        p.batch.end        = args.end_row;
-        p.batch.assets     = args.asset_loc;
+        p.batch.start        = args.start_row;
+        p.batch.end          = args.end_row;
+        p.batch.assets       = args.asset_loc;
 
-        p.video.service    = args.stream_service;
-        p.video.title      = args.title;
-        p.video.desc       = args.desc;
-        p.video.broadcast  = args.broadcast;
-        p.video.thumb      = args.poster_frame;
-        p.video.ext        = args.asset_ext;
-        p.video.preview    = args.preview_info;
+        p.video.service      = args.stream_service;
+        p.video.group        = args.stream_group;
+        p.video.privacy      = args.stream_privacy;
+        p.video.comments     = args.stream_comments;
+        p.video.downloadable = args.stream_download;
+        p.video.title        = args.title;
+        p.video.desc         = args.desc;
+        p.video.broadcast    = args.broadcast;
+        p.video.thumb        = args.poster_frame;
+        p.video.ext          = args.asset_ext;
+        p.video.preview      = args.preview_info;
 
-        p.storage.type     = args.storage_type;
-        p.storage.region   = args.storage_region;
-        p.storage.bucket   = args.storage_bucket;
-        p.storage.folder   = args.storage_folder;
+        p.storage.type       = args.storage_type;
+        p.storage.region     = args.storage_region;
+        p.storage.bucket     = args.storage_bucket;
+        p.storage.folder     = args.storage_folder;
 
         extend(true, configuration.params, p);
 
         return configuration.params;
 
+    },
+
+    detect_datasource : function(uri) {
+
+        if (!uri) {
+            return null;
+        }
+
+        if (uri.indexOf(enums.data.tokens.GSHEET_DOMAIN) > -1) {
+
+            return enums.data.types.GOOGLE;
+
+        } else {
+
+            if (fs.openSync(uri)) {
+
+                fs.closeSync(uri);
+                return enums.data.types.JSON_FILE;
+
+            } else {
+
+                return enums.data.types.JSON_URL;
+
+            }
+
+        }
+
+    },
+
+    is_batch : function() {
+
+        var p = config.params;
+
+        if (p.fields.index   &&
+            p.data.key       &&
+            !(p.batch.start) &&
+            !(p.batch.end))
+        {
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }

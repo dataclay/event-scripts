@@ -5,6 +5,7 @@ var async    = require('async'),
     emoji    = require('node-emoji'),
     config   = require('./config'),
     gsheet   = require('./gsheet'),
+    stream   = require('./stream'),
     path     = require('path');
 
 var deploy = {
@@ -31,7 +32,7 @@ var deploy = {
         console.log("\n\n\t--------------------------------------------------\n\n\t" + emoji.get('eyes') + "\tOpened Row " + row.row_idx + " in Worksheet \"" + gsheet.worksheet.title + "\"");
         
         deploy.video_file = path.resolve(p.batch.assets, (row[p.fields.output.name] + "." + p.video.ext));
-        jw.video.asset = deploy.video_file;
+        stream.upload = deploy.video_file;
 
         if (row[enums.data.fields.STREAM]) {
           
@@ -130,7 +131,7 @@ var deploy = {
       function(step) {
 
         deploy.video_file = path.resolve(p.batch.assets, row[p.fields.output.name] + '.' + p.video.ext);
-        jw.video.asset = deploy.video_file;
+        stream.upload = deploy.video_file;
 
         if (row[p.fields.stream.name]) {
           
@@ -166,12 +167,7 @@ var deploy = {
                   },
 
                   function(step) {
-
-                    //send to streaming service.
-                    if (config.params.video.service == enums.video.services.JWPLATFORM) {
-                      jw.video.create(gsheet.row, step);
-                    }
-
+                    stream.create(config.params.video.service, gsheet.row, step);
                   },
 
                   //update the single row with all relevant data
