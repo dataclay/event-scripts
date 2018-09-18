@@ -3,11 +3,11 @@ var enums = require('./constants'),
 
 var stream = {
 
-      upload    : null
-    , key       : null
-    , preview   : null
-    , embed     : null
-    , download  : null
+      upload          : null
+    , key             : null
+    , preview         : null
+    , embed_code      : null
+    , source_asset    : null
 
     , info      : {
 
@@ -37,7 +37,7 @@ var stream = {
         if (config.is_batch()) {
 
             switch (service) {
-                case enums.video.services.VIMEO      : formula = '=CONCATENATE("<iframe width=\'650\' height=\'564\' src=\'https://player.vimeo.com/video/", ' + p.fields.stream.letter + row.row_idx + ', "\' frameborder=\'0\' allowFullScreen mozallowfullscreen webkitAllowFullScreen></iframe>")';
+                case enums.video.services.VIMEO      : formula = stream.embed_code;
                                                        break;
                 case enums.video.services.JWPLATFORM : formula = '=CONCATENATE("<script src=\'//content.jwplatform.com/players/", ' + p.fields.stream.letter + row.row_idx + ', "-", ' + p.video.preview.player_key + ', "\'></script>")';
                                                        break;
@@ -48,7 +48,7 @@ var stream = {
         } else {
 
             switch (service) {
-                case enums.video.services.VIMEO      : formula = '=CONCATENATE("<iframe width=\'650\' height=\'564\' src=\'https://player.vimeo.com/video/", "' + stream.key + '", "\' frameborder=\'0\' allowFullScreen mozallowfullscreen webkitAllowFullScreen></iframe>")';
+                case enums.video.services.VIMEO      : formula = stream.embed_code;
                                                        break;
                 case enums.video.services.JWPLATFORM : formula = '=CONCATENATE("<script src=\'//content.jwplatform.com/players/", "' + stream.key + '", "-", "' + p.video.preview.player_key + '", "\'></script>")';
                                                        break;

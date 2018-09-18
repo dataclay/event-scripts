@@ -316,8 +316,7 @@ var gsheet = {
     gsheet.row[p.fields.stream.name   ] = stream.key;
     gsheet.row[p.fields.preview.name  ] = stream.preview(); 
     gsheet.row[p.fields.embed.name    ] = stream.embed();
-
-    console.log("Saving single row");
+    
     gsheet.row.save(step);
 
   },

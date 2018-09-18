@@ -64,37 +64,38 @@ async.series([
   function(step){
 
     var conf =  {
-                    gcreds          : argv.gcreds_file
-                  , jwcreds         : argv.jwcreds_file
-                  , awscreds        : argv.awscreds_file
-                  , ytcreds         : argv.ytcreds_file
-                  , vmocreds        : argv.vmocreds_file
-                  , stream_service  : argv.stream_service
-                  , stream_group    : argv.stream_group
-                  , stream_privacy  : argv.stream_privacy
-                  , stream_comments : argv.stream_comments
-                  , stream_download : argv.stream_download
-                  , data_type       : argv.data_type || enums.data.types.GOOGLE
-                  , user            : argv.author
-                  , data_collection : argv.worksheet
-                  , sheet_key       : argv.sheet_key
-                  , data_uri        : argv.data_uri
-                  , data_index      : argv.data_index
-                  , data_key        : argv.data_key
-                  , start_row       : argv.start_row
-                  , end_row         : argv.end_row
-                  , asset_loc       : argv.asset_loc
-                  , poster_frame    : argv.poster_frame
-                  , asset_ext       : argv.asset_ext
-                  , preview_info    : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
-                  , storage_type    : (argv.storage_service || enums.storage.types.NONE)
-                  , storage_region  : argv.s3_region
-                  , storage_bucket  : argv.s3_bucket
-                  , storage_folder  : argv.s3_folder
-                  , broadcast       : argv.broadcast
-                  , title           : argv.title
-                  , desc            : argv.desc
-                  , bot_enabled     : argv.bot_enabled
+                    gcreds           : argv.gcreds_file
+                  , jwcreds          : argv.jwcreds_file
+                  , awscreds         : argv.awscreds_file
+                  , ytcreds          : argv.ytcreds_file
+                  , vmocreds         : argv.vmocreds_file
+                  , stream_service   : argv.stream_service
+                  , stream_authorize : argv.stream_authorize
+                  , stream_group     : argv.stream_group
+                  , stream_privacy   : argv.stream_privacy
+                  , stream_comments  : argv.stream_comments
+                  , stream_download  : argv.stream_download
+                  , data_type        : argv.data_type || enums.data.types.GOOGLE
+                  , user             : argv.author
+                  , data_collection  : argv.worksheet
+                  , sheet_key        : argv.sheet_key
+                  , data_uri         : argv.data_uri
+                  , data_index       : argv.data_index
+                  , data_key         : argv.data_key
+                  , start_row        : argv.start_row
+                  , end_row          : argv.end_row
+                  , asset_loc        : argv.asset_loc
+                  , poster_frame     : argv.poster_frame
+                  , asset_ext        : argv.asset_ext
+                  , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
+                  , storage_type     : (argv.storage_service || enums.storage.types.NONE)
+                  , storage_region   : argv.s3_region
+                  , storage_bucket   : argv.s3_bucket
+                  , storage_folder   : argv.s3_folder
+                  , broadcast        : argv.broadcast
+                  , title            : argv.title
+                  , desc             : argv.desc
+                  , bot_enabled      : argv.bot_enabled
                 };
 
     config.get(conf); 
@@ -111,7 +112,7 @@ async.series([
       } else if (config.params.video.service == enums.video.services.YOUTUBE) {
         yt.get(step)
       } else if (config.params.video.service == enums.video.services.VIMEO) {
-        vmo.get(step)
+        vmo.get(step) 
       }
       
   },
@@ -165,6 +166,6 @@ async.series([
   }
 
 ], function(err) {
-  console.log("exiting");
+  console.log("\n\nExiting main process.  Bye for now! " + emoji.get('wave'));
   process.exit(0);
 }); //END MAIN ALGORITHM

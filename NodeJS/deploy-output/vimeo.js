@@ -11,21 +11,23 @@ var enums           = require('./constants'),
     url             = require('url'),
     logln           = require('single-line-log').stdout,
     emoji           = require('node-emoji'),
-    user            = null;
+    user            = null,
+    api             = null;
 
 const Vimeo         = require("vimeo").Vimeo,
       opn           = require("opn"),
       prettyBytes   = require("pretty-bytes"),
-      api           = new Vimeo(config.params.video.key, config.params.video.secret),
       vmoScopes     = ['public','private','create','edit','delete','interact','upload','video_files'];
     
 var vmo = {
 
-    get : function(step) {
+    get : function(step, auth_only) {
 
         let vmoState = uuid.v4(); 
 
-        if (!config.params.prefs.oauth.vimeo && !config.params.prefs.oauth.vimeo.access_token) {
+        api = new Vimeo(config.params.video.key, config.params.video.secret);
+
+        if (!config.params.prefs.oauth.vimeo || !config.params.prefs.oauth.vimeo.access_token) {
 
             opn(api.buildAuthorizationEndpoint(config.params.video.redirect, vmoScopes, vmoState).toString());
 
@@ -37,25 +39,27 @@ var vmo = {
 
             } else {
 
-                //if an access token does not exist then do the following
-                if (!config.params.prefs.oauth.vimeo.access_token) {
+                api.accessToken(auth_url.query.code, config.params.video.redirect, (err, response) => {
 
-                    api.accessToken(auth_url.query.code, config.params.video.redirect, (err, response) => {
+                    if (err) {
+                        throw err;
+                    }
 
-                        if (err) {
-                            throw err;
-                        }
+                    config.params.prefs.oauth.vimeo = response;
+                    config.write_prefs(config.params.prefs);
 
-                        config.params.prefs.oauth.vimeo = response;
-                        config.write_prefs(config.params.prefs);
+                    api.setAccessToken(response.access_token);
+                    user = response.user;
 
-                        api.setAccessToken(response.access_token);
-                        user = response.user;
+                    if (config.params.video.authorize) {
+                        console.log("\n\t" + emoji.get('tada') + "\tYou're in!  This application can now access your Vimeo account.");
+                        console.log("\n\t" + emoji.get('clipboard') + "\tAuthorization info saved to:\n\t\t\t" + config.where_prefs());
+                        step(true);
+                    } else {
                         step();
+                    }
 
-                    });
-
-                }
+                });
 
             }
 
@@ -77,9 +81,7 @@ var vmo = {
 
         group  : { id: null, name: null, uri: null },
 
-        get_privacy : function(step) {
-
-            if (config.params.video.privacy === "unlisted") {
+        get_details : function(step) {
                     
                 var req_options = {
                       method: "GET"
@@ -94,20 +96,17 @@ var vmo = {
                     }
 
                     if (body) {
-                        stream.key = body.link.split('https://vimeo.com/')[1];
-                        console.log("\n\t" + emoji.get('see_no_evil') + "\t[ " + path.parse(stream.upload).base + " ] is [ " + config.params.video.privacy + " ]")
+                        
+                        stream.key = ((config.params.video.privacy === "unlisted") ? body.link.split('https://vimeo.com/')[1] : vmo.video.key);
+                        console.log("\n\t" + emoji.get('see_no_evil') + "\t[ " + path.parse(stream.upload).base + " ] is [ " + config.params.video.privacy + " ]");
+
+                        stream.embed_code = body.embed.html;
+                        console.log("\n\t" + emoji.get('man-woman-girl-boy') + "\t Vimeo embed code:\n\t\t\t" + stream.embed_code);
+
                         step();
                     }
 
-                })    
-
-            } else {
-
-                stream.key = vmo.video.key
-                console.log("\n\t" + emoji.get('eye') + "\t[ " + path.parse(stream.upload).base + " ] is [ public ]")
-                step();
-
-            }
+                })
 
         },
 
@@ -219,7 +218,7 @@ var vmo = {
                 vmo.video.key = uri.substring(uri.lastIndexOf('/') + 1, uri.length);
 
                 async.series([
-                    vmo.video.get_privacy,
+                    vmo.video.get_details,
                     vmo.video.create_group,
                     vmo.video.add_to_group
                 ], step);                

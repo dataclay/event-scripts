@@ -187,6 +187,7 @@ var configuration = {
             console.log(pad("Storage Secret", 25)           + " : " + p.storage.secret             );
             console.log(pad("Stream Credentials", 25)       + " : " + p.video.creds                );
             console.log(pad("Stream Service", 25)           + " : " + p.video.service              );
+            console.log(pad("Stream Authorize", 25)         + " : " + p.video.authorize            );
             console.log(pad("Stream Group", 25)             + " : " + p.video.group                );
             console.log(pad("Stream Privacy", 25)           + " : " + p.video.privacy              );
             console.log(pad("Stream Commenting", 25)        + " : " + p.video.comments             );
@@ -227,6 +228,10 @@ var configuration = {
         let prefs_file = `${__dirname}/prefs.json`;
         writejson.sync(prefs_file, prefs, null, 4)
 
+    },
+
+    where_prefs : function(prefs) {
+        return `${__dirname}/prefs.json`;
     },
 
     get : function(args) {
@@ -368,6 +373,7 @@ var configuration = {
         p.batch.assets       = args.asset_loc;
 
         p.video.service      = args.stream_service;
+        p.video.authorize    = args.stream_authorize;
         p.video.group        = args.stream_group;
         p.video.privacy      = args.stream_privacy;
         p.video.comments     = args.stream_comments;
