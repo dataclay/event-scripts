@@ -34,6 +34,7 @@
     "aws-sdk": "^2.262.1",
     "bug-killer": "^4.4.4",
     "extend": "^3.0.0",
+    "ffmpeg-on-progress": "^1.0.0",
     "fluent-ffmpeg": "^2.0.1",
     "fs-extra": "^6.0.1",
     "glob": "^7.0.0",
@@ -58,6 +59,7 @@
     "sprintf-js": "^1.1.1",
     "uuid": "^3.3.2",
     "vimeo": "^2.1.0",
+    "winston": "^3.1.0",
     "write-json": "^3.0.1",
     "youtube-api": "^2.0.9"
   }

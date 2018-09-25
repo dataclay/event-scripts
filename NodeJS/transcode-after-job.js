@@ -84,33 +84,39 @@ of your working directory for this code repository.
 */
 
 //Constants
-var ffmpeg_win  = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
-    ffprobe_win = "C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe",
-    ffmpeg_osx  = "/usr/local/bin/ffmpeg",
-    ffprobe_osx = "/usr/local/bin/ffprobe";
+const ffmpeg_win  = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
+      ffprobe_win = "C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe",
+      ffmpeg_osx  = "/usr/local/bin/ffmpeg",
+      ffprobe_osx = "/usr/local/bin/ffprobe",
+      spacer      = 18;;
 
-//Required Node Modules
-var os     = require('os'),
-    path   = require('path'),
-    fs     = require('fs'),
-    glob   = require('glob'),
-    ffmpeg = require('fluent-ffmpeg'),
-    logln  = require('single-line-log').stdout,
-    argv   = require('minimist')(process.argv.slice(2));
+var winston     = require('winston'),
+    moment      = require('moment'),
+    os          = require('os'),
+    path        = require('path'),
+    fs          = require('fs'),
+    glob        = require('glob'),
+    pad         = require('pad'),
+    ffmpeg      = require('fluent-ffmpeg'),
+    ffmpeg_prog = require('ffmpeg-on-progress'),
+    logln       = require('single-line-log').stdout,
+    argv        = require('minimist')(process.argv.slice(2));
 
-var ffmpeg_cmd  = ffmpeg(),
-    input_file  = path.resolve(argv.input),
-    output      = path.resolve(path.join(argv.outdir, argv.outname)),
-    dest_loc    = path.resolve(argv.dest),
-    remove_orig = (argv.cleanup        || true     ),
-    vcodec      = (argv.vcodec         || 'libx264'),
-    vbit        = (parseInt(argv.vbit) || 2048     ),
-    acodec      = (argv.acodec         || 'ac3'    ),
-    abit        = (argv.abit           || '128k'   ),
-    file_ext    = (argv.file_ext       || '.mp4'   ),
-    vcontainer  = (argv.container      || 'mp4'    ),
-    pixformat   = (argv.pixformat      || 'yuv420p');
-
+var ffmpeg_cmd     = ffmpeg(),
+    input_file     = path.resolve(argv.input),
+    output         = path.resolve(path.join(argv.outdir, argv.outname)),
+    dest_loc       = path.resolve(argv.dest),
+    remove_orig    = ((argv.cleanup ? JSON.parse(argv.cleanup) : null) || false    ),
+    vcodec         = (argv.vcodec              || 'libx264'),
+    vbit           = (parseInt(argv.vbit)      || 2048     ),
+    acodec         = (argv.acodec              || 'ac3'    ),
+    abit           = (argv.abit                || '128k'   ),
+    file_ext       = (argv.file_ext            || '.mp4'   ),
+    vcontainer     = (argv.container           || 'mp4'    ),
+    pixformat      = (argv.pixformat           || 'yuv420p'),
+    input_duration = null,
+    output_path    = null
+    dest_path      = null;
 
 if (process.platform == 'win32') {
     ffmpeg.setFfmpegPath(ffmpeg_win);
@@ -120,7 +126,37 @@ if (process.platform == 'win32') {
     ffmpeg.setFfprobePath(ffprobe_osx);
 }
 
-console.log("\n\nSetting input file to " + input_file);
+const { createLogger, format, transports } = require('winston');
+const log = winston.createLogger({
+
+  format : format.combine(
+    format.splat(),
+    format.simple(),
+    format.printf(info => `${info.message}`)
+  ),
+
+  transports : [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename : `${__dirname}/transcode_out.log`, level : 'info'  }),
+    new winston.transports.File({ filename : `${__dirname}/transcode_err.log`, level : 'error' })
+  ]
+
+})
+
+const log_progress = (progress, event) => {
+
+  var prog_msg  = '\n\t'   + pad("Target Size" ,spacer)    + '=>\t' + (event.targetSize/1000) + ' MB'
+      prog_msg += '\n\n\t' + pad("Input Frame",spacer)   + '=>\t' + event.frames 
+      prog_msg += '\n\n\t' + pad("Percent Complete",spacer) + '=>\t' + (progress * 100).toFixed() + '%\n'
+  
+  logln(prog_msg);
+  
+}
+
+//console.log("\n\nSetting input file to " + input_file);
+log.info("\n----- [ " + moment().format('MMMM Do YYYY, h:mm:ss A') + " ] ------------------------- " + "\n")
+log.info("\n\t" + pad("Input File",spacer) + "=>\t" + input_file);
+
 ffmpeg_cmd.input(input_file);
 
 //FFmpeg parameters
@@ -139,53 +175,88 @@ ffmpeg_cmd.videoBitrate(vbit)
           .save(output + file_ext);
 
 ffmpeg_cmd.on('start', (command) => {
-    console.log('\n\nStarting transcode process:\n\n\t' + command);
+
+  ffmpeg.ffprobe(input_file, function(err, metadata) {
+
+      if (err) {
+        log.error(err.message)
+        process.exit(0);
+      }
+
+      input_duration = metadata.format.duration * 1000;
+      log.info("\n\t" + pad("Input Runtime",spacer) + "=>\t" + (input_duration/1000) + " seconds");
+      log.info("\n\t" + pad("Transcode Command",spacer) + "=>\t" + command);
+
+  });
+
 });
 
 ffmpeg_cmd.on('error', (err, stdout, stderr) => {
-        
-        if (err) {
-          console.log("\nError: " + err.message);
-          console.log(err.stack);
-        }
+  if (err) {
+    log.error("\n\t" + pad("Error",spacer) + "=>\t" + err.message);
+  }
 });
 
-ffmpeg_cmd.on('progress', function(progress) {
-    logln('\n\nProcessing...\n\n\tTarget Size =>\t\t' + (progress.targetSize/1000) + ' MB\n\tTotal Frames =>\t\t' + progress.frames + '\n\tPercent Complete =>\t' + progress.percent + '%');
-});
+ffmpeg_cmd.on('progress', ffmpeg_prog(log_progress, input_duration));
 
 ffmpeg_cmd.on('end', (stdout, err) => {
-        console.log("\n\nCopying transcoded output to destination location.");
-        //possibly delete input to save space.  or run as a service / cron job?
 
-        fs.copyFile(output + '.mp4', path.resolve(dest_loc, (argv.outname + '.mp4')), (err) => {
+    output_path = output + file_ext;
+    dest_path   = path.resolve(dest_loc, (argv.outname + file_ext));
+
+    log.info("\n\t" + pad("Transcoded Output",spacer) + "=>\t" + output_path);
+
+    if (output_path !== dest_path) {
+
+      if (!fs.existsSync(dest_loc)) fs.mkdirSync(dest_loc);
+
+      fs.copyFile(output_path, dest_path, (err) => {
+      
+        if (err) {
+          log.error("\n\tAn error ocurred when moving the output file to final destination.");
+          throw err;
+        } else {
+
+          log.info("\n\t" + pad("Saved Destination",spacer) + "=>\t" + dest_path);
+        
+          if (remove_orig) {
           
-          if (err) {
-            
-            console.log("\n\tAn error ocurred when moving the output file to final destination: " + err);
-            return;
+            fs.unlink(input_file, (err) => {
+              if (err) {
+                log.error(err);
+                throw err;
+              } 
+              log.info("\n\t" + pad("Deleted Input",spacer) + "=>\t" + input_file);  
+            });
 
-          } else {
+            fs.unlink(output_path, (err) => {
+              if (err) {
+                log.error(err)
+                throw err;
+              }
+              log.info("\n\t" + pad("Deleted Output",spacer) + "=>\t" + output_path);
+            });
 
-            console.log("\n\t" + path.resolve(dest_loc, (argv.outname + ".mp4")));
-            
-            if (JSON.parse(remove_orig)) {
-            
-              console.log("\n\nDeleting original After Effects output file " + input_file);
-              
-              fs.unlink(input_file, (err) => {
-                if (err) throw err;
-                console.log(input_file + ' was deleted.');
-              });
-
-              fs.unlink(output + '.mp4', (err) => {
-                if (err) throw err;
-                console.log(output + ' was deleted.');
-              });
-
-            }
-            
           }
           
+        }
+        
+      });
+
+    } else {
+
+      if (remove_orig) {
+
+        fs.unlink(input_file, (err) => {
+          if (err) {
+            log.error(err);
+            throw err;
+          } 
+          log.info("\n\t" + pad("Deleted Input",spacer) + "=>\t" + input_file);  
         });
+
+      }
+
+    } 
+
 });
