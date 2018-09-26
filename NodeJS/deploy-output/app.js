@@ -38,7 +38,8 @@ understand how to use this script.
 
 */
 
-var enums             = require('./constants'),
+var log               = require('./logger'),
+    enums             = require('./constants'),
     async             = require('async'),
     fs                = require('fs'),
     pth               = require('path'),
@@ -59,113 +60,126 @@ var enums             = require('./constants'),
     pad               = require('pad'),
     argv              = require('minimist')(process.argv.slice(2));
 
-async.series([
+log.info("\n\n------- Deploying output on [ " + moment().format('MMMM Do YYYY, h:mm:ss A') + " ] ----------------")
 
-  function(step){
+try {
 
-    var conf =  {
-                    gcreds           : argv.gcreds_file
-                  , jwcreds          : argv.jwcreds_file
-                  , awscreds         : argv.awscreds_file
-                  , ytcreds          : argv.ytcreds_file
-                  , vmocreds         : argv.vmocreds_file
-                  , stream_service   : argv.stream_service
-                  , stream_authorize : argv.stream_authorize
-                  , stream_group     : argv.stream_group
-                  , stream_privacy   : argv.stream_privacy
-                  , stream_comments  : argv.stream_comments
-                  , stream_download  : argv.stream_download
-                  , data_type        : argv.data_type || enums.data.types.GOOGLE
-                  , user             : argv.author
-                  , data_collection  : argv.worksheet
-                  , sheet_key        : argv.sheet_key
-                  , data_uri         : argv.data_uri
-                  , data_index       : argv.data_index
-                  , data_key         : argv.data_key
-                  , start_row        : argv.start_row
-                  , end_row          : argv.end_row
-                  , asset_loc        : argv.asset_loc
-                  , poster_frame     : argv.poster_frame
-                  , asset_ext        : argv.asset_ext
-                  , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
-                  , storage_type     : (argv.storage_service || enums.storage.types.NONE)
-                  , storage_region   : argv.s3_region
-                  , storage_bucket   : argv.s3_bucket
-                  , storage_folder   : argv.s3_folder
-                  , broadcast        : argv.broadcast
-                  , title            : argv.title
-                  , desc             : argv.desc
-                  , bot_enabled      : argv.bot_enabled
-                };
+  async.series([
 
-    config.get(conf); 
-    config.display();
-    step();
-  },
+    function(step){
 
-  config.read_prefs,
+      var conf =  {
+                      gcreds           : argv.gcreds_file
+                    , jwcreds          : argv.jwcreds_file
+                    , awscreds         : argv.awscreds_file
+                    , ytcreds          : argv.ytcreds_file
+                    , vmocreds         : argv.vmocreds_file
+                    , stream_service   : argv.stream_service
+                    , stream_authorize : argv.stream_authorize
+                    , stream_group     : argv.stream_group
+                    , stream_privacy   : argv.stream_privacy
+                    , stream_comments  : argv.stream_comments
+                    , stream_download  : argv.stream_download
+                    , data_type        : argv.data_type || enums.data.types.GOOGLE
+                    , user             : argv.author
+                    , data_collection  : argv.worksheet
+                    , sheet_key        : argv.sheet_key
+                    , data_uri         : argv.data_uri
+                    , data_index       : argv.data_index
+                    , data_key         : argv.data_key
+                    , start_row        : argv.start_row
+                    , end_row          : argv.end_row
+                    , asset_loc        : argv.asset_loc
+                    , poster_frame     : argv.poster_frame
+                    , asset_ext        : argv.asset_ext
+                    , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
+                    , storage_type     : (argv.storage_service || enums.storage.types.NONE)
+                    , storage_region   : argv.s3_region
+                    , storage_bucket   : argv.s3_bucket
+                    , storage_folder   : argv.s3_folder
+                    , broadcast        : argv.broadcast
+                    , title            : argv.title
+                    , desc             : argv.desc
+                    , bot_enabled      : argv.bot_enabled
+                    , stream_url       : argv.stream_url
+                  };
 
-  function choose_stream_service(step) {
-      
-      if (config.params.video.service == enums.video.services.JWPLATFORM) {
-        jw.get(step)
-      } else if (config.params.video.service == enums.video.services.YOUTUBE) {
-        yt.get(step)
-      } else if (config.params.video.service == enums.video.services.VIMEO) {
-        vmo.get(step) 
-      }
-      
-  },
+      config.get(conf); 
+      config.display();
+      step();
+    },
 
-  gsheet.get,
-  
-  function process_video(step) {
+    config.read_prefs,
+
+    function choose_stream_service(step) {
+
+        log.info("\n\t[ STREAMING SERVICE ]");
+        
+        if (config.params.video.service == enums.video.services.JWPLATFORM) {
+          jw.get(step)
+        } else if (config.params.video.service == enums.video.services.YOUTUBE) {
+          yt.get(step)
+        } else if (config.params.video.service == enums.video.services.VIMEO) {
+          vmo.get(step) 
+        }
+        
+    },
+
+    gsheet.get,
     
-      var p           = config.params,
-          sheet_query = null,
-          sql         = null;
+    function process_video(step) {
+      
+        var p           = config.params,
+            sheet_query = null,
+            sql         = null;
 
-      //Processed rows discontiguous (Templater Bot is on) 
-      if (!config.is_batch())
-      {
+        //Processed rows discontiguous (Templater Bot is on) 
+        if (!config.is_batch())
+        {
 
-          sql = p.fields.index + '=' + p.data.key;
-          
-          sheet_query = { 
-              'offset' : 1
-            , 'limit'  : 1
-            , 'query'  : sql
-          };
+            sql = p.fields.index + '=' + p.data.key;
+            
+            sheet_query = { 
+                'offset' : 1
+              , 'limit'  : 1
+              , 'query'  : sql
+            };
 
-      //Processed rows are contiguous (Batch process)
-      } else {
+        //Processed rows are contiguous (Batch process)
+        } else {
 
-        deploy.is_batch = true;
-        sheet_query = {
-          offset  : (p.batch.start-1),
-          limit   : ((p.batch.end) - (p.batch.start))+1,
-          orderby : p.fields.index
+          deploy.is_batch = true;
+          sheet_query = {
+            offset  : (p.batch.start-1),
+            limit   : ((p.batch.end) - (p.batch.start))+1,
+            orderby : p.fields.index
+          }
+
         }
 
-      }
+        //Retrieve the rows needed to process
+        gsheet.worksheet.getRows(sheet_query, function( err, rows ){
 
-      //Retrieve the rows needed to process
-      gsheet.worksheet.getRows(sheet_query, function( err, rows ){
+            if (err) {
+              log.error(err);
+              throw err;
+            }
 
-          if (err) {
-            throw err;
-          }
+            if (config.is_batch()) {
+              deploy.batch(rows, step);
+            } else {
+              deploy.single(rows[0], step);
+            }
 
-          if (config.is_batch()) {
-            deploy.batch(rows, step);
-          } else {
-            deploy.single(rows[0], step);
-          }
+        });
+    }
 
-      });
-  }
+  ], function(err) {
+    log.info("\n\t[ EXIT ]");
+  }); //END MAIN APP ENTRY
 
-], function(err) {
-  console.log("\n\nExiting main process.  Bye for now! " + emoji.get('wave'));
-  process.exit(0);
-}); //END MAIN ALGORITHM
+} catch (err) {
+
+  log.error(err.message);
+
+}

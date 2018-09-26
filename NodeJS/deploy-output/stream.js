@@ -1,5 +1,7 @@
-var enums = require('./constants'),
-    config = require('./config');
+var log     = require('./logger'),
+    enums   = require('./constants'),
+    config  = require('./config'),
+    sprintf = require('sprintf-js').sprintf;
 
 var stream = {
 
@@ -10,21 +12,6 @@ var stream = {
     , source_asset    : null
 
     , info      : {
-
-    }
-
-    , create    : function(service, row, step) {
-
-        switch (service) {
-
-          case enums.video.services.VIMEO : vmo.video.create(row, step);    break;
-          case enums.video.services.JW    : jw.video.create(row, step);     break;
-
-          default                         : throw new Error(enums.errors.absent_stream_service);
-
-        }
-
-        return;
 
     }
 
@@ -93,6 +80,14 @@ var stream = {
         }
 
         return formula;
+
+    }
+
+    , url       : function(row) {
+
+        var p = config.params;
+
+        return sprintf(p.video.stream_url, stream.key);
 
     }
 }

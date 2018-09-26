@@ -1,4 +1,5 @@
-var enums             = require('./constants')
+var log               = require('./logger'),
+    enums             = require('./constants'),
     stream            = require('./stream'),
     async             = require('async'),
     URL               = require('url'),
@@ -27,12 +28,8 @@ var gsheet = {
   },
 
   auth      :  function(step) {
-
       var creds = require(config.params.auth.google.creds);
-
           gsheet.doc.useServiceAccountAuth(creds, step);
-          console.log("\n\nRetrieving Google Sheet...\n");
-
   },  
 
   store_url : function(step) {
@@ -53,7 +50,9 @@ var gsheet = {
         if (p.storage.type == enums.storage.types.S3) {
 
           var dl_link  = 'https://' + (enums.aws.regions[p.storage.region]).endpoint + '/' + p.storage.bucket + '/' + p.storage.folder + '/' + path.parse(aws.asset).base;
-          console.log('\n\t' + emoji.get('floppy_disk') + '\tDownload @ ' + dl_link);          
+          log.info("\n\t\t%s\tDownload @ %s"
+                  , emoji.get('floppy_disk')
+                  , dl_link);
             
         } else {
 
@@ -75,11 +74,10 @@ var gsheet = {
 
             var sheet;
 
-            //console.log(gsheet.worksheet);
-
-            console.log(pad('Google Doc',25) + ' : [ ' + info.title + ' ] by ' + info.author.email);
+            log.info("\t\t" + pad('Google Document',25) + ' : [ ' + info.title + ' ] by ' + info.author.email);
             
             if (!config.params.data.collection) {
+              log.error(enums.errors.absent_collection);
               throw new Error(enums.errors.absent_collection);
             }
 
@@ -92,7 +90,7 @@ var gsheet = {
               
             }
             
-            console.log(pad('Worksheet', 25) + ' : [ ' + sheet.title + ' ] | ' + sheet.rowCount + ' Rows, ' + sheet.colCount + ' Columns');
+            log.info("\t\t" + pad('Worksheet', 25) + ' : [ ' + sheet.title + ' ] | ' + sheet.rowCount + ' Rows, ' + sheet.colCount + ' Columns');
             
             gsheet.worksheet = sheet;
 
@@ -129,8 +127,15 @@ var gsheet = {
 
           async.series([
 
-              function (step) {
-                stream.create(config.params.video.service, gsheet.row, step);
+              function(step) {
+
+                switch (config.params.video.service) {
+                  case enums.video.services.VIMEO : vmo.video.create(gsheet.row, step); break;
+                  case enums.video.services.JW    : jw.video.create(gsheet.row, step ); break;
+                  default                         : log.error(enums.errors.absent_stream_service); throw new Error(enums.errors.absent_stream_service);
+
+                }
+
               },
 
               function (step) {
@@ -159,10 +164,23 @@ var gsheet = {
                           var c = cells[0];
 
                           c.setValue(enums.stream.status.CREATED, function() {
-                            console.log("\n\t" + emoji.get('key') + "\t" + config.params.video.service + " stream key [ " + stream.key + " ]");
-                            console.log("\n\t" + emoji.get('studio_microphone') + "\tBroadcast Status [ " + enums.stream.status.CREATED + " ]");
-                            console.log("\n\t" + emoji.get('timer_clock') + "\t[ " + gsheet.row[config.params.fields.output.name] + " ] staged to streaming provider [ " + config.params.video.service + " ]");
+
+                            log.info("\n\t\t%s\t[ %s ] stream key [ %s ]"
+                                    , emoji.get('key')
+                                    , config.params.video.service
+                                    , stream.key);
+
+                            log.info("\n\t\t%s\tBroadcast status [ %s ]"
+                                    , emoji.get('studio_microphone')
+                                    , enums.stream.status.CREATED);
+                            
+                            log.info("\n\t\t%s\t[ %s ] staged to [ %s ]"
+                                    , emoji.get('timer_clock')
+                                    , gsheet.row[config.params.fields.output.name]
+                                    , config.params.video.service);
+                            
                             step();
+
                           });
 
                         })
@@ -184,7 +202,7 @@ var gsheet = {
   },
 
   print_col : function(col) {
-    console.log(pad(("  [ " + col.name + " ]"), 25) + " : " + col.pos + " (" + col.letter + ")");
+    log.info("\t\t" + pad(("  [ " + col.name + " ]"), 25) + " : " + col.pos + " (" + col.letter + ")");
     return;
   
   },
@@ -205,7 +223,7 @@ var gsheet = {
         deferred.reject();
       }
 
-      console.log(pad("Column Positions", 25));
+      log.info("\t\t" + pad("Column Positions", 25));
 
       var f = config.params.fields;
 
@@ -249,6 +267,12 @@ var gsheet = {
           gsheet.print_col(f.preview);
         }
 
+        if (c.value == f.url.name) {
+          f.url.pos = c.col;
+          f.url.letter = gsheet.column_to_letter(c.col);
+          gsheet.print_col(f.url);
+        }
+
       }
 
       deferred.resolve();
@@ -275,7 +299,7 @@ var gsheet = {
       ,'return-empty' : true
     }, (err, cells) => {
 
-        if (err) { throw err }
+        if (err) { log.error(err); throw err }
         
         var c = cells[0];
 
@@ -297,11 +321,33 @@ var gsheet = {
       ,'return-empty' : true
     }, (err, cells) => {
 
-        if (err) { throw err }
+        if (err) { log.error(err); throw err }
         
         var c = cells[0];
 
         c.setValue(stream.preview(gsheet.row), step);
+
+    });
+
+  },
+
+  store_stream_url : function(step) {
+
+    var p = config.params;
+
+    gsheet.worksheet.getCells({
+       'min-row' : gsheet.row.row_idx
+      ,'max-row' : gsheet.row.row_idx
+      ,'min-col' : config.params.fields.url.pos
+      ,'max-col' : config.params.fields.url.pos
+      ,'return-empty' : true
+    }, (err, cells) => {
+
+        if (err) { log.error(err); throw err }
+        
+        var c = cells[0];
+
+        c.setValue(stream.url(), step);
 
     });
 
@@ -316,6 +362,7 @@ var gsheet = {
     gsheet.row[p.fields.stream.name   ] = stream.key;
     gsheet.row[p.fields.preview.name  ] = stream.preview(); 
     gsheet.row[p.fields.embed.name    ] = stream.embed();
+    gsheet.row[p.fields.url.name      ] = stream.url();
     
     gsheet.row.save(step);
 
@@ -324,6 +371,8 @@ var gsheet = {
   get : function(step) {
 
     //BEGIN MAIN ENTRY
+    log.info("\n\t[ DATASTORE ]\n");
+
     async.series([
       
         //Create Google Spreadsheet object

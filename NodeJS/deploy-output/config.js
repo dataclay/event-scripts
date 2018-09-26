@@ -1,6 +1,7 @@
 
 //Building Blocks — Legos
-var enums     = require('./constants'),
+var log       = require('./logger'),
+    enums     = require('./constants'),
     Q         = require('q'),
     extend    = require('extend'),
     readjson  = require('r-json'),
@@ -178,35 +179,37 @@ var configuration = {
 
             var p = configuration.params;
 
-            console.log("\n\nGathered user configuration...\n");
-            console.log(pad("Data",  25)                    + " : " + p.data.url                   );
-            console.log(pad("Google Credentials", 25)       + " : " + p.auth.google.creds          );
-            console.log(pad("Storage Credentials", 25)      + " : " + p.storage.creds              );
-            console.log(pad("Storage Service", 25)          + " : " + p.storage.type               );
-            console.log(pad("Storage Access ID", 25)        + " : " + p.storage.accessID           );
-            console.log(pad("Storage Secret", 25)           + " : " + p.storage.secret             );
-            console.log(pad("Stream Credentials", 25)       + " : " + p.video.creds                );
-            console.log(pad("Stream Service", 25)           + " : " + p.video.service              );
-            console.log(pad("Stream Authorize", 25)         + " : " + p.video.authorize            );
-            console.log(pad("Stream Group", 25)             + " : " + p.video.group                );
-            console.log(pad("Stream Privacy", 25)           + " : " + p.video.privacy              );
-            console.log(pad("Stream Commenting", 25)        + " : " + p.video.comments             );
-            console.log(pad("Stream Downloadable", 25)      + " : " + p.video.downloadable         );
-            console.log(pad("Stream API Key", 25)           + " : " + p.video.key                  );
-            console.log(pad("Stream API Secret", 25)        + " : " + p.video.secret               );
-            console.log(pad("Stream API user", 25)          + " : " + p.video.user                 );
-            console.log(pad("Data Collection", 25)          + " : " + p.data.collection            );
-            console.log(pad("Data Index", 25)               + " : " + (p.fields.index || "default"));
-            console.log(pad("Data Key", 25)                 + " : " + p.data.key                   );
-            console.log(pad("Data Domain Reference", 25)    + " : " + p.video.preview.domain       );
-            console.log(pad("Data Route Reference", 25)     + " : " + p.video.preview.route        );
-            console.log(pad("Data Player Reference", 25)    + " : " + p.video.preview.player_key   );
-            console.log(pad("Video Title", 25)              + " : " + p.video.title                );
-            console.log(pad("Video Description", 25)        + " : " + p.video.desc                 );
-            console.log(pad("Assets", 25)                   + " : " + p.batch.assets               );
-            console.log(pad("Start", 25)                    + " : " + p.batch.start                );
-            console.log(pad("End", 25)                      + " : " + p.batch.end                  );
-            console.log(pad("Bot Enabled", 25)              + " : " + p.data.bot_enabled           );
+            log.info("\n\t[ CONFIGURATION ]\n");
+            log.info("\t\t" + pad("Data",  25)                    + " : " + p.data.url                   );
+            log.info("\t\t" + pad("Google Credentials", 25)       + " : " + p.auth.google.creds          );
+            log.info("\t\t" + pad("Storage Credentials", 25)      + " : " + p.storage.creds              );
+            log.info("\t\t" + pad("Storage Service", 25)          + " : " + p.storage.type               );
+            log.info("\t\t" + pad("Storage Access ID", 25)        + " : " + p.storage.accessID           );
+            log.info("\t\t" + pad("Storage Secret", 25)           + " : " + p.storage.secret             );
+            log.info("\t\t" + pad("Stream Credentials", 25)       + " : " + p.video.creds                );
+            log.info("\t\t" + pad("Stream Service", 25)           + " : " + p.video.service              );
+            log.info("\t\t" + pad("Stream Authorize", 25)         + " : " + p.video.authorize            );
+            log.info("\t\t" + pad("Stream Group", 25)             + " : " + p.video.group                );
+            log.info("\t\t" + pad("Stream Privacy", 25)           + " : " + p.video.privacy              );
+            log.info("\t\t" + pad("Stream Commenting", 25)        + " : " + p.video.comments             );
+            log.info("\t\t" + pad("Stream Downloadable", 25)      + " : " + p.video.downloadable         );
+            log.info("\t\t" + pad("Stream API Key", 25)           + " : " + p.video.key                  );
+            log.info("\t\t" + pad("Stream API Secret", 25)        + " : " + p.video.secret               );
+            log.info("\t\t" + pad("Stream API user", 25)          + " : " + p.video.user                 );
+            log.info("\t\t" + pad("Stream URL format", 25)        + " : " + p.video.stream_url           );
+            log.info("\t\t" + pad("Data Collection", 25)          + " : " + p.data.collection            );
+            log.info("\t\t" + pad("Data Index", 25)               + " : " + (p.fields.index || "default"));
+            log.info("\t\t" + pad("Data Key", 25)                 + " : " + p.data.key                   );
+            log.info("\t\t" + pad("Data Domain Reference", 25)    + " : " + p.video.preview.domain       );
+            log.info("\t\t" + pad("Data Route Reference", 25)     + " : " + p.video.preview.route        );
+            log.info("\t\t" + pad("Data Player Reference", 25)    + " : " + p.video.preview.player_key   );
+            log.info("\t\t" + pad("Video Title", 25)              + " : " + p.video.title                );
+            log.info("\t\t" + pad("Video Description", 25)        + " : " + p.video.desc                 );
+            log.info("\t\t" + pad("Video Poster", 25)             + " : " + p.video.thumb                );
+            log.info("\t\t" + pad("Assets", 25)                   + " : " + p.batch.assets               );
+            log.info("\t\t" + pad("Start", 25)                    + " : " + p.batch.start                );
+            log.info("\t\t" + pad("End", 25)                      + " : " + p.batch.end                  );
+            log.info("\t\t" + pad("Bot Enabled", 25)              + " : " + p.data.bot_enabled           );
             rl.close();
 
     },
@@ -251,6 +254,7 @@ var configuration = {
         if (configuration.detect_datasource(args.data_uri) === enums.data.types.GOOGLE) {
 
             if (!fs.existsSync(args.gcreds)) {
+                log.error(enums.errors.absent_gcreds_file, args.gcreds);
                 throw new Error(sprintf(enums.errors.absent_gcreds_file, args.gcreds));
             } else {
                 p.auth.google.creds = args.gcreds;    
@@ -263,6 +267,7 @@ var configuration = {
         if (args.storage_service && (args.storage_service == enums.storage.types.S3)) {
 
             if (!fs.existsSync(args.awscreds)) {
+                log.error(enums.errors.absent_awscreds_file, args.awscreds)
                 throw new Error(sprintf(enums.errors.absent_awscreds_file, args.awscreds));
             } else {
 
@@ -273,6 +278,7 @@ var configuration = {
                     p.storage.accessID = awscreds.accessKeyID;
                     p.storage.secret   = awscreds.secretAccessKey;
                 } catch (e) {
+                    log.error(enums.errors.json_read_err, args.awscreds);
                     throw new Error(sprintf(enums.errors.json_read_err, args.awscreds));
                 }
 
@@ -285,6 +291,7 @@ var configuration = {
         if (args.stream_service && (args.stream_service == enums.video.services.JWPLATFORM)) {
 
             if (!fs.existsSync(args.jwcreds)) {
+                log.error(enums.errors.absent_jwcreds_file, args.jwcreds);
                 throw new Error(sprintf(enums.errors.absent_jwcreds_file, args.jwcreds));
             } else {
                 jwcreds_contents = fs.readFileSync(args.jwcreds);
@@ -296,6 +303,7 @@ var configuration = {
                     p.video.key        = jwcreds.key;
                     p.video.secret     = jwcreds.secret;    
                 } catch(e) {
+                    log.error(enums.errors.json_read_err, args.jwcreds);
                     throw new Error(sprintf(enums.errors.json_read_err, args.jwcreds));
                 }
                 
@@ -307,6 +315,7 @@ var configuration = {
         if (args.stream_service && (args.stream_service == enums.video.services.YOUTUBE)) {
 
             if (!fs.existsSync(args.ytcreds)) {
+                log.error(enums.errors.absent_ytcreds_file, args.ytcreds)
                 throw new Error(sprintf(enums.errors.absent_ytcreds_file, args.ytcreds));
             } else {
                 ytcreds_contents = fs.readFileSync(args.ytcreds);
@@ -319,6 +328,7 @@ var configuration = {
                     p.video.key        = ytcreds.installed.client_id;
                     p.video.secret     = ytcreds.installed.client_secret;
                 } catch(e) {
+                    log.error(enums.errors.json_read_err, args.ytcreds);
                     throw new Error(sprintf(enums.errors.json_read_err, args.ytcreds));
                 }
                 
@@ -330,6 +340,7 @@ var configuration = {
         if (args.stream_service && (args.stream_service == enums.video.services.VIMEO)) {
 
             if (!fs.existsSync(args.vmocreds)) {
+                log.error(enums.errors.absent_vmocreds_file, args.vmocreds)
                 throw new Error(sprintf(enums.errors.absent_vmocreds_file, args.vmocreds));
             } else {
                 vmocreds_contents = fs.readFileSync(args.vmocreds);
@@ -343,13 +354,13 @@ var configuration = {
                     p.video.secret     = vmocreds.client_secret;
                     p.video.redirect   = vmocreds.redirect_url;
                 } catch(e) {
+                    log.error(enums.errors.json_read_err, args.vmocreds);
                     throw new Error(sprintf(enums.errors.json_read_err, args.vmocreds));
                 }
                 
             }
 
         }
-
 
         p.user.name          = args.user || "Unknown";
 
@@ -367,6 +378,7 @@ var configuration = {
         p.fields.bcast       = { name : enums.data.fields.BCAST,   pos : null, letter: null };
         p.fields.embed       = { name : enums.data.fields.EMBED,   pos : null, letter: null };
         p.fields.preview     = { name : enums.data.fields.PREV,    pos : null, letter: null };
+        p.fields.url         = { name : enums.data.fields.URL,     pos : null, letter: null };
         
         p.batch.start        = args.start_row;
         p.batch.end          = args.end_row;
@@ -381,6 +393,7 @@ var configuration = {
         p.video.title        = args.title;
         p.video.desc         = args.desc;
         p.video.broadcast    = args.broadcast;
+        p.video.stream_url   = args.stream_url;
         p.video.thumb        = args.poster_frame;
         p.video.ext          = args.asset_ext;
         p.video.preview      = args.preview_info;
@@ -425,7 +438,7 @@ var configuration = {
 
     is_batch : function() {
 
-        var p = config.params;
+        var p = configuration.params;
 
         if (p.fields.index   &&
             p.data.key       &&

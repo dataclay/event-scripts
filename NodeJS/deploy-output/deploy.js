@@ -1,12 +1,15 @@
 var async    = require('async'),
     fs       = require('fs'),
     aws      = require('./aws'),
+    vmo      = require('./vimeo'),
+    jw       = require('./jwplatform'),
     enums    = require('./constants'),
     emoji    = require('node-emoji'),
     config   = require('./config'),
     gsheet   = require('./gsheet'),
     stream   = require('./stream'),
-    path     = require('path');
+    path     = require('path'),
+    log      = require('./logger');
 
 var deploy = {
 
@@ -16,10 +19,16 @@ var deploy = {
 
   batch : function(rows, step) {
 
-    console.log("\n\nNow deploying " + (rows.length) + " videos...  " + emoji.get('airplane_departure'));
-
     var p = config.params,
         row_count = (p.batch.start-1);
+
+    log.info("\n\t[ DEPLOYMENT %s ]"
+            , emoji.get('airplane_departure'));
+
+    log.info("\n\t\t%s\tDeploying [ %s ] videos to [ %s ] ..."
+            , emoji.get('airplane_departure')
+            , rows.length
+            , p.video.service)
 
     async.eachOfSeries(rows, 
       
@@ -29,19 +38,27 @@ var deploy = {
         row.row_idx = row_count;
         gsheet.row = row;
 
-        console.log("\n\n\t--------------------------------------------------\n\n\t" + emoji.get('eyes') + "\tOpened Row " + row.row_idx + " in Worksheet \"" + gsheet.worksheet.title + "\"");
+        log.info("\n\n\t\t--------------------------------------------------\n\n\t\t%s\tOpened Row [ %s ] in Worksheet [ %s ]"
+                , emoji.get('eyes')
+                , row.row_idx 
+                , gsheet.worksheet.title);
         
         deploy.video_file = path.resolve(p.batch.assets, (row[p.fields.output.name] + "." + p.video.ext));
         stream.upload = deploy.video_file;
 
         if (row[enums.data.fields.STREAM]) {
           
-          console.log("\n\t" + emoji.get('ok_hand') + "\tRow " + row.row_idx + " already has a stream key.  Skipping.");
+          log.info("\n\t\t%s\tRow [ %s ] already has a stream key.  Skipping."
+                  , emoji.get('ok_hand')
+                  , row.row_idx);
+
           step();
 
         } else {
 
-          console.log("\n\t" + emoji.get('mag_right') + "\tSearching for [ " + row[p.fields.output.name] + "." + p.video.ext + " ]...");
+          log.info("\n\t\t%s\tSearching for [ %s ] ..."
+                  , emoji.get('mag_right')
+                  , (row[p.fields.output.name] + "." + p.video.ext));
           
           if (fs.existsSync(deploy.video_file)) {
 
@@ -58,8 +75,12 @@ var deploy = {
                   function(step) {
 
                     if (config.params.storage.type == enums.storage.types.S3) {
+                      
+                      log.info("\n\t\t%s\tSending [ %s ] to Amazon S3 ... %s "
+                              , emoji.get('clapper')
+                              , path.parse(deploy.video_file).base
+                              , emoji.get('rocket'));
 
-                      console.log("\n\t" + emoji.get('clapper') + "\tSending [ " + path.parse(deploy.video_file).base + " ] to Amazon S3...  " + emoji.get('rocket'));
                       aws.asset = deploy.video_file;
                       aws.put_obj(base64data, step);
 
@@ -85,16 +106,28 @@ var deploy = {
 
                   function(step) {
                     gsheet.store_bcast_preview(step)
+                  },
+
+                  function(step) {
+                    gsheet.store_stream_url(step)
                   }
 
               ], function(){
-                console.log("\n\t" + emoji.get('pencil2') + "\tWrote to Row " + row.row_idx + " in Worksheet \"" + gsheet.worksheet.title + "\"");
+                
+                log.info("\n\t\t%s\tWrote to row [ %s ] in worksheet [ %s ]"
+                        , emoji.get('pencil2')
+                        , row.row_idx
+                        , gsheet.worksheet.title);
+
                 step();
+
               });
 
           } else { //video file doesn't exist
 
-            console.log("\n\tCouldn't find [" + path.parse(deploy.video_file).base + "] in the file system");
+            log.error("\n\t\t%s\tCouldn't find [ %s ] in the file system."
+                    , emoji.get('x')
+                    , path.parse(deploy.video_file).base);
 
           }
 
@@ -105,9 +138,13 @@ var deploy = {
       function(err){
 
         if (!err) {
-          console.log("\n\n# # # # # # # # # # # # # # # # # # # # # #\n\nDone Processing!  " + emoji.emojify(':thumbsup:  :thumbsup:  :v:') + "\n\n\n");
+          log.info("\n\t[ COMPLETE ]\n\n\t\t%s\tDone processing [ %s ] rows"
+              , emoji.get('thumbsup')
+              , rows.length);
         } else {
-          console.log("\n\nThere was an error during batch upload =>\n\t" + err);
+          log.error("\n\n\t%sThere was an error during batch upload:\n\t\t%s"
+              , emoji.get('x')
+              , err.message)
         } 
 
         step();
@@ -118,13 +155,18 @@ var deploy = {
 
   single : function(row, step) {
 
-    console.log("\n\nNow deploying single video...  " + emoji.get('airplane_departure'));
+    log.info("\n\t[ DEPLOYMENT %s ]"
+            , emoji.get('airplane_departure'));
 
     var p = config.params;
 
     gsheet.row = row;
 
-    console.log("\n\n\t--------------------------------------------------\n\n\t" + emoji.get('eyes') + "\tOpened row with `"+ p.fields.index +"` key of `" + row[p.fields.index] + "` in Worksheet \"" + gsheet.worksheet.title + "\"");
+    log.info("\n\t\t%s\tOpened row with [ %s ] key of [ %s ] in Worksheet [ %s ]"
+              , emoji.get('eyes')
+              , p.fields.index
+              , row[p.fields.index]
+              , gsheet.worksheet.title);
 
     async.series([
 
@@ -135,19 +177,27 @@ var deploy = {
 
         if (row[p.fields.stream.name]) {
           
-          console.log("\n\t" + emoji.get('ok_hand') + "\tRow with key `" + row[p.fields.index] + "` already has a stream key.  Skipping.");
+          log.info("\n\t\t%s\tRow with key [ %s ] already has a stream key.  Skipping."
+                    , emoji.get('ok_hand')
+                    , row[p.fields.index]);
           step();
 
         } else {
 
-          console.log("\n\t" + emoji.get('mag_right') + "\tSearching for [ " + row[p.fields.output.name] + "." + p.video.ext + " ]...");
+          log.info("\n\t\t%s\tSearching for [ %s.%s ] in assets location ..."
+                  , emoji.get('mag_right')
+                  , row[p.fields.output.name]
+                  , p.video.ext)
 
           if (fs.existsSync(deploy.video_file)) {
 
-            //read the video file to send to S3
+              //read the video file to send to S3
               file_data = fs.readFileSync(deploy.video_file)
 
-              if (!file_data) { throw err; }
+              if (!file_data) { 
+                log.error(err);
+                throw err; 
+              }
 
               var base64data = new Buffer(file_data, 'binary');
 
@@ -157,7 +207,11 @@ var deploy = {
                   function(step) {
 
                       if (config.params.storage.type == enums.storage.types.S3) {
-                        console.log("\n\t" + emoji.get('clapper') + "\tSending [ " + path.parse(deploy.video_file).base + " ] to Amazon S3...  " + emoji.get('rocket'));
+                        log.info("\n\t\t%s\tSending [ %s ] to Amazon S3...  %s"
+                                , emoji.get('clapper')
+                                , path.parse(deploy.video_file).base
+                                , emoji.get('rocket'));
+
                         aws.asset = deploy.video_file;
                         aws.put_obj(base64data, step);
                       } else {
@@ -167,20 +221,32 @@ var deploy = {
                   },
 
                   function(step) {
-                    stream.create(config.params.video.service, gsheet.row, step);
+
+                    switch (config.params.video.service) {
+                      case enums.video.services.VIMEO : vmo.video.create(gsheet.row, step);    break;
+                      case enums.video.services.JW    : jw.video.create(gsheet.row, step);     break;
+                      default                         : log.error(enums.errors.absent_stream_service); throw new Error(enums.errors.absent_stream_service);
+
+                    }
+
                   },
 
                   //update the single row with all relevant data
                   gsheet.update_single_row
 
                 ], function(err) {
-                    console.log("\n\t" + emoji.get('pencil2') + "\tWrote to Row " + row[p.fields.index] + " in Worksheet \"" + gsheet.worksheet.title + "\"");
+                    log.info("\n\t\t%s\tWrote to Row [ %s ] in Worksheet [ %s ]"
+                              , emoji.get('pencil2')
+                              , row[p.fields.index]
+                              , gsheet.worksheet.title);
+
                     step();
               })
 
           } else {
 
-            console.log("\n\tCouldn't find [" + path.parse(deploy.video_file).base + "] in the file system");
+            log.info("\n\t\tCouldn't find [ %s ] in the file system"
+                    , path.parse(deploy.video_file).base);
 
           }
 
@@ -190,9 +256,15 @@ var deploy = {
 
     ], function(err) {
 
-      if (err) throw err;
+      if (err) {
+        log.error(err);
+        throw err;
+      }
 
-      console.log("\n\n# # # # # # # # # # # # # # # # # # # # # #\n\nDone processing row with key `" + gsheet.row[p.fields.index] + "`!   " + emoji.emojify(':thumbsup:  :thumbsup:  :v:') + "\n\n\n");
+      log.info("\n\t[ COMPLETE ]\n\n\t\t%s\tDone processing row with [ %s ] key of [ %s ]"
+              , emoji.get('thumbsup')
+              , config.params.fields.index
+              , gsheet.row[p.fields.index]);
       step();
 
     })

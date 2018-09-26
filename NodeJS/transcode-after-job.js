@@ -145,9 +145,9 @@ const log = winston.createLogger({
 
 const log_progress = (progress, event) => {
 
-  var prog_msg  = '\n\t'   + pad("Target Size" ,spacer)    + '=>\t' + (event.targetSize/1000) + ' MB'
-      prog_msg += '\n\n\t' + pad("Input Frame",spacer)   + '=>\t' + event.frames 
-      prog_msg += '\n\n\t' + pad("Percent Complete",spacer) + '=>\t' + (progress * 100).toFixed() + '%\n'
+  var prog_msg  = '\n\t'   + pad("Target Size" ,spacer)     + '=>\t' + (event.targetSize/1000) + ' MB';
+      prog_msg += '\n\n\t' + pad("Input Frame",spacer)      + '=>\t' + (event.frames);
+      prog_msg += '\n\n\t' + pad("Percent Complete",spacer) + '=>\t' + (progress * 100).toFixed() + '%\n';
   
   logln(prog_msg);
   
@@ -184,7 +184,7 @@ ffmpeg_cmd.on('start', (command) => {
       }
 
       input_duration = metadata.format.duration * 1000;
-      log.info("\n\t" + pad("Input Runtime",spacer) + "=>\t" + (input_duration/1000) + " seconds");
+      log.info("\n\t" + pad("Input Runtime",spacer)     + "=>\t" + (input_duration/1000) + " seconds");
       log.info("\n\t" + pad("Transcode Command",spacer) + "=>\t" + command);
 
   });

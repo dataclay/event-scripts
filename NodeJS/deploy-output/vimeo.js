@@ -1,4 +1,5 @@
-var enums           = require('./constants'),
+var log             = require('./logger'),
+    enums           = require('./constants'),
     config          = require('./config'),
     stream          = require('./stream'),
     async           = require('async'),
@@ -11,6 +12,7 @@ var enums           = require('./constants'),
     url             = require('url'),
     logln           = require('single-line-log').stdout,
     emoji           = require('node-emoji'),
+    path            = require('path'),
     user            = null,
     api             = null;
 
@@ -35,6 +37,7 @@ var vmo = {
 
             if (auth_url.query.state !== vmoState) {
 
+                log.error(enums.errors.incorrect_vmo_state);
                 throw new Error(enums.errors.incorrect_vmo_state);
 
             } else {
@@ -42,6 +45,7 @@ var vmo = {
                 api.accessToken(auth_url.query.code, config.params.video.redirect, (err, response) => {
 
                     if (err) {
+                        log.error(err.message);
                         throw err;
                     }
 
@@ -52,8 +56,14 @@ var vmo = {
                     user = response.user;
 
                     if (config.params.video.authorize) {
-                        console.log("\n\t" + emoji.get('tada') + "\tYou're in!  This application can now access your Vimeo account.");
-                        console.log("\n\t" + emoji.get('clipboard') + "\tAuthorization info saved to:\n\t\t\t" + config.where_prefs());
+                        
+                        log.info("\n\t\t%s\tYou're in!  This application can now access your Vimeo account."
+                                , emoji.get('tada'));
+
+                        log.info("\n\t\t%s\tAuthorization info saved to:\n\t\t\t%s"
+                                , emoji.get('clipboard')
+                                , config.where_prefs());
+
                         step(true);
                     } else {
                         step();
@@ -66,7 +76,7 @@ var vmo = {
         } else {
 
             api.setAccessToken(config.params.prefs.oauth.vimeo.access_token);
-            console.log("\nVimeo access token already retrieved!");
+            log.info("\n\t\tVimeo access token already retrieved!");
             step();
 
         }
@@ -91,17 +101,24 @@ var vmo = {
                 api.request(req_options, function(error, body, status_code, headers) {
 
                     if (error) {
-                        console.log(error)
+                        log.error(error)
                         step();
                     }
 
                     if (body) {
                         
                         stream.key = ((config.params.video.privacy === "unlisted") ? body.link.split('https://vimeo.com/')[1] : vmo.video.key);
-                        console.log("\n\t" + emoji.get('see_no_evil') + "\t[ " + path.parse(stream.upload).base + " ] is [ " + config.params.video.privacy + " ]");
+
+                        log.info("\n\t\t%s\tPrivacy for [ %s ] is set to [ %s ]"
+                                , emoji.get('see_no_evil')
+                                , path.parse(stream.upload).base
+                                , config.params.video.privacy);
 
                         stream.embed_code = body.embed.html;
-                        console.log("\n\t" + emoji.get('man-woman-girl-boy') + "\t Vimeo embed code:\n\t\t\t" + stream.embed_code);
+                       
+                        log.info("\n\t\t%s\t Vimeo embed code:\n\t\t\t%s"
+                                , emoji.get('man-woman-girl-boy')
+                                , stream.embed_code)
 
                         step();
                     }
@@ -148,7 +165,8 @@ var vmo = {
                         api.request(req_make_album, function(error, body, status_code, headers) {
 
                             if (error) {
-                                throw new Error(error);
+                                log.error(error.message)
+                                throw error;
                             }
 
                             vmo.video.group.uri = body.uri;
@@ -182,11 +200,15 @@ var vmo = {
 
                 api.request(req_vid_to_group, function(error, body, status_code, headers) {
 
-                    if (error) 
-                        throw new Error(error);
-                    else 
-                        console.log("\n\t" + emoji.get('books') + "\tMoved [ " + path.parse(stream.upload).base + " ] to group [ " + vmo.video.group.name + " ]");
-
+                    if (error) {
+                        log.error(error);
+                        throw error;
+                    } else {
+                        log.info("\n\t\t%s\tMoved [ %s ] to group [ %s ]"
+                                , emoji.get('books')
+                                , path.parse(stream.upload).base
+                                , vmo.video.group.name);
+                    }
                     step();
 
                 });
@@ -199,14 +221,50 @@ var vmo = {
 
         },
 
+        set_poster   : function(step) {
+
+            //make a call to set the poster frame
+            var p = config.params,
+                req_set_poster = {
+                                    method : "POST"
+                                  , path   : "/videos/" + vmo.video.key + "/pictures"
+                                  , query  : { active: true, time: parseFloat(p.video.thumb) }
+                                 }
+
+            api.request(req_set_poster, (err, body, status_code, headers) => {
+
+                if (err) {
+                    log.error(err);
+                } else {
+                    log.info("\n\t\t%s\tSet the poster frame for [ %s ] to [ %s ] seconds"
+                            , emoji.get('frame_with_picture')
+                            , path.parse(stream.upload).base
+                            , parseFloat(p.video.thumb))
+                }
+
+                step();
+
+            })
+
+        },
+
         create : function(row, step) {
 
             var p = config.params,
                 vid = {
-                          name         : p.video.title
-                        , description  : p.video.desc
-                        , privacy      : { view : p.video.privacy, download: p.video.downloadable, comments: p.video.comments }
-                      }
+                          name         : (config.is_batch() ? row[p.video.title] : p.video.title)
+                        , description  : (config.is_batch() ? row[p.video.desc]  : p.video.desc)
+                        , privacy      : { 
+                                              view     : p.video.privacy
+                                            , download : p.video.downloadable
+                                            , comments : p.video.comments
+                                         }
+                      };
+
+            log.info("\n\t\t%s\tInitiating upload of [ %s ] to Vimeo ... %s"
+                    , emoji.get('boom')
+                    , path.parse(stream.upload).base
+                    , emoji.get('rocket'))
 
             api.upload(
 
@@ -217,21 +275,27 @@ var vmo = {
 
                 vmo.video.key = uri.substring(uri.lastIndexOf('/') + 1, uri.length);
 
+                log.info("\n\t\t%s\tFinished uploading [ %s ] to Vimeo!"
+                        , emoji.get('clapper')
+                        , path.parse(stream.upload).base);
+
                 async.series([
                     vmo.video.get_details,
                     vmo.video.create_group,
-                    vmo.video.add_to_group
+                    vmo.video.add_to_group,
+                    vmo.video.set_poster
                 ], step);                
                 
               },
 
               function (bytesUploaded, bytesTotal) {
                 var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-                logln("\n\t" + emoji.get('clapper') + "\tSending [ " + path.parse(stream.upload).base + " ] to Vimeo...  " + percentage + "%  "  + emoji.get('rocket') + "\n");
+                logln("\n\t\t" + emoji.get('clapper') + "\tSending [ " + path.parse(stream.upload).base + " ] to Vimeo...  " + percentage + "%  "  + emoji.get('rocket') + "\n");
               },
 
               function (error) {
-                console.log('\n\nUpload of video asset failed because: ' + error)
+                log.error('\n\nUpload of video asset failed because: %s'
+                          , error)
                 step();
               }
             )

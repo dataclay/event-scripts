@@ -86,6 +86,7 @@ module.exports = Object.freeze({
            , BCAST   : "broadcast-status"
            , EMBED   : "embed-script"
            , PREV    : "broadcast-preview"
+           , URL     : "stream-url"
 
         }
 
