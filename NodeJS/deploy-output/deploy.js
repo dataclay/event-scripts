@@ -46,7 +46,7 @@ var deploy = {
         deploy.video_file = path.resolve(p.batch.assets, (row[p.fields.output.name] + "." + p.video.ext));
         stream.upload = deploy.video_file;
 
-        if (row[enums.data.fields.STREAM]) {
+        if (!p.video.overwrite && row[enums.data.fields.STREAM]) {
           
           log.info("\n\t\t%s\tRow [ %s ] already has a stream key.  Skipping."
                   , emoji.get('ok_hand')
@@ -175,7 +175,7 @@ var deploy = {
         deploy.video_file = path.resolve(p.batch.assets, row[p.fields.output.name] + '.' + p.video.ext);
         stream.upload = deploy.video_file;
 
-        if (row[p.fields.stream.name]) {
+        if (!p.video.overwrite && row[p.fields.stream.name]) {
           
           log.info("\n\t\t%s\tRow with key [ %s ] already has a stream key.  Skipping."
                     , emoji.get('ok_hand')

@@ -80,6 +80,7 @@ try {
                     , stream_privacy   : argv.stream_privacy
                     , stream_comments  : argv.stream_comments
                     , stream_download  : argv.stream_download
+                    , stream_overwrite : argv.stream_overwrite
                     , data_type        : argv.data_type || enums.data.types.GOOGLE
                     , user             : argv.author
                     , data_collection  : argv.worksheet

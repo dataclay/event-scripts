@@ -193,6 +193,7 @@ var configuration = {
             log.info("\t\t" + pad("Stream Privacy", 25)           + " : " + p.video.privacy              );
             log.info("\t\t" + pad("Stream Commenting", 25)        + " : " + p.video.comments             );
             log.info("\t\t" + pad("Stream Downloadable", 25)      + " : " + p.video.downloadable         );
+            log.info("\t\t" + pad("Stream Overwrite", 25)         + " : " + p.video.overwrite            );
             log.info("\t\t" + pad("Stream API Key", 25)           + " : " + p.video.key                  );
             log.info("\t\t" + pad("Stream API Secret", 25)        + " : " + p.video.secret               );
             log.info("\t\t" + pad("Stream API user", 25)          + " : " + p.video.user                 );
@@ -397,6 +398,7 @@ var configuration = {
         p.video.thumb        = args.poster_frame;
         p.video.ext          = args.asset_ext;
         p.video.preview      = args.preview_info;
+        p.video.overwrite    = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);
 
         p.storage.type       = args.storage_type;
         p.storage.region     = args.storage_region;
