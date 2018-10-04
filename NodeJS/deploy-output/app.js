@@ -126,6 +126,17 @@ try {
         
     },
 
+    function setup_storage(step) {
+
+        log.info("\n\t[ STORAGE SERVICE ]");
+
+        if (config.params.storage.type === enums.storage.types.S3) 
+        {
+          aws.config(step);
+        }
+
+    },
+
     gsheet.get,
     
     function process_video(step) {
@@ -134,7 +145,7 @@ try {
             sheet_query = null,
             sql         = null;
 
-        //Processed rows discontiguous (Templater Bot is on) 
+        //Processing discontiguously (Templater Bot) 
         if (!config.is_batch())
         {
 
@@ -146,10 +157,11 @@ try {
               , 'query'  : sql
             };
 
-        //Processed rows are contiguous (Batch process)
+        //Processed contiguously (Batch process)
         } else {
 
           deploy.is_batch = true;
+
           sheet_query = {
             offset  : (p.batch.start-1),
             limit   : ((p.batch.end) - (p.batch.start))+1,
@@ -162,7 +174,7 @@ try {
         gsheet.worksheet.getRows(sheet_query, function( err, rows ){
 
             if (err) {
-              log.error(err);
+              log.error("\n\tThere was an error:\n\t\t%s\n\t\tUsing sheet query %j", err, sheet_query);
               throw err;
             }
 

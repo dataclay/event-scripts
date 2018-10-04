@@ -13,6 +13,7 @@ var log             = require('./logger'),
     logln           = require('single-line-log').stdout,
     emoji           = require('node-emoji'),
     path            = require('path'),
+    aws             = require('./aws'),
     user            = null,
     api             = null;
 
@@ -261,44 +262,88 @@ var vmo = {
                                          }
                       };
 
-            log.info("\n\t\t%s\tInitiating upload of [ %s ] to Vimeo ... %s"
+            //If the AWS is set as storage and a link exists, then use Vimeo's pull method
+            if (p.storage.type === enums.storage.types.S3 && aws.S3_download_url)
+            {
+                
+                log.info("\n\t\t%s\tVimeo pulling video from storage [ %s ] from link\n\t\t\t\t[ %s ]"
+                        , emoji.get('telephone_receiver')
+                        , p.storage.type
+                        , aws.S3_download_url);
+
+                vid.upload = { approach: "pull", link: aws.S3_download_url }
+
+                var pull_req = {
+                      method  : "POST"
+                    , path    : "/me/videos/"
+                    , query   : vid
+                }
+
+                api.request(pull_req, (error, body, status_code, headers) => {
+
+                    if (error) {
+                        log.error(error);
+                    }
+
+                    vmo.video.key = body.uri.substring(body.uri.lastIndexOf('/') + 1, body.uri.length);
+
+                    log.info("\n\t\t%s\tFinished uploading [ %s ] to Vimeo!"
+                            , emoji.get('clapper')
+                            , path.parse(stream.upload).base);
+
+                    async.series([
+                        vmo.video.get_details,
+                        vmo.video.create_group,
+                        vmo.video.add_to_group,
+                        vmo.video.set_poster
+                    ], step);
+
+                });
+
+
+            } else {
+
+                log.info("\n\t\t%s\tInitiating upload of [ %s ] to Vimeo ... %s"
                     , emoji.get('boom')
                     , path.parse(stream.upload).base
                     , emoji.get('rocket'))
 
-            api.upload(
+                api.upload(
 
-              stream.upload, //path to asset on the filesystem
-              vid, //options to upload
+                  stream.upload, //path to asset on the filesystem
+                  vid, //options to upload
 
-              function (uri) {
+                  function (uri) {
 
-                vmo.video.key = uri.substring(uri.lastIndexOf('/') + 1, uri.length);
+                    vmo.video.key = uri.substring(uri.lastIndexOf('/') + 1, uri.length);
 
-                log.info("\n\t\t%s\tFinished uploading [ %s ] to Vimeo!"
-                        , emoji.get('clapper')
-                        , path.parse(stream.upload).base);
+                    log.info("\n\t\t%s\tFinished uploading [ %s ] to Vimeo!"
+                            , emoji.get('clapper')
+                            , path.parse(stream.upload).base);
 
-                async.series([
-                    vmo.video.get_details,
-                    vmo.video.create_group,
-                    vmo.video.add_to_group,
-                    vmo.video.set_poster
-                ], step);                
-                
-              },
+                    async.series([
+                        vmo.video.get_details,
+                        vmo.video.create_group,
+                        vmo.video.add_to_group,
+                        vmo.video.set_poster
+                    ], step);                
+                    
+                  },
 
-              function (bytesUploaded, bytesTotal) {
-                var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-                logln("\n\t\t" + emoji.get('clapper') + "\tSending [ " + path.parse(stream.upload).base + " ] to Vimeo...  " + percentage + "%  "  + emoji.get('rocket') + "\n");
-              },
+                  function (bytesUploaded, bytesTotal) {
+                    var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+                    logln("\n\t\t" + emoji.get('clapper') + "\tSending [ " + path.parse(stream.upload).base + " ] to Vimeo...  " + percentage + "%  "  + emoji.get('rocket') + "\n");
+                  },
 
-              function (error) {
-                log.error('\n\nUpload of video asset failed because: %s'
-                          , error)
-                step();
-              }
-            )
+                  function (error) {
+                    log.error('\n\nUpload of video asset failed because: %s'
+                              , error)
+                    step();
+
+                  }
+                )
+
+            }
 
         }
 

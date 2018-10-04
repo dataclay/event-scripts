@@ -265,7 +265,7 @@ var configuration = {
 
         //Get AWS credentials
         //Optional if user wants to use S3
-        if (args.storage_service && (args.storage_service == enums.storage.types.S3)) {
+        if (args.storage_type && (args.storage_type == enums.storage.types.S3)) {
 
             if (!fs.existsSync(args.awscreds)) {
                 log.error(enums.errors.absent_awscreds_file, args.awscreds)

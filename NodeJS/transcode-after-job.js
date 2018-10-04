@@ -81,6 +81,12 @@ of your working directory for this code repository.
     --cleanup       Remove original files after transcode
                     Type: Boolean, Default: true
 
+    --poster        Extracts a frame from the input file
+                    Type: Float, Default: null
+
+    --poster_format The still image type for a poster image
+                    Type: String, Default: "png"
+
 */
 
 //Constants
@@ -90,7 +96,8 @@ const ffmpeg_win  = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
       ffprobe_osx = "/usr/local/bin/ffprobe",
       spacer      = 18;;
 
-var winston     = require('winston'),
+var async       = require('async'),
+    winston     = require('winston'),
     moment      = require('moment'),
     os          = require('os'),
     path        = require('path'),
@@ -102,7 +109,7 @@ var winston     = require('winston'),
     logln       = require('single-line-log').stdout,
     argv        = require('minimist')(process.argv.slice(2));
 
-var ffmpeg_cmd     = ffmpeg(),
+var transcode      = ffmpeg(),
     input_file     = path.resolve(argv.input),
     output         = path.resolve(path.join(argv.outdir, argv.outname)),
     dest_loc       = path.resolve(argv.dest),
@@ -114,9 +121,11 @@ var ffmpeg_cmd     = ffmpeg(),
     file_ext       = (argv.file_ext            || '.mp4'   ),
     vcontainer     = (argv.container           || 'mp4'    ),
     pixformat      = (argv.pixformat           || 'yuv420p'),
+    poster_time    = (parseFloat(argv.poster)  || 0        ),
+    poster_format  = (argv.poster_format       || 'png'    ),
     input_duration = null,
-    output_path    = null
-    dest_path      = null;
+    output_path    = output + file_ext,
+    dest_path      = path.resolve(dest_loc, (argv.outname + file_ext));
 
 if (process.platform == 'win32') {
     ffmpeg.setFfmpegPath(ffmpeg_win);
@@ -143,100 +152,194 @@ const log = winston.createLogger({
 
 })
 
-const log_progress = (progress, event) => {
 
-  var prog_msg  = '\n\t'   + pad("Target Size" ,spacer)     + '=>\t' + (event.targetSize/1000) + ' MB';
-      prog_msg += '\n\n\t' + pad("Input Frame",spacer)      + '=>\t' + (event.frames);
-      prog_msg += '\n\n\t' + pad("Percent Complete",spacer) + '=>\t' + (progress * 100).toFixed() + '%\n';
-  
-  logln(prog_msg);
-  
+/*
+ *
+ * Transcode Class
+ *
+ */
+
+ var transcode = {
+
+    cmd           : ffmpeg()
+
+  , done          : null
+
+  , init          : (step) => {
+
+      log.info("\n\n----- [ " + moment().format('MMMM Do YYYY, h:mm:ss A') + " ] ------------------------- " + "\n")
+      log.info("\n\t" + pad("Input File",spacer) + "=>\t" + input_file);
+
+      step();
+
+  }
+
+  , setup         : (step) => {
+
+      transcode.cmd.input(input_file)
+                   // set target bitrate
+                   .videoBitrate(vbit)
+                   // set target codec
+                   .videoCodec(vcodec)
+                   // set audio bitrate
+                   .audioBitrate(abit)
+                   // set audio codec
+                   .audioCodec(acodec)
+                   // set pixel format
+                   .outputOption('-pix_fmt ' + pixformat)
+                   // set output format to force
+                   .outputFormat(vcontainer)
+                   //setup error behavior
+                   .on('err', transcode.on_error)
+                   //setup start behavior
+                   .on('start', transcode.on_start)
+                   //setup progress behavior
+                   .on('progress',ffmpeg_prog(transcode.progress_readout, input_duration))
+                   //setup completion behavior
+                   .on('end', transcode.on_complete)
+
+      step();
+
+  }
+
+  , get : (step) => {
+
+      transcode.done = step;
+      transcode.cmd.save(output + file_ext);
+
+  }
+
+  , on_start      : (command) => {
+
+      ffmpeg.ffprobe(input_file, function(err, metadata) {
+
+          if (err) {
+            log.error(err.message)
+            process.exit(0);
+          }
+
+          input_duration = metadata.format.duration * 1000;
+          log.info("\n\t" + pad("Input Runtime",spacer)     + "=>\t" + (input_duration/1000) + " seconds");
+          log.info("\n\t" + pad("Transcode Command",spacer) + "=>\t" + command);
+
+      });
+
+  }
+
+  , on_error      : (err, stdout, stderr) => {
+
+      if (err) log.error("\n\t" + pad("Error", spacer) + "=>\t" + err.message);
+
+  }
+
+  , progress_readout : (prog, evt) => {
+
+      var msg  = '\n\t'   + pad("Target Size" ,spacer) + '=>\t' + (evt.targetSize/1000) + ' MB';
+          msg += '\n\n\t' + pad("Input Frame" ,spacer) + '=>\t' + (evt.frames);
+          msg += '\n\n\t' + pad("Percent Complete",spacer) + '=>\t' + (prog * 100).toFixed() + '%\n';  //This doesn't work and I'm removing it.
+      
+      logln(msg);
+
+  }
+
+  , on_complete   : (stdout, err) => {
+
+      log.info("\n\t" + pad("Transcoded Output",spacer) + "=>\t" + output_path);
+
+      //clean.archive(output_path, dest_path);
+
+      transcode.done();
+
+  }
+
 }
 
-//console.log("\n\nSetting input file to " + input_file);
-log.info("\n----- [ " + moment().format('MMMM Do YYYY, h:mm:ss A') + " ] ------------------------- " + "\n")
-log.info("\n\t" + pad("Input File",spacer) + "=>\t" + input_file);
 
-ffmpeg_cmd.input(input_file);
+/*
+ * 
+ * Poster frame extraction
+ *
+ */
 
-//FFmpeg parameters
-ffmpeg_cmd.videoBitrate(vbit)
-          // set target codec
-          .videoCodec(vcodec)
-          // set audio bitrate
-          .audioBitrate(abit)
-          // set audio codec
-          .audioCodec(acodec)
-          // set pixel format
-          .outputOption('-pix_fmt ' + pixformat)
-          // set output format to force
-          .outputFormat(vcontainer)
-          // save to output
-          .save(output + file_ext);
+var poster = {
 
-ffmpeg_cmd.on('start', (command) => {
+  cmd  : ffmpeg(),
 
-  ffmpeg.ffprobe(input_file, function(err, metadata) {
+  done : null,
 
-      if (err) {
-        log.error(err.message)
-        process.exit(0);
+  setup : function(step) {
+
+      log.info("\n\t" + pad("Poster Frame",spacer) + "=>\t%s"
+            , poster_time);
+
+      poster.cmd.input(input_file)
+                //seek to time
+                .seekInput(poster_time)
+                //output framecount
+                .outputOption('-vframes 1')
+                //initialization function
+                .on('start', poster.init)
+                //when extraction ends
+                .on('end', poster.complete);
+
+      step();
+    
+  },
+
+  init : function(command) {
+
+    log.info("\n\t" + pad("Extract Poster",spacer) + "=>\t%s"
+            , command);
+
+  },
+
+  get : function (step) {
+
+        poster.done = step;
+        poster.cmd.save(output + '.' + poster_format.toLowerCase());
+
+  },
+
+  complete : function() {
+
+    poster.done();
+
+  }
+
+}
+
+
+/*
+ * 
+ * Cleanup Tasks
+ *
+ */
+
+var clean = {
+
+  archive : (orig, dest, step) => {
+
+    if (orig !== dest) {
+
+      if (!fs.existsSync(dest_loc))
+      {
+        fs.mkdirSync(dest_loc);
       }
 
-      input_duration = metadata.format.duration * 1000;
-      log.info("\n\t" + pad("Input Runtime",spacer)     + "=>\t" + (input_duration/1000) + " seconds");
-      log.info("\n\t" + pad("Transcode Command",spacer) + "=>\t" + command);
-
-  });
-
-});
-
-ffmpeg_cmd.on('error', (err, stdout, stderr) => {
-  if (err) {
-    log.error("\n\t" + pad("Error",spacer) + "=>\t" + err.message);
-  }
-});
-
-ffmpeg_cmd.on('progress', ffmpeg_prog(log_progress, input_duration));
-
-ffmpeg_cmd.on('end', (stdout, err) => {
-
-    output_path = output + file_ext;
-    dest_path   = path.resolve(dest_loc, (argv.outname + file_ext));
-
-    log.info("\n\t" + pad("Transcoded Output",spacer) + "=>\t" + output_path);
-
-    if (output_path !== dest_path) {
-
-      if (!fs.existsSync(dest_loc)) fs.mkdirSync(dest_loc);
-
-      fs.copyFile(output_path, dest_path, (err) => {
+      fs.copyFile(orig, dest, (err) => {
       
         if (err) {
-          log.error("\n\tAn error ocurred when moving the output file to final destination.");
+
+          log.error("\n\tAn error ocurred when archiving the transcode file to final destination.");
           throw err;
+
         } else {
 
-          log.info("\n\t" + pad("Saved Destination",spacer) + "=>\t" + dest_path);
+          log.info("\n\t" + pad("Saved Destination",spacer) + "=>\t" + dest);
         
           if (remove_orig) {
-          
-            fs.unlink(input_file, (err) => {
-              if (err) {
-                log.error(err);
-                throw err;
-              } 
-              log.info("\n\t" + pad("Deleted Input",spacer) + "=>\t" + input_file);  
-            });
-
-            fs.unlink(output_path, (err) => {
-              if (err) {
-                log.error(err)
-                throw err;
-              }
-              log.info("\n\t" + pad("Deleted Output",spacer) + "=>\t" + output_path);
-            });
-
+            clean.delete(input_file);
+            clean.delete(orig);
           }
           
         }
@@ -245,18 +348,45 @@ ffmpeg_cmd.on('end', (stdout, err) => {
 
     } else {
 
-      if (remove_orig) {
+      if (remove_orig) clean.delete(input_file);
 
-        fs.unlink(input_file, (err) => {
-          if (err) {
-            log.error(err);
-            throw err;
-          } 
-          log.info("\n\t" + pad("Deleted Input",spacer) + "=>\t" + input_file);  
-        });
+    }
 
-      }
+    step();
 
-    } 
+  },
 
-});
+  delete : (f) => {
+
+    fs.unlink(f, (err) => {
+
+      if (err) {
+        log.error(err);
+        throw err;
+      } 
+
+      log.info("\n\t" + pad("Deleted",spacer) + "=>\t" + f);  
+
+    });
+
+  }
+
+}
+
+async.series([
+      transcode.init
+    , transcode.setup
+    , transcode.get
+    , poster.setup
+    , poster.get
+    , (step) => { clean.archive(output_path, dest_path, step) }
+  ], (err) => {
+
+    log.info("\n\t" + pad("Complete",spacer) + "=>\tFinished!");
+
+    if (err) {
+      log.error(err.message);
+      throw err;
+    }
+
+})
