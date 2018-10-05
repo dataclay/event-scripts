@@ -90,42 +90,43 @@ of your working directory for this code repository.
 */
 
 //Constants
-const ffmpeg_win  = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
-      ffprobe_win = "C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe",
-      ffmpeg_osx  = "/usr/local/bin/ffmpeg",
-      ffprobe_osx = "/usr/local/bin/ffprobe",
-      spacer      = 18;;
+const ffmpeg_win       = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
+      ffprobe_win      = "C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe",
+      ffmpeg_osx       = "/usr/local/bin/ffmpeg",
+      ffprobe_osx      = "/usr/local/bin/ffprobe",
+      spacer           = 22;
 
-var async       = require('async'),
-    winston     = require('winston'),
-    moment      = require('moment'),
-    os          = require('os'),
-    path        = require('path'),
-    fs          = require('fs'),
-    glob        = require('glob'),
-    pad         = require('pad'),
-    ffmpeg      = require('fluent-ffmpeg'),
-    ffmpeg_prog = require('ffmpeg-on-progress'),
-    logln       = require('single-line-log').stdout,
-    argv        = require('minimist')(process.argv.slice(2));
+var   async            = require('async'),
+      sprintf          = require('sprintf-js').sprintf,
+      chalk            = require('chalk'),
+      winston          = require('winston'),
+      moment           = require('moment'),
+      os               = require('os'),
+      path             = require('path'),
+      fs               = require('fs'),
+      glob             = require('glob'),
+      pad              = require('pad'),
+      ffmpeg           = require('fluent-ffmpeg'),
+      ffmpeg_prog      = require('ffmpeg-on-progress'),
+      logln            = require('single-line-log').stdout,
+      argv             = require('minimist')(process.argv.slice(2));
 
-var transcode      = ffmpeg(),
-    input_file     = path.resolve(argv.input),
-    output         = path.resolve(path.join(argv.outdir, argv.outname)),
-    dest_loc       = path.resolve(argv.dest),
-    remove_orig    = ((argv.cleanup ? JSON.parse(argv.cleanup) : null) || false    ),
-    vcodec         = (argv.vcodec              || 'libx264'),
-    vbit           = (parseInt(argv.vbit)      || 2048     ),
-    acodec         = (argv.acodec              || 'ac3'    ),
-    abit           = (argv.abit                || '128k'   ),
-    file_ext       = (argv.file_ext            || '.mp4'   ),
-    vcontainer     = (argv.container           || 'mp4'    ),
-    pixformat      = (argv.pixformat           || 'yuv420p'),
-    poster_time    = (parseFloat(argv.poster)  || 0        ),
-    poster_format  = (argv.poster_format       || 'png'    ),
-    input_duration = null,
-    output_path    = output + file_ext,
-    dest_path      = path.resolve(dest_loc, (argv.outname + file_ext));
+var   transcode        = ffmpeg(),
+      input_file       = path.resolve(argv.input),
+      output           = path.resolve(path.join(argv.outdir, argv.outname)),
+      dest_loc         = path.resolve(argv.dest),
+      remove_orig      = ((argv.cleanup ? JSON.parse(argv.cleanup) : null) || false    ),
+      vcodec           = (argv.vcodec              || 'libx264'),
+      vbit             = (parseInt(argv.vbit)      || 2048     ),
+      acodec           = (argv.acodec              || 'ac3'    ),
+      abit             = (argv.abit                || '128k'   ),
+      file_ext         = (argv.file_ext            || '.mp4'   ),
+      vcontainer       = (argv.container           || 'mp4'    ),
+      pixformat        = (argv.pixformat           || 'yuv420p'),
+      poster_time      = (parseFloat(argv.poster)  || 0        ),
+      poster_format    = (argv.poster_format       || 'png'    );
+
+
 
 if (process.platform == 'win32') {
     ffmpeg.setFfmpegPath(ffmpeg_win);
@@ -161,22 +162,39 @@ const log = winston.createLogger({
 
  var transcode = {
 
-    cmd           : ffmpeg()
+  cmd             : ffmpeg(),
 
-  , done          : null
+  done            : null,
 
-  , init          : (step) => {
+  input           : null,
 
-      log.info("\n\n----- [ " + moment().format('MMMM Do YYYY, h:mm:ss A') + " ] ------------------------- " + "\n")
-      log.info("\n\t" + pad("Input File",spacer) + "=>\t" + input_file);
+  input_duration  : null,
 
-      step();
+  output          : null,
 
-  }
+  output_dest     : null,
 
-  , setup         : (step) => {
+  init          : (step) => {
 
-      transcode.cmd.input(input_file)
+    log.info("\n\n" + chalk.bold.cyan("----- ") + chalk.bold.white("[ ") + chalk.bold.magenta(moment().format('MMMM Do YYYY, h:mm:ss A')) + chalk.bold.white(" ]") + chalk.bold.cyan(" ------------------------- ") + "\n")
+    log.info("\n\t" + chalk.bold.white(pad("Input File",spacer) + "=>\t") + chalk.green(input_file));
+
+    if (!fs.existsSync(input_file)) {      
+      var err_msg = chalk.bold.white(pad("\n\tInput File Error",spacer) + "=>\t") + chalk.green("[ " + chalk.bold.green("%s") + " ] does not exist in the file system.");       
+      log.error(err_msg , path.parse(input_file).base);
+    }
+
+    transcode.input = input_file;
+    transcode.output = output + file_ext;
+    transcode.output_dest = path.resolve(dest_loc, (argv.outname + file_ext));
+
+    step();
+
+  },
+
+  setup  : (step) => {
+
+      transcode.cmd.input(transcode.input)
                    // set target bitrate
                    .videoBitrate(vbit)
                    // set target codec
@@ -194,65 +212,87 @@ const log = winston.createLogger({
                    //setup start behavior
                    .on('start', transcode.on_start)
                    //setup progress behavior
-                   .on('progress',ffmpeg_prog(transcode.progress_readout, input_duration))
+                   .on('progress',ffmpeg_prog(transcode.progress_readout, transcode.input_duration))
                    //setup completion behavior
                    .on('end', transcode.on_complete)
 
       step();
 
-  }
+  },
 
-  , get : (step) => {
+  get : (step) => {
 
+      
       transcode.done = step;
-      transcode.cmd.save(output + file_ext);
+      transcode.cmd.save(transcode.output);
 
-  }
+  },
 
-  , on_start      : (command) => {
+  on_start      : (cmd) => {
 
-      ffmpeg.ffprobe(input_file, function(err, metadata) {
+      ffmpeg.ffprobe(transcode.input, function(err, metadata) {
 
           if (err) {
             log.error(err.message)
             process.exit(0);
           }
 
-          input_duration = metadata.format.duration * 1000;
-          log.info("\n\t" + pad("Input Runtime",spacer)     + "=>\t" + (input_duration/1000) + " seconds");
-          log.info("\n\t" + pad("Transcode Command",spacer) + "=>\t" + command);
+          transcode.input_duration = metadata.format.duration * 1000;
+          log.info("\n\t" + chalk.bold.white(pad("Input Runtime",spacer)        + "=>\t") + chalk.green((transcode.input_duration/1000) + " seconds"));
+          log.info("\n\t" + chalk.bold.white(pad("Transcode Command",spacer)    + "=>\t") + chalk.green(cmd));
+          log.info("\n\t" + chalk.bold.white(pad("Initiating Transcode",spacer) + "=>\t") + chalk.green("Please wait..."));
 
       });
 
-  }
+  },
 
-  , on_error      : (err, stdout, stderr) => {
+  on_error      : (err, stdout, stderr) => {
 
       if (err) log.error("\n\t" + pad("Error", spacer) + "=>\t" + err.message);
 
-  }
+  },
 
-  , progress_readout : (prog, evt) => {
+  progress_readout : (prog, evt) => {
 
-      var msg  = '\n\t'   + pad("Target Size" ,spacer) + '=>\t' + (evt.targetSize/1000) + ' MB';
-          msg += '\n\n\t' + pad("Input Frame" ,spacer) + '=>\t' + (evt.frames);
-          msg += '\n\n\t' + pad("Percent Complete",spacer) + '=>\t' + (prog * 100).toFixed() + '%\n';  //This doesn't work and I'm removing it.
+      var msg  = '\n\t'   + chalk.bold.white(pad("Target Size" ,spacer) + '=>\t')     + chalk.green((evt.targetSize/1000) + ' MB');
+          msg += '\n\n\t' + chalk.bold.white(pad("Input Frame" ,spacer) + '=>\t')     + chalk.green(evt.frames);
+          msg += '\n\n\t' + chalk.bold.white(pad("Percent Complete",spacer) + '=>\t') + chalk.green((prog * 100).toFixed() + '%\n');  //This doesn't work and I'm removing it.
       
       logln(msg);
 
-  }
+  },
 
-  , on_complete   : (stdout, err) => {
+  on_complete   : (stdout, err) => {
 
-      log.info("\n\t" + pad("Transcoded Output",spacer) + "=>\t" + output_path);
-
-      //clean.archive(output_path, dest_path);
-
+      log.info("\n\t" + chalk.bold.white(pad("Transcoded Output",spacer) + "=>\t")    + chalk.green(transcode.output));
       transcode.done();
 
+  },
+
+  archive : (step) => {
+
+      if (transcode.output !== transcode.output_dest) {
+
+        if (!fs.existsSync(dest_loc)) fs.mkdirSync(dest_loc);
+
+        utils.copy(transcode.output, transcode.output_dest);
+
+        if (remove_orig) {
+              utils.delete(transcode.input)
+              utils.delete(transcode.output);
+        }
+
+      } else {
+
+        if (remove_orig) utils.delete(transcode.input);
+
+      }
+
+      step();
+
   }
 
-}
+};
 
 
 /*
@@ -263,14 +303,30 @@ const log = winston.createLogger({
 
 var poster = {
 
-  cmd  : ffmpeg(),
+  cmd           : ffmpeg(),
 
-  done : null,
+  done          : null,
 
-  setup : function(step) {
+  input         : null,
 
-      log.info("\n\t" + pad("Poster Frame",spacer) + "=>\t%s"
-            , poster_time);
+  output        : null,
+
+  output_dest   : null,
+
+  init : (step) => {
+
+    log.info("\n\t" + chalk.bold.white(pad("Poster Frame",spacer) + "=>\t") + chalk.green("%s")
+      , poster_time);
+
+    poster.input       = input_file;
+    poster.output      = output + '.' + poster_format.toLowerCase();
+    poster.output_dest = path.resolve(dest_loc, (argv.outname + '.' + poster_format));
+
+    step();
+
+  },
+
+  setup : (step) => {
 
       poster.cmd.input(input_file)
                 //seek to time
@@ -278,31 +334,114 @@ var poster = {
                 //output framecount
                 .outputOption('-vframes 1')
                 //initialization function
-                .on('start', poster.init)
+                .on('start', poster.on_start)
                 //when extraction ends
-                .on('end', poster.complete);
+                .on('end', poster.on_end);
 
       step();
     
   },
 
-  init : function(command) {
-
-    log.info("\n\t" + pad("Extract Poster",spacer) + "=>\t%s"
-            , command);
-
-  },
-
-  get : function (step) {
+  get : (step) => {
 
         poster.done = step;
-        poster.cmd.save(output + '.' + poster_format.toLowerCase());
+        poster.cmd.save(poster.output);
 
   },
 
-  complete : function() {
+  on_start : (cmd) => {
+
+    log.info("\n\t" + chalk.bold.white(pad("Extract Poster",spacer) + "=>\t") + chalk.green("%s")
+            , cmd);
+
+  },
+
+  on_end : (cmd) => {
 
     poster.done();
+
+  },
+
+  archive : (step) => {
+
+    if (poster.output !== poster.output_dest) {
+
+      utils.copy(poster.output, poster.output_dest)
+      utils.delete(poster.output);
+
+    }
+
+    step();
+
+  } 
+
+}
+
+
+/*
+ * 
+ * Re-usable Utilities
+ *
+ */
+
+var utils = {
+
+  delete : (f) => {  
+
+    fs.unlinkSync(f)
+
+    log.info("\n\t" + chalk.bold.white(pad("Deleted",spacer) + "=>\t") + chalk.green(f)
+            , path.parse(f).base);
+  
+  },
+
+  delete_async : (f, callback) => {
+
+    fs.unlinkSync(f, (err) => {
+
+      if (err) {
+        log.error(err);
+        throw err;
+      } 
+
+      log.info("\n\t" + chalk.bold.white(pad("Deleted",spacer) + "=>\t") + chalk.green(f)
+                , path.parse(f).base);
+
+      if (callback) callback();
+
+    });
+
+  },
+
+  copy : (f, f_copy) => {
+
+    fs.copyFileSync(f, f_copy);
+
+    log.info("\n\t" + chalk.bold.white(pad("Copied", spacer) + "=>\t") + chalk.green(f_copy)
+            , path.parse(f_copy).base);
+
+  },
+
+  copy_async : (f, f_copy, callback) => {
+
+    fs.copyFile(f, f_copy, (err) => {
+
+      if (err) {
+
+          log.error("\n\tAn error ocurred when copying [ %s ] to archive destination."
+                    , path.parse(f).base);
+          throw err;
+
+        } else {
+
+          log.info("\n\t" + chalk.bold.white(pad("Copied",spacer) + "=>\t") + chalk.green(f_copy)
+                  , path.parse(f_copy).base);
+          
+          if (callback) callback();
+          
+        }
+
+    })
 
   }
 
@@ -311,82 +450,26 @@ var poster = {
 
 /*
  * 
- * Cleanup Tasks
+ * Main Entry 
  *
  */
-
-var clean = {
-
-  archive : (orig, dest, step) => {
-
-    if (orig !== dest) {
-
-      if (!fs.existsSync(dest_loc))
-      {
-        fs.mkdirSync(dest_loc);
-      }
-
-      fs.copyFile(orig, dest, (err) => {
-      
-        if (err) {
-
-          log.error("\n\tAn error ocurred when archiving the transcode file to final destination.");
-          throw err;
-
-        } else {
-
-          log.info("\n\t" + pad("Saved Destination",spacer) + "=>\t" + dest);
-        
-          if (remove_orig) {
-            clean.delete(input_file);
-            clean.delete(orig);
-          }
-          
-        }
-        
-      });
-
-    } else {
-
-      if (remove_orig) clean.delete(input_file);
-
-    }
-
-    step();
-
-  },
-
-  delete : (f) => {
-
-    fs.unlink(f, (err) => {
-
-      if (err) {
-        log.error(err);
-        throw err;
-      } 
-
-      log.info("\n\t" + pad("Deleted",spacer) + "=>\t" + f);  
-
-    });
-
-  }
-
-}
 
 async.series([
       transcode.init
     , transcode.setup
     , transcode.get
+    , poster.init
     , poster.setup
     , poster.get
-    , (step) => { clean.archive(output_path, dest_path, step) }
+    , transcode.archive
+    , poster.archive
   ], (err) => {
 
-    log.info("\n\t" + pad("Complete",spacer) + "=>\tFinished!");
+    log.info("\n\t" + chalk.bold.white(pad("Completed",spacer) + "=>\t") + chalk.bold.red("Exiting!"));
 
     if (err) {
       log.error(err.message);
       throw err;
     }
 
-})
+});
