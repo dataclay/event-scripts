@@ -94,7 +94,8 @@ const ffmpeg_win       = "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
       ffprobe_win      = "C:\\Program Files\\ffmpeg\\bin\\ffprobe.exe",
       ffmpeg_osx       = "/usr/local/bin/ffmpeg",
       ffprobe_osx      = "/usr/local/bin/ffprobe",
-      spacer           = 22;
+      spacer           = 22,
+      file_types       = { 'MOVIE' : 'movie', 'STILL' : 'still', 'SEQUENCE' : 'sequence'};
 
 var   async            = require('async'),
       sprintf          = require('sprintf-js').sprintf,
@@ -111,8 +112,7 @@ var   async            = require('async'),
       logln            = require('single-line-log').stdout,
       argv             = require('minimist')(process.argv.slice(2));
 
-var   transcode        = ffmpeg(),
-      input_file       = path.resolve(argv.input),
+var   input_file       = path.resolve(argv.input),
       output           = path.resolve(path.join(argv.outdir, argv.outname)),
       dest_loc         = path.resolve(argv.dest),
       remove_orig      = ((argv.cleanup ? JSON.parse(argv.cleanup) : null) || false    ),
@@ -162,39 +162,51 @@ const log = winston.createLogger({
 
  var transcode = {
 
-  cmd             : ffmpeg(),
+  cmd    : ffmpeg(),
 
-  done            : null,
+  done   : null,
 
-  input           : null,
+  input  : { 
+             path        : null, 
+             type        : null,
+             duration    : null,
+             seq_holders : 0 
+           },
 
-  input_duration  : null,
+  output : { 
+             path      : null,
+             dest      : null,
+             framerate : null
+           },
 
-  output          : null,
-
-  output_dest     : null,
-
-  init          : (step) => {
+  init : (step) => {
 
     log.info("\n\n" + chalk.bold.cyan("----- ") + chalk.bold.white("[ ") + chalk.bold.magenta(moment().format('MMMM Do YYYY, h:mm:ss A')) + chalk.bold.white(" ]") + chalk.bold.cyan(" ------------------------- ") + "\n")
-    log.info("\n\t" + chalk.bold.white(pad("Input File",spacer) + "=>\t") + chalk.green(input_file));
 
-    if (!fs.existsSync(input_file)) {      
-      var err_msg = chalk.bold.white(pad("\n\tInput File Error",spacer) + "=>\t") + chalk.green("[ " + chalk.bold.green("%s") + " ] does not exist in the file system.");       
-      log.error(err_msg , path.parse(input_file).base);
-    }
+    var input_props = utils.inspect_file(input_file);
 
-    transcode.input = input_file;
-    transcode.output = output + file_ext;
-    transcode.output_dest = path.resolve(dest_loc, (argv.outname + file_ext));
+    transcode.input.path        = input_props.path;
+    transcode.input.type        = input_props.type;
+    transcode.input.seq_holders = input_props.seq_holders;
+    transcode.input.ext         = input_props.extension;
 
+    // if (!fs.existsSync(input_file)) {      
+    //   var err_msg = chalk.bold.white(pad("\n\tInput File Error",spacer) + "=>\t") + chalk.green("[ " + chalk.bold.green("%s") + " ] does not exist in the file system.");       
+    //   log.error(err_msg , path.parse(input_file).base);
+    // }
+
+    log.info("\n\t" + chalk.bold.white(pad("Input File",spacer) + "=>\t") + chalk.green(transcode.input.path));
+
+    transcode.output.path = utils.devise_output(transcode, output) + file_ext;
+    transcode.output.dest = path.resolve(dest_loc, (utils.devise_output(transcode, argv.outname) + file_ext));
+    
     step();
 
   },
 
   setup  : (step) => {
 
-      transcode.cmd.input(transcode.input)
+      transcode.cmd.input(transcode.input.path)
                    // set target bitrate
                    .videoBitrate(vbit)
                    // set target codec
@@ -216,37 +228,60 @@ const log = winston.createLogger({
                    //setup completion behavior
                    .on('end', transcode.on_complete)
 
+      if (transcode.input.type === file_types.SEQUENCE) {
+        transcode.cmd.inputOption("-framerate 30");
+        transcode.cmd.inputOption("-pattern_type glob");
+      } 
+
       step();
 
   },
 
   get : (step) => {
 
+      //if a still image, then skip transcoding
+      if (transcode.input.type === file_types.STILL) {
+
+        log.info("\n\t" + chalk.bold.white(pad("Skipping Transcode", spacer)) + "=>\t" + chalk.green("Still image needs no transcoding"));
+        step();
+
+      } else {
+
+        transcode.done = step;
+        transcode.cmd.save(transcode.output.path);
+
+      }
+
+  },
+
+  on_start : (cmd) => {
+
       
-      transcode.done = step;
-      transcode.cmd.save(transcode.output);
+      if (transcode.input.type === file_types.MOVIE ) {
+
+        ffmpeg.ffprobe(transcode.input.path, function(err, metadata) {
+
+            if (err) {
+              log.error(err.message)
+              process.exit(0);
+            }
+
+            transcode.input.duration = metadata.format.duration * 1000;
+            log.info("\n\t" + chalk.bold.white(pad("Input Runtime",spacer)        + "=>\t") + chalk.green((transcode.input.duration/1000) + " seconds"));
+            log.info("\n\t" + chalk.bold.white(pad("Transcode Command",spacer)    + "=>\t") + chalk.green(cmd));
+            log.info("\n\t" + chalk.bold.white(pad("Initiating Transcode",spacer) + "=>\t") + chalk.green("Please wait..."));
+
+        });
+
+      } else {
+
+        log.info("\n\t" + chalk.bold.white(pad("Transcode Sequence",spacer) + "=>\t") + chalk.green(cmd))
+
+      } 
 
   },
 
-  on_start      : (cmd) => {
-
-      ffmpeg.ffprobe(transcode.input, function(err, metadata) {
-
-          if (err) {
-            log.error(err.message)
-            process.exit(0);
-          }
-
-          transcode.input_duration = metadata.format.duration * 1000;
-          log.info("\n\t" + chalk.bold.white(pad("Input Runtime",spacer)        + "=>\t") + chalk.green((transcode.input_duration/1000) + " seconds"));
-          log.info("\n\t" + chalk.bold.white(pad("Transcode Command",spacer)    + "=>\t") + chalk.green(cmd));
-          log.info("\n\t" + chalk.bold.white(pad("Initiating Transcode",spacer) + "=>\t") + chalk.green("Please wait..."));
-
-      });
-
-  },
-
-  on_error      : (err, stdout, stderr) => {
+  on_error : (err, stdout, stderr) => {
 
       if (err) log.error("\n\t" + pad("Error", spacer) + "=>\t" + err.message);
 
@@ -264,27 +299,35 @@ const log = winston.createLogger({
 
   on_complete   : (stdout, err) => {
 
-      log.info("\n\t" + chalk.bold.white(pad("Transcoded Output",spacer) + "=>\t")    + chalk.green(transcode.output));
+      log.info("\n\t" + chalk.bold.white(pad("Transcoded Output",spacer) + "=>\t")    + chalk.green(transcode.output.path));
       transcode.done();
 
   },
 
   archive : (step) => {
 
-      if (transcode.output !== transcode.output_dest) {
+      var src_file = null,
+          copy_file = null;
 
-        if (!fs.existsSync(dest_loc)) fs.mkdirSync(dest_loc);
+      if (transcode.input.type !== file_types.STILL) {
 
-        utils.copy(transcode.output, transcode.output_dest);
+        if (transcode.output.path !== transcode.output.dest) {
 
-        if (remove_orig) {
-              utils.delete(transcode.input)
-              utils.delete(transcode.output);
+          if (!fs.existsSync(dest_loc)) 
+            fs.mkdirSync(dest_loc);
+
+          utils.copy(transcode.output.path, transcode.output.dest);
+
+          if (remove_orig) {
+            utils.delete(transcode.input.path)
+            utils.delete(transcode.output.path);
+          }
+
+        } else {
+
+          if (remove_orig) utils.delete(transcode.input.path);
+
         }
-
-      } else {
-
-        if (remove_orig) utils.delete(transcode.input);
 
       }
 
@@ -318,17 +361,27 @@ var poster = {
     log.info("\n\t" + chalk.bold.white(pad("Poster Frame",spacer) + "=>\t") + chalk.green("%s")
       , poster_time);
 
-    poster.input       = input_file;
-    poster.output      = output + '.' + poster_format.toLowerCase();
-    poster.output_dest = path.resolve(dest_loc, (argv.outname + '.' + poster_format));
+    poster.input        = (transcode.input.type === file_types.SEQUENCE) ? transcode.output.path : transcode.input.path;
+    
+    if (transcode.input.type === file_types.STILL) {
 
+      poster.output       = transcode.input.path;
+      poster.output_dest  = path.resolve(dest_loc, path.parse(utils.devise_output(transcode, output)).base + "." + transcode.input.ext);
+
+    } else {
+
+      poster.output       = utils.devise_output(transcode, output) + '.' + poster_format.toLowerCase();
+      poster.output_dest  = path.resolve(dest_loc, path.parse(poster.output).base);  
+
+    }
+    
     step();
 
   },
 
   setup : (step) => {
 
-      poster.cmd.input(input_file)
+      poster.cmd.input(poster.input)
                 //seek to time
                 .seekInput(poster_time)
                 //output framecount
@@ -344,8 +397,17 @@ var poster = {
 
   get : (step) => {
 
+      if (transcode.input.type === file_types.STILL) {
+
+        log.info("\n\t" + chalk.bold.white(pad("Skipping Poster", spacer)) + "=>\t" + chalk.green("Still image is already a poster frame."));
+        step();
+
+      } else {
+
         poster.done = step;
         poster.cmd.save(poster.output);
+
+      }
 
   },
 
@@ -364,10 +426,15 @@ var poster = {
 
   archive : (step) => {
 
+    var src_file  = null,
+        dest_file = null;
+
     if (poster.output !== poster.output_dest) {
 
-      utils.copy(poster.output, poster.output_dest)
-      utils.delete(poster.output);
+      utils.copy(poster.output, poster.output_dest);
+
+      if (remove_orig)
+        utils.delete(poster.output);
 
     }
 
@@ -386,9 +453,84 @@ var poster = {
 
 var utils = {
 
+  inspect_file : (f) => {
+
+    var props = {},
+        f_dir = path.dirname(f),
+        f_ext = f.substring(f.lastIndexOf('.')+1, f.length);
+
+    if (path.parse(f).base.indexOf("[#") > -1) {
+      
+      var glob_query = path.parse(f).base.split("[#")[0],
+          glob_files = glob.sync(glob_query + "*", {
+                cwd      : f_dir
+              , absolute : true
+          });
+
+      var placeholder_start = path.parse(f).base.indexOf('['),
+          placeholder_end   = path.parse(f).base.indexOf(']');
+      
+      props.seq_holders = placeholder_end - placeholder_start - 1;
+
+      if (glob_files.length > 1) {
+
+        props.path = path.resolve(f_dir, glob_query + "*." + f_ext);
+        props.type = file_types.SEQUENCE;
+
+      } else if (glob_files.length === 1) {
+
+        props.path  = path.resolve(f_dir, glob_files[0]);
+        props.type  = file_types.STILL;
+
+      }
+
+    } else {
+
+        props.seq_holders = 0;
+        props.path        = f
+        props.type        = file_types.MOVIE
+
+
+    }
+
+    props.extension = f_ext;
+
+    return props;
+
+  },
+
+  devise_output : (trans, out) => {
+
+    if (trans.input.type === file_types.SEQUENCE || 
+        trans.input.type === file_types.STILL)
+    {
+
+      if (out.indexOf('_[#') > -1)
+        return (out.split('_[#'))[0];
+      else
+        return (out.split('[#'))[0];
+
+    } else {
+
+      return out;
+
+    }
+
+  },
+
   delete : (f) => {  
 
-    fs.unlinkSync(f)
+    
+    if (transcode.input.type === file_types.SEQUENCE) {
+
+      glob.sync(f, { absolute : true }).forEach((image) => { fs.unlinkSync(image) });
+
+    } else {
+
+      fs.unlinkSync(f)  
+
+    }
+    
 
     log.info("\n\t" + chalk.bold.white(pad("Deleted",spacer) + "=>\t") + chalk.green(f)
             , path.parse(f).base);
