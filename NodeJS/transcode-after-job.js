@@ -54,6 +54,15 @@ of your working directory for this code repository.
 3.  To modify the transcode settings, you can set some argument values. 
     Below is a list of arguments and their defaults
 
+    --out_name      The name of the output asset that ffmpeg creates
+                    Type: String, Default: null
+
+    --outdir        A path to where ffmpeg should store its output
+                    Type: String, Default: null
+
+    --dest          A path to a directory to archive ffmpeg's output
+                    Type: String, Default: null
+
     --vcodec        The type of encoder you want to use
                     Type: String, Default: 'libx264'
 
@@ -81,7 +90,7 @@ of your working directory for this code repository.
     --cleanup       Remove original files after transcode
                     Type: Boolean, Default: true
 
-    --poster        Extracts a frame from the input file
+    --poster        Extracts a frame from ffmpeg's input or output
                     Type: Float, Default: null
 
     --poster_format The still image type for a poster image

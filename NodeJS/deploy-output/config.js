@@ -451,6 +451,28 @@ var configuration = {
         } else {
             return true;
         }
+    },
+
+    output_is_sequence : function(name) {
+
+        if ((name.indexOf('[#') > -1) || (name.indexOf('#]') > -1))
+            return true
+        else 
+            return false;
+
+    },
+
+    sanitize : function(name) {
+
+        if (name.indexOf('_[#') > -1)
+            return (name.split('_[#'))[0]
+        else if (name.indexOf('-[#') > -1)
+            return (name.split('-[#'))[0]
+        else if (name.indexOf('[#') > -1)
+            return (name.split('[#'))[0]
+        else
+            return name;
+
     }
 
 }

@@ -172,7 +172,9 @@ var deploy = {
 
       function(step) {
 
-        deploy.video_file = path.resolve(p.batch.assets, row[p.fields.output.name] + '.' + p.video.ext);
+        deploy.video_file = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext);
+
+
         stream.upload = deploy.video_file;
 
         if (!p.video.overwrite && row[p.fields.stream.name]) {

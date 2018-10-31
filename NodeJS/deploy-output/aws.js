@@ -16,7 +16,7 @@ var aws = {
 
   config : function(step) {
 
-    log.info("\n\t\tUpdating AWS Credentials");
+    log.info("\n\t\tSetting AWS Credentials");
 
     AWS.config.update({ 
         accessKeyId       : config.params.storage.accessID   //enums.aws.accessKeyId,

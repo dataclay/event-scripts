@@ -122,6 +122,9 @@ try {
           yt.get(step)
         } else if (config.params.video.service == enums.video.services.VIMEO) {
           vmo.get(step) 
+        } else {
+          log.info("\n\t\tNo video streaming service selected.");
+          step();
         }
         
     },
@@ -133,6 +136,9 @@ try {
         if (config.params.storage.type === enums.storage.types.S3) 
         {
           aws.config(step);
+        } else {
+            log.info("\n\t\tNo storage service selected.");
+            step();
         }
 
     },
@@ -174,7 +180,7 @@ try {
         gsheet.worksheet.getRows(sheet_query, function( err, rows ){
 
             if (err) {
-              log.error("\n\tThere was an error:\n\t\t%s\n\t\tUsing sheet query %j", err, sheet_query);
+              log.error("\n\t\tThere was an error:\n\t\t\t%s\n\t\t\tUsing sheet query %j", err, sheet_query);
               throw err;
             }
 
