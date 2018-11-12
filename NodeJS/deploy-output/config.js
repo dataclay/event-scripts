@@ -206,7 +206,9 @@ var configuration = {
             log.info("\t\t" + pad("Data Player Reference", 25)    + " : " + p.video.preview.player_key   );
             log.info("\t\t" + pad("Video Title", 25)              + " : " + p.video.title                );
             log.info("\t\t" + pad("Video Description", 25)        + " : " + p.video.desc                 );
-            log.info("\t\t" + pad("Video Poster", 25)             + " : " + p.video.thumb                );
+            log.info("\t\t" + pad("Poster Frame", 25)             + " : " + p.video.thumb                );
+            log.info("\t\t" + pad("Poster Extension", 25)         + " : " + p.video.thumb_ext            );
+            log.info("\t\t" + pad("Poster Archive", 25)           + " : " + p.video.thumb_archive        );
             log.info("\t\t" + pad("Assets", 25)                   + " : " + p.batch.assets               );
             log.info("\t\t" + pad("Start", 25)                    + " : " + p.batch.start                );
             log.info("\t\t" + pad("End", 25)                      + " : " + p.batch.end                  );
@@ -249,9 +251,11 @@ var configuration = {
             ytcreds           = null,
             vmocreds_contents = null,
             vmocreds          = null;
-        
+
+
         //Required for Google Sheet data sources
         //Get Google Service Account credentials
+        log.info(args.data_uri);
         if (configuration.detect_datasource(args.data_uri) === enums.data.types.GOOGLE) {
 
             if (!fs.existsSync(args.gcreds)) {
@@ -363,47 +367,49 @@ var configuration = {
 
         }
 
-        p.user.name          = args.user || "Unknown";
+        p.user.name           = args.user || "Unknown";
 
-        p.data.type          = args.data_type || enums.data.types.GOOGLE;
-        p.data.url           = args.data_uri;
-        p.data.collection    = args.data_collection;
-        p.data.sheet_key     = args.sheet_key;
-        p.data.bot_enabled   = args.bot_enabled;
-        p.data.key           = args.data_key;
+        p.data.type           = args.data_type || enums.data.types.GOOGLE;
+        p.data.url            = args.data_uri;
+        p.data.collection     = args.data_collection;
+        p.data.sheet_key      = args.sheet_key;
+        p.data.bot_enabled    = args.bot_enabled;
+        p.data.key            = args.data_key;
         
-        p.fields.index       = args.data_index || null;
-        p.fields.output      = { name : enums.data.fields.OUTPUT,  pos : null, letter: null };
-        p.fields.download    = { name : enums.data.fields.S3_LINK, pos : null, letter: null };
-        p.fields.stream      = { name : enums.data.fields.STREAM,  pos : null, letter: null };
-        p.fields.bcast       = { name : enums.data.fields.BCAST,   pos : null, letter: null };
-        p.fields.embed       = { name : enums.data.fields.EMBED,   pos : null, letter: null };
-        p.fields.preview     = { name : enums.data.fields.PREV,    pos : null, letter: null };
-        p.fields.url         = { name : enums.data.fields.URL,     pos : null, letter: null };
+        p.fields.index        = args.data_index || null;
+        p.fields.output       = { name : enums.data.fields.OUTPUT,  pos : null, letter: null };
+        p.fields.download     = { name : enums.data.fields.S3_LINK, pos : null, letter: null };
+        p.fields.stream       = { name : enums.data.fields.STREAM,  pos : null, letter: null };
+        p.fields.bcast        = { name : enums.data.fields.BCAST,   pos : null, letter: null };
+        p.fields.embed        = { name : enums.data.fields.EMBED,   pos : null, letter: null };
+        p.fields.preview      = { name : enums.data.fields.PREV,    pos : null, letter: null };
+        p.fields.url          = { name : enums.data.fields.URL,     pos : null, letter: null };
         
-        p.batch.start        = args.start_row;
-        p.batch.end          = args.end_row;
-        p.batch.assets       = args.asset_loc;
+        p.batch.start         = args.start_row;
+        p.batch.end           = args.end_row;
+        p.batch.assets        = args.asset_loc;
 
-        p.video.service      = args.stream_service;
-        p.video.authorize    = args.stream_authorize;
-        p.video.group        = args.stream_group;
-        p.video.privacy      = args.stream_privacy;
-        p.video.comments     = args.stream_comments;
-        p.video.downloadable = args.stream_download;
-        p.video.title        = args.title;
-        p.video.desc         = args.desc;
-        p.video.broadcast    = args.broadcast;
-        p.video.stream_url   = args.stream_url;
-        p.video.thumb        = args.poster_frame;
-        p.video.ext          = args.asset_ext;
-        p.video.preview      = args.preview_info;
-        p.video.overwrite    = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);
-
-        p.storage.type       = args.storage_type;
-        p.storage.region     = args.storage_region;
-        p.storage.bucket     = args.storage_bucket;
-        p.storage.folder     = args.storage_folder;
+        p.video.service       = args.stream_service;
+        p.video.authorize     = args.stream_authorize;
+        p.video.group         = args.stream_group;
+        p.video.privacy       = args.stream_privacy;
+        p.video.comments      = args.stream_comments;
+        p.video.downloadable  = args.stream_download;
+        p.video.title         = args.title;
+        p.video.desc          = args.desc;
+        p.video.broadcast     = args.broadcast;
+        p.video.stream_url    = args.stream_url;
+        p.video.thumb         = args.poster_frame;
+        p.video.thumb_ext     = args.poster_ext;
+        p.video.thumb_archive = args.poster_archive;
+        p.video.ext           = args.asset_ext;
+        p.video.preview       = args.preview_info;
+        p.video.overwrite     = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);
+ 
+        p.storage.type        = args.storage_type;
+        p.storage.region      = args.storage_region;
+        p.storage.bucket      = args.storage_bucket;
+        p.storage.folder      = args.storage_folder;
 
         extend(true, configuration.params, p);
 

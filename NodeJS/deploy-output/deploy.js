@@ -17,6 +17,8 @@ var deploy = {
 
   video_file : null,
 
+  poster_file : null,
+
   batch : function(rows, step) {
 
     var p = config.params,
@@ -172,8 +174,11 @@ var deploy = {
 
       function(step) {
 
-        deploy.video_file = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext);
+        deploy.video_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext        );
 
+        if (p.video.thumb_archive) {
+          deploy.poster_file = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.thumb_ext  );
+        }
 
         stream.upload = deploy.video_file;
 
@@ -193,7 +198,7 @@ var deploy = {
 
           if (fs.existsSync(deploy.video_file)) {
 
-              //read the video file to send to S3
+              //read output asset file to send to S3
               file_data = fs.readFileSync(deploy.video_file)
 
               if (!file_data) { 
@@ -201,7 +206,16 @@ var deploy = {
                 throw err; 
               }
 
-              var base64data = new Buffer(file_data, 'binary');
+              //ready poster asset to send to S3
+              poster_data = fs.readFileSync(deploy.poster_file)
+
+              var base64data_video = new Buffer(file_data, 'binary'),
+                  base64data_poster;
+
+              if (p.video.thumb_archive) {
+                base64data_poster = new Buffer(poster_data, 'binary');  
+              }
+              
 
               async.series([
 
@@ -222,12 +236,37 @@ var deploy = {
                       
                   },
 
+                  //Transport poster to storage provider
                   function(step) {
 
-                    switch (config.params.video.service) {
-                      case enums.video.services.VIMEO : vmo.video.create(gsheet.row, step);    break;
-                      case enums.video.services.JW    : jw.video.create(gsheet.row, step);     break;
-                      default                         : log.error(enums.errors.absent_stream_service); throw new Error(enums.errors.absent_stream_service);
+                    if ( config.p.video_archive && 
+                        (config.params.storage.type == enums.storage.types.S3)) {
+                        log.info("\n\t\t%s\tSending [ %s ] to Amazon S3...  %s"
+                                , emoji.get('clapper')
+                                , path.parse(deploy.poster_file).base
+                                , emoji.get('rocket'));
+
+                        aws.asset = deploy.poster_file;
+                        aws.put_obj(base64data_poster, step);
+                      } else {
+                        step();
+                      }
+
+                  },
+
+                  function(step) {
+
+                    if (config.params.video.service) {
+
+                      switch (config.params.video.service) {
+                        case enums.video.services.VIMEO : vmo.video.create(gsheet.row, step);    break;
+                        case enums.video.services.JW    : jw.video.create(gsheet.row, step);     break;
+                        default                         : log.error(enums.errors.absent_stream_service);
+                      }
+
+                    } else {
+
+                      step();
 
                     }
 
