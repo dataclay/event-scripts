@@ -134,7 +134,8 @@ var   input_file       = path.resolve(argv.input),
       pixformat        = (argv.pixformat           || 'yuv420p'),
       poster_time      = (parseFloat(argv.poster)  || 0        ),
       poster_format    = (argv.poster_format       || 'png'    );
-
+      clip_start       = (argv.clip_start          || 0        );
+      clip_end         = (argv.clip_end            || 5        );
 
 
 if (process.platform == 'win32') {
@@ -453,6 +454,76 @@ var poster = {
 
 }
 
+/*
+ * 
+ * Preview Clip 
+ *
+ */
+
+ var clip = {
+
+  cmd           : ffmpeg(),
+
+  done          : null,
+
+  input         : null,
+
+  output        : null,
+
+  output_dest   : null,
+
+  init : (step) => {
+
+    if (!clip_start && !clip_end) return;
+
+    log.info("\n\t" + chalk.bold.white(pad("Clip Start Time",spacer) + "=>\t") + chalk.green("%s")
+      , clip_start);
+
+    log.info("\n\t" + chalk.bold.white(pad("Clip End Time",spacer) + "=>\t") + chalk.green("%s")
+      , clip_end);
+
+
+    clip.input  = (transcode.input.type === file_types.SEQUENCE) ? transcode.output.path : transcode.input.path;
+    
+    if (transcode.input.type === file_types.STILL) {
+
+      clip.output       = transcode.input.path;
+      clip.output_dest  = path.resolve(dest_loc, path.parse(utils.devise_output(transcode, output)).base + "." + transcode.input.ext);
+
+    } else {
+
+      clip.output       = utils.devise_output(transcode, output) + '.' + poster_format.toLowerCase();
+      clip.output_dest  = path.resolve(dest_loc, path.parse(poster.output).base);  
+
+    }
+    
+    step();
+
+  },
+
+  setup : (step) => {
+
+    log.info("\n\tSetting up the clip preparation");
+    step();
+
+  },
+
+  get : (step) => {
+
+    log.info("\n\tGetting the information on the clip");
+    step();
+
+  },
+
+  archive : (step) => {
+
+    log.info("\n\tArchiving extracted clip");
+    step();
+
+  }
+
+ }
+
 
 /*
  * 
@@ -612,8 +683,12 @@ async.series([
     , poster.init
     , poster.setup
     , poster.get
+    , clip.init
+    , clip.setup
+    , clip.get
     , transcode.archive
     , poster.archive
+    , clip.archive
   ], (err) => {
 
     log.info("\n\t" + chalk.bold.white(pad("Completed",spacer) + "=>\t") + chalk.bold.red("Exiting!"));
