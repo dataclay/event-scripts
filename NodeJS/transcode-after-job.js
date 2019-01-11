@@ -53,48 +53,60 @@ of your working directory for this code repository.
 
 3.  To modify the transcode settings, you can set some argument values. 
     Below is a list of arguments and their defaults
+  
+    --out_name        The name of the output asset that ffmpeg creates
+                      Type: String, Default: null
+  
+    --outdir          A path to where ffmpeg should store its output
+                      Type: String, Default: null
+  
+    --dest            A path to a directory to archive ffmpeg's output
+                      Type: String, Default: null
+  
+    --vcodec          The type of encoder you want to use
+                      Type: String, Default: 'libx264'
+  
+    --vbit            The bitrate for the transcoded output
+                      Type: Integer, Default: 2048
+  
+    --acodec          The audio encoder you want to use
+                      Type: String, Default: 'ac3'
+  
+    --abit            The bitrate of the audio 
+                      Type: String, Default: '128k'
+  
+    --file_ext        The file extension for transcoded output
+                      Type: String, Default: '.mp4'
+  
+    --vcontainer      The file format container of transcoded output
+                      Type: String, Default: 'mp4'
+  
+    --pixformat       The pixel format for the transcoded output. 
+                      Type: String, Default: 'yuv420p'
+                      
+                      For a list of pixel formats, visit: 
+                      https://ffmpeg.org/doxygen/trunk/pixfmt_8h_source.html
+  
+    --cleanup         Remove original files after transcode
+                      Type: Boolean, Default: true
+  
+    --poster          Extracts a frame from ffmpeg's input or output
+                      Type: Float, Default: null
+  
+    --poster_format   The still image type for a poster image
+                      Type: String, Default: "png"
+  
+    --gif_start       Start time of the input for a preview clip
+                      Type: Float, Default: 0
 
-    --out_name      The name of the output asset that ffmpeg creates
-                    Type: String, Default: null
+    --gif_duration    The duration of a preview clip.
+                      Type: Float, Default: 3
 
-    --outdir        A path to where ffmpeg should store its output
-                    Type: String, Default: null
+    --gif_fps         The frame rate of the preview clip
+                      Type: Integer, Default: 30
 
-    --dest          A path to a directory to archive ffmpeg's output
-                    Type: String, Default: null
-
-    --vcodec        The type of encoder you want to use
-                    Type: String, Default: 'libx264'
-
-    --vbit          The bitrate for the transcoded output
-                    Type: Integer, Default: 2048
-
-    --acodec        The audio encoder you want to use
-                    Type: String, Default: 'ac3'
-
-    --abit          The bitrate of the audio 
-                    Type: String, Default: '128k'
-
-    --file_ext      The file extension to be used for transcoded output
-                    Type: String, Default: '.mp4'
-
-    --vcontainer    The file format container of transcoded output
-                    Type: String, Default: 'mp4'
-
-    --pixformat     The pixel format for the transcoded output. 
-                    Type: String, Default: 'yuv420p'
-                    
-                    For a list of pixel formats, visit the following URL: 
-                    https://ffmpeg.org/doxygen/trunk/pixfmt_8h_source.html
-
-    --cleanup       Remove original files after transcode
-                    Type: Boolean, Default: true
-
-    --poster        Extracts a frame from ffmpeg's input or output
-                    Type: Float, Default: null
-
-    --poster_format The still image type for a poster image
-                    Type: String, Default: "png"
+    --gif_scale       The extension of the file for the clip
+                      Type: Integer, Default: 480
 
 */
 
@@ -125,17 +137,20 @@ var   input_file       = path.resolve(argv.input),
       output           = path.resolve(path.join(argv.outdir, argv.outname)),
       dest_loc         = path.resolve(argv.dest),
       remove_orig      = ((argv.cleanup ? JSON.parse(argv.cleanup) : null) || false    ),
-      vcodec           = (argv.vcodec                    || 'libx264'),
-      vbit             = (parseInt(argv.vbit)            || 2048     ),
-      acodec           = (argv.acodec                    || 'ac3'    ),
-      abit             = (argv.abit                      || '128k'   ),
-      file_ext         = (argv.file_ext                  || '.mp4'   ),
-      vcontainer       = (argv.container                 || 'mp4'    ),
-      pixformat        = (argv.pixformat                 || 'yuv420p'),
-      poster_time      = (parseFloat(argv.poster_start)  || 0        ),
-      poster_format    = (argv.poster_format             || 'png'    );
-      clip_start       = (argv.clip_start          || 0        );
-      clip_end         = (argv.clip_end            || 5        );
+      vcodec           = (argv.vcodec                    || 'libx264' ),
+      vbit             = (parseInt(argv.vbit)            || 2048      ),
+      acodec           = (argv.acodec                    || 'ac3'     ),
+      abit             = (argv.abit                      || '128k'    ),
+      file_ext         = (argv.file_ext                  || '.mp4'    ),
+      vcontainer       = (argv.container                 || 'mp4'     ),
+      pixformat        = (argv.pixformat                 || 'yuv420p' ),
+      poster_time      = (parseFloat(argv.poster_start)  || 0         ),
+      poster_format    = (argv.poster_format             || 'png'     ),
+
+      gif_start        = (argv.gif_start                 || 0         ),
+      gif_duration     = (argv.gif_duration              || 3         ),
+      gif_fps          = (argv.gif_fps                   || 30        ),
+      gif_scale        = (argv.gif_scale                 || 480       );
 
 
 if (process.platform == 'win32') {
@@ -187,6 +202,13 @@ const log = winston.createLogger({
              path      : null,
              dest      : null,
              framerate : null
+           },
+
+  clip :   {
+             path      : null,
+             dest      : null,
+             start     : null,
+             duration  : null
            },
 
   init : (step) => {
@@ -436,9 +458,6 @@ var poster = {
 
   archive : (step) => {
 
-    var src_file  = null,
-        dest_file = null;
-
     if (poster.output !== poster.output_dest) {
 
       utils.copy(poster.output, poster.output_dest);
@@ -474,26 +493,28 @@ var poster = {
 
   init : (step) => {
 
-    if (!clip_start && !clip_end) return;
+    if (!gif_start && !gif_duration) return;
 
-    log.info("\n\t" + chalk.bold.white(pad("Clip Start Time",spacer) + "=>\t") + chalk.green("%s")
-      , clip_start);
+    log.info("\n\t" + chalk.bold.white(pad("GIF Clip Start", spacer) + "=>\t") + chalk.green("%s")
+      , gif_start);
 
-    log.info("\n\t" + chalk.bold.white(pad("Clip End Time",spacer) + "=>\t") + chalk.green("%s")
-      , clip_end);
+    log.info("\n\t" + chalk.bold.white(pad("GIF Clip Duration", spacer) + "=>\t") + chalk.green("%s")
+      , gif_duration);
 
-
-    clip.input  = (transcode.input.type === file_types.SEQUENCE) ? transcode.output.path : transcode.input.path;
+    clip.input = (transcode.input.type === file_types.SEQUENCE) ? transcode.output.path : transcode.input.path;
     
     if (transcode.input.type === file_types.STILL) {
 
-      clip.output       = transcode.input.path;
-      clip.output_dest  = path.resolve(dest_loc, path.parse(utils.devise_output(transcode, output)).base + "." + transcode.input.ext);
+      //clip.output       = clip.prefix + path.resolve(transcode.input.path).base;
+      //clip.output_dest  = path.resolve(dest_loc, path.parse(utils.devise_output(transcode, output)).base + "." + transcode.input.ext);
+      log.info("\n\t" + chalk.bold.white(pad("Input was a still image, no need to setup a clip.")))
 
     } else {
 
-      clip.output       = utils.devise_output(transcode, output) + '.' + poster_format.toLowerCase();
-      clip.output_dest  = path.resolve(dest_loc, path.parse(poster.output).base);  
+      let clip_out_file = path.resolve(path.dirname(output), path.parse(output).base);
+
+      clip.output       = utils.devise_output(transcode, clip_out_file) + '.gif';
+      clip.output_dest  = path.resolve(dest_loc, path.parse(clip.output).base);
 
     }
     
@@ -503,21 +524,71 @@ var poster = {
 
   setup : (step) => {
 
-    log.info("\n\tSetting up the clip preparation");
+    //Get video clip
+    clip.cmd.input(clip.input)
+            //seek to clip start
+            .seekInput(gif_start)
+            //set duration of clip
+            .outputOption('-t ' + gif_duration)
+            //setup filter complex for gif conversion
+            .complexFilter('[0:v] fps=' + gif_fps + ',scale=' + gif_scale + ':-1,split [a][b];[a] palettegen [p];[b][p] paletteuse')
+            //register start function
+            .on('start', clip.on_start)
+            //register completion function
+            .on('end', clip.on_end)
+            //register error function
+            .on('err', clip.on_err)
+
     step();
+
+  },
+
+  on_start : (cmd) => {
+
+    log.info("\n\t" + chalk.bold.white(pad("GIF Clip Extraction",spacer) + "=>\t") + chalk.green("%s")
+            , cmd);
+
+  },
+
+  on_end : (cmd) => {
+
+    clip.done();
+
+  },
+
+  on_err : (cmd) => {
+
+    console.log("There was an error extracting a clip");
 
   },
 
   get : (step) => {
 
-    log.info("\n\tGetting the information on the clip");
-    step();
+    if (transcode.input.type === file_types.STILL) {
+
+        log.info("\n\t" + chalk.bold.white(pad("Skipping Clip", spacer)) + "=>\t" + chalk.green("Cannot get a clip from a still image."));
+        step();
+
+    } else {
+
+        clip.done = step;
+        clip.cmd.save(clip.output);
+
+    }
 
   },
 
   archive : (step) => {
 
-    log.info("\n\tArchiving extracted clip");
+    if (clip.output !== clip.output_dest) {
+
+      utils.copy(clip.output, clip.output_dest);
+
+      if (remove_orig) 
+        utils.delete(clip.output);
+
+    }
+
     step();
 
   }
