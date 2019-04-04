@@ -18,6 +18,7 @@ var log       = require('./logger'),
 
 
 //Configuration
+var app_data = let app_data = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences/Dataclay' : process.env.APPDATA + "/Dataclay");
 var configuration = {
 
     params : { 
@@ -219,7 +220,7 @@ var configuration = {
 
     read_prefs : function(step) {
 
-        let prefs_file = `${__dirname}/prefs.json`;
+        let prefs_file = `${app_data}/prefs.json`;
         let prefs      = readjson(prefs_file); 
 
         configuration.params.prefs = prefs;
@@ -231,13 +232,13 @@ var configuration = {
     write_prefs : function(prefs) {
 
         //First read the file and place into memory
-        let prefs_file = `${__dirname}/prefs.json`;
+        let prefs_file = `${app_data}/prefs.json`;
         writejson.sync(prefs_file, prefs, null, 4)
 
     },
 
     where_prefs : function(prefs) {
-        return `${__dirname}/prefs.json`;
+        return `${app_data}/prefs.json`;
     },
 
     get : function(args) {
