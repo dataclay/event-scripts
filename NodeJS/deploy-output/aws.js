@@ -12,8 +12,14 @@ var aws = {
 
   asset : null,
 
-  S3_download_url : null,
+  S3_URL : {
 
+      video   : null
+    , poster  : null
+    , preview : null
+
+  },
+  
   config : function(step) {
 
     log.info("\n\t\tSetting AWS Credentials");
@@ -60,12 +66,18 @@ var aws = {
             throw err;
           }
 
-          aws.S3_download_url = 'https://' + (enums.aws.regions[p.storage.region]).endpoint + '/' + p.storage.bucket + '/' + p.storage.folder + '/' + path.parse(aws.asset).base;
           step();
 
         });
 
     }
+
+  },
+
+  download_url : function(file) {
+
+    let p = config.params;
+    return 'https://' + p.storage.bucket + '.' + enums.aws.s3_default_url + '/' + p.storage.folder + '/' + path.parse(file).base;
 
   }
 

@@ -202,9 +202,8 @@ var gsheet = {
   },
 
   print_col : function(col) {
-    log.info("\t\t" + pad(("  [ " + col.name + " ]"), 25) + " : " + col.pos + " (" + col.letter + ")");
+    log.info("\t\t" + pad(("  [ " + col.name + " ]"), 25) + " : " + pad(col.pos.toString(), 3) + " (" + col.letter + ")");
     return;
-  
   },
 
   get_col_positions : function(step) {
@@ -231,46 +230,21 @@ var gsheet = {
 
         var c = cells[cell];
 
-        if (f.index && (c.value == f.index.name)) {
-          f.index.pos = c.col;
-          f.index.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.index);
-        }
+        // if the column / property exists in the fields list, then set it
+        if (Object.keys(enums.data.fields).some((key) => {
+            return enums.data.fields[key] === c.value
+        })) {
+          
+          for (var name in f) {
 
-        if (c.value == f.download.name) {
-          f.download.pos    = c.col;
-          f.download.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.download);
-        }
+            if (f[name].name === c.value && (name !== 'index')) {
+                f[name].pos    = c.col;
+                f[name].letter = gsheet.column_to_letter(c.col);
+                gsheet.print_col(f[name]);
+            }
+            
+          }
 
-        if (c.value == f.stream.name) {
-          f.stream.pos = c.col;
-          f.stream.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.stream);
-        }
-
-        if (c.value == f.bcast.name) {
-          f.bcast.pos = c.col;
-          f.bcast.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.bcast)
-        }
-
-        if (c.value == f.embed.name) {
-          f.embed.pos = c.col;
-          f.embed.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.embed);
-        }
-
-        if (c.value == f.preview.name) {
-          f.preview.pos = c.col;
-          f.preview.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.preview);
-        }
-
-        if (c.value == f.url.name) {
-          f.url.pos = c.col;
-          f.url.letter = gsheet.column_to_letter(c.col);
-          gsheet.print_col(f.url);
         }
 
       }
@@ -357,12 +331,14 @@ var gsheet = {
 
     var p = config.params;
 
-    gsheet.row[p.fields.download.name ] = aws.S3_download_url || 'Unavailable';
-    gsheet.row[p.fields.bcast.name    ] = enums.stream.status.CREATED;
-    gsheet.row[p.fields.stream.name   ] = stream.key;
-    gsheet.row[p.fields.preview.name  ] = stream.preview(); 
-    gsheet.row[p.fields.embed.name    ] = stream.embed();
-    gsheet.row[p.fields.url.name      ] = stream.url();
+    gsheet.row[p.fields.download.name   ] = aws.S3_URL.video   || 'Unavailable';
+    gsheet.row[p.fields.dl_poster.name  ] = aws.S3_URL.poster  || 'Unavailable';
+    gsheet.row[p.fields.dl_preview.name ] = aws.S3_URL.preview || 'Unavailable';
+    gsheet.row[p.fields.bcast.name      ] = enums.stream.status.CREATED;
+    gsheet.row[p.fields.stream.name     ] = stream.key;
+    gsheet.row[p.fields.preview.name    ] = stream.preview(); 
+    gsheet.row[p.fields.embed.name      ] = stream.embed();
+    gsheet.row[p.fields.url.name        ] = stream.url();
     
     gsheet.row.save(step);
 

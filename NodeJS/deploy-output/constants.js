@@ -45,6 +45,7 @@ module.exports = Object.freeze({
     aws : {
 
           signatureVersion : 'v4'
+        , s3_default_url   : 's3.amazonaws.com'
         , regions          : {
                                   "us-east-1"      : { name: "US East",       location: "N. Virgina",    endpoint: "s3.us-east-1.amazonaws.com"         }
                                 , "us-east-2"      : { name: "US East",       location: "Ohio",          endpoint: "s3.us-east-2.amazonaws.com"         }
@@ -80,13 +81,15 @@ module.exports = Object.freeze({
 
         , fields : {
 
-             OUTPUT  : "output"
-           , S3_LINK : "s3-link"
-           , STREAM  : "stream-key"
-           , BCAST   : "broadcast-status"
-           , EMBED   : "embed-script"
-           , PREV    : "broadcast-preview"
-           , URL     : "stream-url"
+             OUTPUT     : "output"
+           , S3_LINK    : "s3-link"
+           , S3_POSTER  : "s3-link-poster"
+           , S3_PREVIEW : "s3-link-preview"
+           , STREAM     : "stream-key"
+           , BCAST      : "broadcast-status"
+           , EMBED      : "embed-script"
+           , PREV       : "broadcast-preview"
+           , URL        : "stream-url"
 
         }
 
