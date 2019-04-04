@@ -18,7 +18,7 @@ var log       = require('./logger'),
 
 
 //Configuration
-var app_data = let app_data = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences/Dataclay' : process.env.APPDATA + "/Dataclay");
+var app_data = (process.platform == 'darwin') ? (path.resolve(process.env.HOME, "Library", "Preferences", "Dataclay")) : (path.resolve(process.env.APPDATA, "Dataclay"));
 var configuration = {
 
     params : { 
