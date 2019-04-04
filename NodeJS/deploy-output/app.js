@@ -93,7 +93,7 @@ try {
                     , asset_loc        : argv.asset_loc
                     , poster_frame     : argv.poster_frame
                     , poster_archive   : argv.poster_archive
-                    , poster_ext       : argv.poster_ext
+                    , poster_ext       : argv.poster_ext || "png"
                     , asset_ext        : argv.asset_ext
                     , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
                     , storage_type     : (argv.storage_service || enums.storage.types.NONE)

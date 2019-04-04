@@ -63,6 +63,8 @@ var configuration = {
           fields : {
                           output      : { name : null, pos : null, letter : null }
                         , download    : { name : null, pos : null, letter : null }
+                        , dl_poster   : { name : null, pos : null, letter : null }
+                        , dl_preview  : { name : null, pos : null, letter : null }
                         , stream      : { name : null, pos : null, letter : null }
                         , bcast       : { name : null, pos : null, letter : null }
                         , embed       : { name : null, pos : null, letter : null }
@@ -256,7 +258,6 @@ var configuration = {
 
         //Required for Google Sheet data sources
         //Get Google Service Account credentials
-        log.info(args.data_uri);
         if (configuration.detect_datasource(args.data_uri) === enums.data.types.GOOGLE) {
 
             if (!fs.existsSync(args.gcreds)) {
@@ -378,13 +379,15 @@ var configuration = {
         p.data.key            = args.data_key;
         
         p.fields.index        = args.data_index || null;
-        p.fields.output       = { name : enums.data.fields.OUTPUT,  pos : null, letter: null };
-        p.fields.download     = { name : enums.data.fields.S3_LINK, pos : null, letter: null };
-        p.fields.stream       = { name : enums.data.fields.STREAM,  pos : null, letter: null };
-        p.fields.bcast        = { name : enums.data.fields.BCAST,   pos : null, letter: null };
-        p.fields.embed        = { name : enums.data.fields.EMBED,   pos : null, letter: null };
-        p.fields.preview      = { name : enums.data.fields.PREV,    pos : null, letter: null };
-        p.fields.url          = { name : enums.data.fields.URL,     pos : null, letter: null };
+        p.fields.output       = { name : enums.data.fields.OUTPUT,     pos : null, letter : null };
+        p.fields.download     = { name : enums.data.fields.S3_LINK,    pos : null, letter : null };
+        p.fields.dl_poster    = { name : enums.data.fields.S3_POSTER,  pos : null, letter : null };
+        p.fields.dl_preview   = { name : enums.data.fields.S3_PREVIEW, pos : null, letter : null };
+        p.fields.stream       = { name : enums.data.fields.STREAM,     pos : null, letter : null };
+        p.fields.bcast        = { name : enums.data.fields.BCAST,      pos : null, letter : null };
+        p.fields.embed        = { name : enums.data.fields.EMBED,      pos : null, letter : null };
+        p.fields.preview      = { name : enums.data.fields.PREV,       pos : null, letter : null };
+        p.fields.url          = { name : enums.data.fields.URL,        pos : null, letter : null };
         
         p.batch.start         = args.start_row;
         p.batch.end           = args.end_row;
@@ -401,8 +404,8 @@ var configuration = {
         p.video.broadcast     = args.broadcast;
         p.video.stream_url    = args.stream_url;
         p.video.thumb         = args.poster_frame;
-        p.video.thumb_ext     = args.poster_ext;
-        p.video.thumb_archive = args.poster_archive;
+        p.video.thumb_ext     = args.poster_ext
+        p.video.thumb_archive = JSON.parse((args.poster_archive === undefined) ? true : args.poster_archive);
         p.video.ext           = args.asset_ext;
         p.video.preview       = args.preview_info;
         p.video.overwrite     = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);

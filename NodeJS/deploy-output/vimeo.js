@@ -263,15 +263,15 @@ var vmo = {
                       };
 
             //If the AWS is set as storage and a link exists, then use Vimeo's pull method
-            if (p.storage.type === enums.storage.types.S3 && aws.S3_download_url)
+            if (p.storage.type === enums.storage.types.S3 && aws.S3_URL.video)
             {
                 
                 log.info("\n\t\t%s\tVimeo pulling video from storage [ %s ] from link\n\t\t\t\t[ %s ]"
                         , emoji.get('telephone_receiver')
                         , p.storage.type
-                        , aws.S3_download_url);
+                        , aws.S3_URL.video);
 
-                vid.upload = { approach: "pull", link: aws.S3_download_url }
+                vid.upload = { approach: "pull", link: aws.S3_URL.video }
 
                 var pull_req = {
                       method  : "POST"
@@ -282,7 +282,9 @@ var vmo = {
                 api.request(pull_req, (error, body, status_code, headers) => {
 
                     if (error) {
-                        log.error(error);
+                        log.error("Error with request to pull video from S3 => \n\t%o\n\n\t%s"
+                                  , pull_req
+                                  , error);
                     }
 
                     vmo.video.key = body.uri.substring(body.uri.lastIndexOf('/') + 1, body.uri.length);

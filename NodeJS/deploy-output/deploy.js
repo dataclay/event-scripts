@@ -62,35 +62,44 @@ var deploy = {
                   , emoji.get('mag_right')
                   , (row[p.fields.output.name] + "." + p.video.ext));
           
-          if (fs.existsSync(deploy.video_file)) {
+          // if (fs.existsSync(deploy.video_file)) {
 
-              //read the video file to send to S3
-              file_data = fs.readFileSync(deploy.video_file)
+          //     //read the video file to send to S3
+          //     file_data = fs.readFileSync(deploy.video_file)
 
-              if (!file_data) { throw err; }
+          //     if (!file_data) { throw err; }
 
-              var base64data = new Buffer(file_data, 'binary');
+          //     var base64data = new Buffer(file_data, 'binary');
 
               async.series([
 
                   //Transport file to storage provider
                   function(step) {
 
-                    if (config.params.storage.type == enums.storage.types.S3) {
-                      
-                      log.info("\n\t\t%s\tSending [ %s ] to Amazon S3 ... %s "
-                              , emoji.get('clapper')
-                              , path.parse(deploy.video_file).base
-                              , emoji.get('rocket'));
+                    let video = {
 
-                      aws.asset = deploy.video_file;
-                      aws.put_obj(base64data, step);
+                        file : video_file
+                      , step : step
 
-                    } else {
-
-                      step();
-                      
                     }
+
+                    deploy.archive_asset(video);
+
+                    // if (config.params.storage.type == enums.storage.types.S3) {
+                      
+                    //   log.info("\n\t\t%s\tSending [ %s ] to Amazon S3 ... %s "
+                    //           , emoji.get('clapper')
+                    //           , path.parse(deploy.video_file).base
+                    //           , emoji.get('rocket'));
+
+                    //   aws.asset = deploy.video_file;
+                    //   aws.put_obj(base64data, step);
+
+                    // } else {
+
+                    //   step();
+                      
+                    // }
                     
                   },
 
@@ -125,15 +134,17 @@ var deploy = {
 
               });
 
-          } else { //video file doesn't exist
-
-            log.error("\n\t\t%s\tCouldn't find [ %s ] in the file system."
-                    , emoji.get('x')
-                    , path.parse(deploy.video_file).base);
-
           }
 
-        }
+          // } else { //video file doesn't exist
+
+          //   log.error("\n\t\t%s\tCouldn't find [ %s ] in the file system."
+          //           , emoji.get('x')
+          //           , path.parse(deploy.video_file).base);
+
+          // }
+
+        //}
           
       },
 
@@ -174,11 +185,9 @@ var deploy = {
 
       function(step) {
 
-        deploy.video_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext        );
-
-        if (p.video.thumb_archive) {
-          deploy.poster_file = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.thumb_ext  );
-        }
+        deploy.video_file    = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext        );
+        deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.thumb_ext  );
+        deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + 'gif'              );
 
         stream.upload = deploy.video_file;
 
@@ -191,72 +200,28 @@ var deploy = {
 
         } else {
 
-          log.info("\n\t\t%s\tSearching for [ %s.%s ] in assets location ..."
-                  , emoji.get('mag_right')
-                  , row[p.fields.output.name]
-                  , p.video.ext)
-
-          if (fs.existsSync(deploy.video_file)) {
-
-              //read output asset file to send to S3
-              file_data = fs.readFileSync(deploy.video_file)
-
-              if (!file_data) { 
-                log.error(err);
-                throw err; 
-              }
-
-              //ready poster asset to send to S3
-              poster_data = fs.readFileSync(deploy.poster_file)
-
-              var base64data_video = new Buffer(file_data, 'binary'),
-                  base64data_poster;
-
-              if (p.video.thumb_archive) {
-                base64data_poster = new Buffer(poster_data, 'binary');  
-              }
-              
-
               async.series([
 
-                  //Transport file to storage provider
-                  function(step) {
-
-                      if (config.params.storage.type == enums.storage.types.S3) {
-                        log.info("\n\t\t%s\tSending [ %s ] to Amazon S3...  %s"
-                                , emoji.get('clapper')
-                                , path.parse(deploy.video_file).base
-                                , emoji.get('rocket'));
-
-                        aws.asset = deploy.video_file;
-                        aws.put_obj(base64data, step);
-                      } else {
-                        step();
-                      }
-                      
-                  },
+                  //Transport video asset file to storage provider
+                  (step) => deploy.archive_asset({
+                                  name: 'video'
+                                , file: deploy.video_file
+                                , step: step}),
 
                   //Transport poster to storage provider
-                  function(step) {
+                  (step) => deploy.archive_asset({
+                                  name: 'poster'
+                                , file: deploy.poster_file
+                                , step: step}),
 
-                    if ( config.p.video_archive && 
-                        (config.params.storage.type == enums.storage.types.S3)) {
-                        log.info("\n\t\t%s\tSending [ %s ] to Amazon S3...  %s"
-                                , emoji.get('clapper')
-                                , path.parse(deploy.poster_file).base
-                                , emoji.get('rocket'));
+                  (step) => deploy.archive_asset({
+                                  name: 'preview'
+                                , file: deploy.preview_file
+                                , step: step}),
 
-                        aws.asset = deploy.poster_file;
-                        aws.put_obj(base64data_poster, step);
-                      } else {
-                        step();
-                      }
+                  (step) => {
 
-                  },
-
-                  function(step) {
-
-                    if (config.params.video.service) {
+                    if (p.video.service) {
 
                       switch (config.params.video.service) {
                         case enums.video.services.VIMEO : vmo.video.create(gsheet.row, step);    break;
@@ -284,14 +249,7 @@ var deploy = {
                     step();
               })
 
-          } else {
-
-            log.info("\n\t\tCouldn't find [ %s ] in the file system"
-                    , path.parse(deploy.video_file).base);
-
           }
-
-        }
         
       }
 
@@ -310,7 +268,47 @@ var deploy = {
 
     })
 
-  }
+  },
+
+  archive_asset : function(options) {
+
+    //if the file exists
+    if (fs.existsSync(options.file)) {
+
+      let file_data = fs.readFileSync(options.file);
+
+      if (!file_data) { 
+        log.error(err);
+        throw err; 
+      }
+
+      let base64data = new Buffer(file_data, 'binary');
+
+      //invoke the AWS S3 actions if the storage type is S3
+      if (config.params.storage.type == enums.storage.types.S3) {
+
+        log.info("\n\t\t%s\tSending [ %s ] to Amazon S3 ..."
+                 , emoji.get('rocket')
+                 , path.parse(options.file).base);
+
+        aws.asset = options.file;
+        aws.put_obj(base64data, options.step);
+        aws.S3_URL[options.name] = aws.download_url(options.file);
+
+      }
+
+    } else {
+
+      log.error("\n\t\t%s\tCould not find file [ %s ].  Skipping archival process."
+                , emoji.get('x')
+                , options.file);
+
+      step();
+
+    }
+    
+
+  } 
 
 }
 
