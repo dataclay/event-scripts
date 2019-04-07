@@ -1,5 +1,12 @@
 module.exports = Object.freeze({
 
+    defaults : {
+
+        VIDEO_TITLE    : "Templater Video"
+      , STORAGE_FOLDER : "Uncategorized"
+
+    },
+
     jw : { 
 
         status : {

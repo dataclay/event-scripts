@@ -5,3 +5,4 @@ node_modules
 /NodeJS/deploy-output/deploy-out.log
 /NodeJS/transcode_err.log
 /NodeJS/transcode_out.log
+/NodeJS/deploy-output/test-cmd.txt

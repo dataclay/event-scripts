@@ -399,7 +399,7 @@ var configuration = {
         p.video.privacy       = args.stream_privacy;
         p.video.comments      = args.stream_comments;
         p.video.downloadable  = args.stream_download;
-        p.video.title         = args.title;
+        p.video.title         = args.title || enums.defaults.VIDEO_TITLE;
         p.video.desc          = args.desc;
         p.video.broadcast     = args.broadcast;
         p.video.stream_url    = args.stream_url;
@@ -413,7 +413,7 @@ var configuration = {
         p.storage.type        = args.storage_type;
         p.storage.region      = args.storage_region;
         p.storage.bucket      = args.storage_bucket;
-        p.storage.folder      = args.storage_folder;
+        p.storage.folder      = args.storage_folder || enums.defaults.STORAGE_FOLDER;
 
         extend(true, configuration.params, p);
 
