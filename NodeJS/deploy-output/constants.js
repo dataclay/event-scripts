@@ -89,7 +89,7 @@ module.exports = Object.freeze({
         , fields : {
 
              OUTPUT     : "output"
-           , S3_LINK    : "s3-link"
+           , S3_LINK    : "s3-link-video"
            , S3_POSTER  : "s3-link-poster"
            , S3_PREVIEW : "s3-link-preview"
            , STREAM     : "stream-key"

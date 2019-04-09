@@ -23,7 +23,19 @@ var configuration = {
 
     params : { 
 
-          prefs  : null,
+          prefs  : {
+
+            "oauth" : {
+
+                "youtube" : {
+                    "access_token"    : null
+                  , "refresh_token"   : null
+                }
+
+                , "vimeo"   : { }
+            }
+
+          },
 
           auth   : {
                           google : {   
@@ -223,11 +235,20 @@ var configuration = {
     read_prefs : function(step) {
 
         let prefs_file = `${app_data}/prefs.json`;
-        let prefs      = readjson(prefs_file); 
+        let prefs      = null;
 
-        configuration.params.prefs = prefs;
+        readjson(prefs_file, (err, data) => {
 
-        step();
+            if (err) {
+                prefs = configuration.write_prefs(configuration.params.prefs);
+                configuration.params.prefs = prefs;
+            }
+
+            configuration.params.prefs = data;
+
+            step();
+
+        })
 
     },
 
