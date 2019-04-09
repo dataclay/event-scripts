@@ -54,7 +54,7 @@ of your working directory for this code repository.
 3.  To modify the transcode settings, you can set some argument values. 
     Below is a list of arguments and their defaults
   
-    --out_name        The name of the output asset that ffmpeg creates
+    --outname         The name of the output asset that ffmpeg creates
                       Type: String, Default: null
   
     --outdir          A path to where ffmpeg should store its output
@@ -144,7 +144,7 @@ var   input_file       = path.resolve(argv.input),
       file_ext         = (argv.file_ext                  || '.mp4'    ),
       vcontainer       = (argv.container                 || 'mp4'     ),
       pixformat        = (argv.pixformat                 || 'yuv420p' ),
-      poster_time      = (parseFloat(argv.poster_start)  || 0         ),
+      poster_time      = (parseFloat(argv.poster)        || 0         ),
       poster_format    = (argv.poster_format             || 'png'     ),
 
       gif_start        = (argv.gif_start                 || 0         ),
@@ -231,7 +231,6 @@ const log = winston.createLogger({
     async.series([(next) => {
 
       ffmpeg.ffprobe(transcode.input.path, (err, metadata) => {
-        console.log(metadata);
         transcode.input.format = metadata.format.format_name.split(',');
         next();
 
@@ -292,7 +291,8 @@ const log = winston.createLogger({
         log.info("\n\t" + chalk.bold.white(pad("Skipping Transcode", spacer)) + "=>\t" + chalk.green("Still image needs no transcoding"));
         step();
 
-      } else if (transcode.input.format.includes(vcontainer)) {
+      } else if (transcode.input.format.includes(vcontainer) &&
+                (transcode.input.ext == vcontainer)) {
 
         log.info("\n\t" + chalk.bold.white(pad("Skipping Transcode", spacer)) + "=>\t" + chalk.green("Transcode format is same as input format.  No need to transcode."));
         step();
