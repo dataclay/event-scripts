@@ -14,6 +14,7 @@ var log             = require('./logger'),
     emoji           = require('node-emoji'),
     path            = require('path'),
     aws             = require('./aws'),
+    https           = require('https'),
     user            = null,
     api             = null;
 
@@ -224,7 +225,149 @@ var vmo = {
 
         set_poster   : function(step) {
 
-            //make a call to set the poster frame
+            //1.  Get the picture URI for the video
+            var   p           = config.params
+                , upload_uri  = null
+                , upload_link = null
+                , poster_stat_uri = null;
+
+            async.series([  (next) => {
+
+                        var req_picture_uri = {
+                              method: "GET"
+                            , path:   "/videos/" + vmo.video.key
+                        }
+                        
+                        api.request(req_picture_uri, (err, body, status_code, headers) => {
+                            if (err) {
+                                log.error(err);
+                            } else {
+                                
+                                upload_uri = body.metadata.connections.pictures.uri;
+
+                                log.info("\n\t\t%s\tPoster setup endpoint => %s"
+                                            , emoji.get('frame_with_picture')
+                                            , upload_uri);
+                                
+                            }
+
+                            next();
+
+                        })
+
+                     },
+
+                     (next) => {
+
+                        var req_upload_link = {
+                              method : "POST"
+                            , path   :  upload_uri
+                        }
+
+                        api.request(req_upload_link, (err, body, status_code, headers) => {
+
+                            if (err) {
+                                log.error(err)
+                            } else {
+                                upload_link = body.link;
+                                //console.log(body);
+                                poster_stat_uri = body.uri;
+                                log.info("\n\t\t%s\tPoster upload link => %s"
+                                            , emoji.get('frame_with_picture')
+                                            , upload_link);
+                            }
+
+                            next();
+
+                        })
+
+                     },
+
+                     (next) => {
+
+                        var vmoClient = new Vimeo(p.video.key, p.video.secret, p.prefs.oauth.vimeo.access_token);
+
+                        var req_upload_poster = vmoClient._buildRequestOptions({
+                                method   : 'PUT',
+                                port     : 443,
+                                hostname : 'i.cloud.vimeo.com',
+                                path     : upload_link.replace('https://i.cloud.vimeo.com', ''),
+                                query    : stream.thumb,
+                                headers  : {
+                                                'Content-Type'   : 'image/png',
+                                                'Accept'         : 'application/vnd.vimeo.*+json;version=3.4'
+                                           }
+                            });
+
+                        let output = '';
+
+                        const req = https.request(req_upload_poster, function(res) {
+        
+                          // log.info('STATUS: ' + res.statusCode);
+                          // log.info('HEADERS: ' + JSON.stringify(res.headers));
+                          
+                          res.setEncoding('utf8');
+                          
+                          res.on('end', () => {
+                              //log.info(output);
+                              log.info("\n\t\t%s\tFinished uploading poster => %s"
+                                        , emoji.get('frame_with_picture')
+                                        , stream.thumb );
+
+                              next();
+                          });
+
+                          res.on('data', function (chunk) {
+                            output += chunk;
+                          });
+
+                        }); 
+                        
+                        req.on('error', function(e) {
+                            log.error('Error: ' + e.message);
+                        });
+
+                        req.on('start', (e) => {
+                            log.info("Started request!");
+                        });
+
+                        fs.createReadStream(stream.thumb).pipe(req);
+
+                     },
+
+                     (next) => {
+
+                        var req_picture_uri = {
+                              method: "PATCH"
+                            , path:   poster_stat_uri
+                            , query: {
+                                "active" : true
+                            }
+                        }
+
+                        log.info("\n\t\t%s\tPoster activation endpoint => %s"
+                                    , emoji.get('frame_with_picture')
+                                    , poster_stat_uri);
+                        
+                        api.request(req_picture_uri, (err, body, status_code, headers) => {
+                            if (err) {
+                                log.error("Error:\n\n%o", err);
+                            } else {
+                                log.info("\n\t\t%s\tPoster activated? => %s"
+                                            , emoji.get('frame_with_picture')
+                                            , body.active);
+                            }
+
+                            next();
+
+                        })
+
+                     }
+
+                ], step);
+
+            //make a call to set the poster frame by time - does not currently work in auto-upload context
+            /* 
             var p = config.params,
                 req_set_poster = {
                                     method : "POST"
@@ -246,6 +389,7 @@ var vmo = {
                 step();
 
             })
+            */
 
         },
 

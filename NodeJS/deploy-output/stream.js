@@ -6,6 +6,8 @@ var log     = require('./logger'),
 var stream = {
 
       upload          : null
+    , thumb           : null
+    , clip            : null
     , key             : null
     , preview         : null
     , embed_code      : null

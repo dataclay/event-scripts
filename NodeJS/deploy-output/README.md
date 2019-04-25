@@ -118,6 +118,36 @@ node app.js --gcreds_file '/Users/me/Dev/credentials/google-service-account-cred
             --asset_ext 'mov'
 ```
 
+In the context of Templater's Event Script registration dialog.  You will likely use the argument macros to get values from Templater's data source into the deployment script.  The following is an example:
+
+```
+node /Users/arie/Dev/event-scripts/NodeJS/deploy-output/app.js\
+        --gcreds_file "/Users/me/Dev/credentials/templater-uploader-0ba4c7b155af.json"\
+        --awscreds_file "/Users/me/Dev/credentials/aws-credentials.json"\
+        --storage_service "S3"\
+        --s3_bucket "templater-output"\
+        --s3_region "eu-west-2"\
+        --s3_folder "arie-tests"\
+        --vmocreds_file "/Users/me/Dev/credentials/templater-uploader-vimeo.json"\
+        --stream_service "Vimeo"\
+        --data_uri "https://docs.google.com/spreadsheets/d/1lIIUFgzELVvpA75JNv3QnX7VmIYVyPjVZjuTRjAAgXw"\
+        --worksheet "streaming"\
+        --domain_cell "streaming_globals!B5"\
+        --route_cell "streaming_globals!B3"\
+        --player_cell "streaming_globals!B4"\
+        --asset_loc $out_dir\
+        --poster_frame $poster\
+        --asset_ext "mp4"\
+        --title $title\
+        --desc $description\
+        --data_index "output"\
+        --data_key $output\
+        --stream_comments "nobody"\
+        --stream_privacy "disable"\
+        --stream_group "Output Tests"\
+        --stream_url "https://sampledomain.com/video/id?=%s"
+```
+
 ### Argument Definitions
 
 |Argument Name    |Value Type |Description                                                                                                 |

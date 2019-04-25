@@ -190,6 +190,8 @@ var deploy = {
         deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + 'gif'              );
 
         stream.upload = deploy.video_file;
+        stream.thumb  = deploy.poster_file;
+        stream.clip   = deploy.preview_file;
 
         if (!p.video.overwrite && row[p.fields.stream.name]) {
           
