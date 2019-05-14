@@ -1,6 +1,7 @@
 var async    = require('async'),
     fs       = require('fs'),
     aws      = require('./aws'),
+    dcQ      = require('./api'),
     vmo      = require('./vimeo'),
     jw       = require('./jwplatform'),
     enums    = require('./constants'),
@@ -61,15 +62,6 @@ var deploy = {
           log.info("\n\t\t%s\tSearching for [ %s ] ..."
                   , emoji.get('mag_right')
                   , (row[p.fields.output.name] + "." + p.video.ext));
-          
-          // if (fs.existsSync(deploy.video_file)) {
-
-          //     //read the video file to send to S3
-          //     file_data = fs.readFileSync(deploy.video_file)
-
-          //     if (!file_data) { throw err; }
-
-          //     var base64data = new Buffer(file_data, 'binary');
 
               async.series([
 
@@ -85,22 +77,6 @@ var deploy = {
 
                     deploy.archive_asset(video);
 
-                    // if (config.params.storage.type == enums.storage.types.S3) {
-                      
-                    //   log.info("\n\t\t%s\tSending [ %s ] to Amazon S3 ... %s "
-                    //           , emoji.get('clapper')
-                    //           , path.parse(deploy.video_file).base
-                    //           , emoji.get('rocket'));
-
-                    //   aws.asset = deploy.video_file;
-                    //   aws.put_obj(base64data, step);
-
-                    // } else {
-
-                    //   step();
-                      
-                    // }
-                    
                   },
 
                   function(step) {
@@ -136,16 +112,6 @@ var deploy = {
 
           }
 
-          // } else { //video file doesn't exist
-
-          //   log.error("\n\t\t%s\tCouldn't find [ %s ] in the file system."
-          //           , emoji.get('x')
-          //           , path.parse(deploy.video_file).base);
-
-          // }
-
-        //}
-          
       },
 
       function(err){
@@ -173,21 +139,38 @@ var deploy = {
 
     var p = config.params;
 
-    gsheet.row = row;
+    if (config.detect_datasource(p.data.url) === enums.data.types.GOOGLE)
+    {
+      gsheet.row = row;
 
-    log.info("\n\t\t%s\tOpened row with [ %s ] key of [ %s ] in Worksheet [ %s ]"
-              , emoji.get('eyes')
-              , p.fields.index
-              , row[p.fields.index]
-              , gsheet.worksheet.title);
+      log.info("\n\t\t%s\tOpened row with [ %s ] key of [ %s ] in Worksheet [ %s ]"
+                , emoji.get('eyes')
+                , p.fields.index
+                , row[p.fields.index]
+                , gsheet.worksheet.title);
+    } else {
+
+      log.info("\n\t\t%s\tDeploying assets created from job with key [ %s ]"
+                , emoji.get('eyes')
+                , dcQ.job._id);
+
+    }
+    
 
     async.series([
 
       function(step) {
 
-        deploy.video_file    = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext        );
-        deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.thumb_ext  );
-        deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + 'gif'              );
+        if (config.detect_datasource(p.data.url) === enums.data.types.GOOGLE) {
+          deploy.video_file    = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.ext        );
+          deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.thumb_ext  );
+          deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + 'gif'              );
+        } else {
+          deploy.video_file    = path.resolve(p.batch.assets, config.sanitize(row["_id"]) + '.' + p.video.ext        );
+          deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(row["_id"]) + '.' + p.video.thumb_ext  );
+          deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row["_id"]) + '.' + 'gif'              );
+        }
+        
 
         stream.upload = deploy.video_file;
         stream.thumb  = deploy.poster_file;
@@ -226,9 +209,9 @@ var deploy = {
                     if (p.video.service) {
 
                       switch (config.params.video.service) {
-                        case enums.video.services.VIMEO : vmo.video.create(gsheet.row, step);    break;
-                        case enums.video.services.JW    : jw.video.create(gsheet.row, step);     break;
-                        default                         : log.error(enums.errors.absent_stream_service);
+                        case enums.video.services.VIMEO         : vmo.video.create(gsheet.row, step);    break;
+                        case enums.video.services.JWPLATFORM    : jw.video.create(gsheet.row, step);     break;
+                        default                                 : log.error(enums.errors.absent_stream_service);
                       }
 
                     } else {
@@ -239,15 +222,34 @@ var deploy = {
 
                   },
 
-                  //update the single row with all relevant data
-                  gsheet.update_single_row
+                  function (step) {
+
+                    //update the single row with all relevant data
+                    if (config.detect_datasource(p.data.url) === enums.data.types.GOOGLE) {
+                      gsheet.update_single_row(step)
+                    } else {
+                      dcQ.update_job(step)
+                    }
+
+                  }
 
                 ], function(err) {
-                    log.info("\n\t\t%s\tWrote to Row [ %s ] in Worksheet [ %s ]"
+
+                    if (config.detect_datasource(p.data.url) === enums.data.types.GOOGLE) {
+                      
+                      log.info("\n\t\t%s\tWrote to Row [ %s ] in Worksheet [ %s ]"
                               , emoji.get('pencil2')
                               , row[p.fields.index]
-                              , gsheet.worksheet.title);
+                              , gsheet.worksheet.title);  
 
+                    } else {
+
+                      log.info("\n\t\t%s\tSaved distribution details for job [ %s ] details"
+                              , emoji.get('cd')
+                              , config.params.data.key);
+
+                    }
+                    
                     step();
               })
 
@@ -262,10 +264,21 @@ var deploy = {
         throw err;
       }
 
-      log.info("\n\t[ COMPLETE ]\n\n\t\t%s\tDone processing row with [ %s ] key of [ %s ]"
+      if (config.detect_datasource(p.data.url) === enums.data.types.GOOGLE) {
+
+        log.info("\n\t[ COMPLETE ]\n\n\t\t%s\tDone processing row with [ %s ] key of [ %s ]"
               , emoji.get('thumbsup')
               , config.params.fields.index
               , gsheet.row[p.fields.index]);
+      
+      } else {
+
+        log.info("\n\t[ COMPLETE ]\n\n\t\t%s\tDone processing job with key [ %s ]"
+              , emoji.get('thumbsup')
+              , config.params.data.key);
+
+      }
+
       step();
 
     })

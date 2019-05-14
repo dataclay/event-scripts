@@ -6,3 +6,5 @@ node_modules
 /NodeJS/transcode_err.log
 /NodeJS/transcode_out.log
 /NodeJS/deploy-output/test-cmd.txt
+/NodeJS/deploy-output/registered-events.txt
+/NodeJS/deploy-output/dependencies.js

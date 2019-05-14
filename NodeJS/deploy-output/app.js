@@ -53,6 +53,7 @@ var log               = require('./logger'),
     config            = require('./config'),
     jw                = require('./jwplatform'),
     gsheet            = require('./gsheet'),
+    dcQ               = require('./api'),
     aws               = require('./aws'),
     yt                = require('./youtube'),
     vmo               = require('./vimeo'),
@@ -86,6 +87,8 @@ try {
                     , data_collection  : argv.worksheet
                     , sheet_key        : argv.sheet_key
                     , data_uri         : argv.data_uri
+                    , dclay_user       : argv.dclay_user
+                    , dclay_pass       : argv.dclay_pass
                     , data_index       : argv.data_index
                     , data_key         : argv.data_key
                     , start_row        : argv.start_row
@@ -96,6 +99,7 @@ try {
                     , poster_ext       : argv.poster_ext || "png"
                     , asset_ext        : argv.asset_ext
                     , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
+                    , player_key       : argv.player_key
                     , storage_type     : (argv.storage_service || enums.storage.types.NONE)
                     , storage_region   : argv.s3_region
                     , storage_bucket   : argv.s3_bucket
@@ -145,7 +149,15 @@ try {
 
     },
 
-    gsheet.get,
+    function get_job(step) {
+        
+        if (!config.params.user.dclay_user) {
+            gsheet.get(step)
+        } else {
+            step(); //Dataclay Queue does not need to open the data.
+        }
+        
+    },
     
     function process_video(step) {
       
@@ -153,46 +165,55 @@ try {
             sheet_query = null,
             sql         = null;
 
-        //Processing discontiguously (Templater Bot) 
-        if (!config.is_batch())
-        {
+       if (config.detect_datasource(p.data.url) === enums.data.types.GOOGLE) {  //Google Sheet Datasource
 
-            sql = p.fields.index + '=' + p.data.key;
-            
-            sheet_query = { 
-                'offset' : 1
-              , 'limit'  : 1
-              , 'query'  : sql
-            };
+            //Processing discontiguously (Templater Bot) 
+            if (!config.is_batch())
+            {
 
-        //Processed contiguously (Batch process)
-        } else {
+                sql = p.fields.index + '=' + p.data.key;
+                
+                sheet_query = { 
+                    'offset' : 1
+                  , 'limit'  : 1
+                  , 'query'  : sql
+                };
 
-          deploy.is_batch = true;
-
-          sheet_query = {
-            offset  : (p.batch.start-1),
-            limit   : ((p.batch.end) - (p.batch.start))+1,
-            orderby : p.fields.index
-          }
-
-        }
-
-        //Retrieve the rows needed to process
-        gsheet.worksheet.getRows(sheet_query, function( err, rows ){
-
-            if (err) {
-              log.error("\n\t\tThere was an error:\n\t\t\t%s\n\t\t\tUsing sheet query %j", err, sheet_query);
-              throw err;
-            }
-
-            if (config.is_batch()) {
-              deploy.batch(rows, step);
+            //Processed contiguously (Batch process)
             } else {
-              deploy.single(rows[0], step);
+
+              deploy.is_batch = true;
+
+              sheet_query = {
+                offset  : (p.batch.start-1),
+                limit   : ((p.batch.end) - (p.batch.start))+1,
+                orderby : p.fields.index
+              }
+
             }
 
-        });
+            //Retrieve the rows needed to process
+            gsheet.worksheet.getRows(sheet_query, function( err, rows ){
+
+                if (err) {
+                  log.error("\n\t\tThere was an error:\n\t\t\t%s\n\t\t\tUsing sheet query %j", err, sheet_query);
+                  throw err;
+                }
+
+                if (config.is_batch()) {
+                  deploy.batch(rows, step);
+                } else {
+                  deploy.single(rows[0], step);
+                }
+
+            });
+
+       } else {  //API Data Source
+
+            dcQ.get_job(deploy.single, step);
+
+       }
+
     }
 
   ], function(err) {

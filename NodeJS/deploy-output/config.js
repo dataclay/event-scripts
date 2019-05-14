@@ -62,7 +62,9 @@ var configuration = {
                    },
 
           user   : { 
-                        name : null 
+                          name   : null 
+                        , q_user : null
+                        , q_pass : null
                    },
 
           data   : {
@@ -391,6 +393,8 @@ var configuration = {
         }
 
         p.user.name           = args.user || "Unknown";
+        p.user.dclay_user     = args.dclay_user || null;
+        p.user.dclay_pass     = args.dclay_pass || null;
 
         p.data.type           = args.data_type || enums.data.types.GOOGLE;
         p.data.url            = args.data_uri;
@@ -429,6 +433,7 @@ var configuration = {
         p.video.thumb_archive = JSON.parse((args.poster_archive === undefined) ? true : args.poster_archive);
         p.video.ext           = args.asset_ext;
         p.video.preview       = args.preview_info;
+        p.video.player_key    = args.player_key;
         p.video.overwrite     = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);
  
         p.storage.type        = args.storage_type;
@@ -454,9 +459,8 @@ var configuration = {
 
         } else {
 
-            if (fs.openSync(uri)) {
+            if (fs.existsSync(uri)) {
 
-                fs.closeSync(uri);
                 return enums.data.types.JSON_FILE;
 
             } else {
@@ -473,8 +477,7 @@ var configuration = {
 
         var p = configuration.params;
 
-        if (p.fields.index   &&
-            p.data.key       &&
+        if (  p.data.key     &&
             !(p.batch.start) &&
             !(p.batch.end))
         {

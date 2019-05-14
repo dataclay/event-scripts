@@ -5,7 +5,6 @@ var log      = require('./logger'),
     enums    = require('./constants'),
     emoji    = require('node-emoji'),
     config   = require('./config'),
-    gsheet   = require('./gsheet'),
     path     = require('path');
 
 var aws = {

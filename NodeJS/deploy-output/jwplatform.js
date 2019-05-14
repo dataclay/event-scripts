@@ -1,4 +1,5 @@
-var enums           = require('./constants'),
+var log             = require('./logger'),
+    enums           = require('./constants'),
     path            = require('path'),
     config          = require('./config'),
     moment          = require('moment'),
@@ -7,6 +8,7 @@ var enums           = require('./constants'),
     stream          = require('./stream')
     fs              = require('fs'),
     emoji           = require('node-emoji'),
+    aws             = require('./aws'), 
     jwLogger        = null,
     api             = null;
 
@@ -25,6 +27,8 @@ var jw = {
                                 key : config.params.video.key //enums.jw.auth.key
                               , secret : config.params.video.secret//enums.jw.auth.secret
                              }, jwLogger);
+
+        log.info("\n\t\tJW Platform ready for asset uploads");
 
         step();
 
@@ -66,7 +70,7 @@ var jw = {
 
             if (config.params.storage.type == enums.storage.types.S3) {
                 
-                vid_options.download_url = aws.S3_download_url;
+                vid_options.download_url = aws.S3_URL['video'];
 
                 api.post('/v1/videos/create', vid_options, null, function(err, results){
 

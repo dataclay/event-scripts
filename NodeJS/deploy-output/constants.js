@@ -9,18 +9,27 @@ module.exports = Object.freeze({
 
     jw : { 
 
-        status : {
-                     CREATED     : "created"
-                   , PROCESSING  : "processing"
-                   , UPDATING    : "updating"
-                   , READY       : "ready"
-                   , FAILED      : "failed"
-                 }
+        status :   {
+                       CREATED     : "created"
+                     , PROCESSING  : "processing"
+                     , UPDATING    : "updating"
+                     , READY       : "ready"
+                     , FAILED      : "failed"
+                   }
 
-      , playback : {
-        
-      }
+      , playback : { 
+                       PREVIEW     : "cdn.jwplayer.com/previews/"
+                     , EMBED_CDN   : "cdn.jwplayer.com/players/"
+                   }
       
+    },
+
+    vimeo : {
+
+        playback : {
+                      DOMAIN      : "vimeo.com"
+                   }
+
     },
 
     video : {
@@ -78,7 +87,9 @@ module.exports = Object.freeze({
 
     data : {
 
-        types  : {
+          dist   : "_distribution"
+
+        , types  : {
 
               GOOGLE    : "google"
             , JSON_FILE : "json_file"
