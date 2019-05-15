@@ -18,6 +18,18 @@ var queue = {
 
     job     : {},
 
+    get_api_domain : () => {
+
+        var endpoint = config.params.data.url,
+            endpoint_parts = endpoint.split('/'),
+            endpoint_protocol = endpoint_parts[0],
+            endpoint_host     = endpoint_parts[2],
+            api_domain        = endpoint_protocol + '//' + endpoint_host;
+
+        return api_domain;
+
+    },
+
     get_job : (next, complete) => {
 
         var req = { auth: {} }
@@ -27,7 +39,7 @@ var queue = {
 
         //log.info("\nGET'ing job with `_id` [ %s ] from Dataclay Queue", config.params.data.key);
 
-        axios.get('https://dataclay.ngrok.io/jobs/' + config.params.data.key, req)
+        axios.get(queue.get_api_domain() + '/jobs/' + config.params.data.key, req)
              .then(response => {
                 queue.job = response.data;
                 next(queue.job, complete);
@@ -63,7 +75,7 @@ var queue = {
                 , config.params.data.key);
 
         //PATCH existing job object with data
-        axios.patch('https://dataclay.ngrok.io/jobs/' + config.params.data.key, req, req_opts)
+        axios.patch(queue.get_api_domain() + '/jobs/' + config.params.data.key, req, req_opts)
           .then(response => {
             next();
           })

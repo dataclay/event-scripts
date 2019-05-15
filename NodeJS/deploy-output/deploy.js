@@ -166,9 +166,9 @@ var deploy = {
           deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + p.video.thumb_ext  );
           deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row[p.fields.output.name]) + '.' + 'gif'              );
         } else {
-          deploy.video_file    = path.resolve(p.batch.assets, config.sanitize(row["_id"]) + '.' + p.video.ext        );
-          deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(row["_id"]) + '.' + p.video.thumb_ext  );
-          deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(row["_id"]) + '.' + 'gif'              );
+          deploy.video_file    = path.resolve(p.batch.assets, config.sanitize(p.video.asset_name || row["_id"]) + '.' + p.video.ext        );
+          deploy.poster_file   = path.resolve(p.batch.assets, config.sanitize(p.video.asset_name || row["_id"]) + '.' + p.video.thumb_ext  );
+          deploy.preview_file  = path.resolve(p.batch.assets, config.sanitize(p.video.asset_name ||row["_id"]) + '.' + 'gif'              );
         }
         
 

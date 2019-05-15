@@ -97,6 +97,7 @@ try {
                     , poster_frame     : argv.poster_frame
                     , poster_archive   : argv.poster_archive
                     , poster_ext       : argv.poster_ext || "png"
+                    , asset_name       : argv.asset_name || null
                     , asset_ext        : argv.asset_ext
                     , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
                     , player_key       : argv.player_key
@@ -106,7 +107,7 @@ try {
                     , storage_folder   : argv.s3_folder
                     , broadcast        : argv.broadcast
                     , title            : argv.title
-                    , desc             : argv.desc
+                    , desc             : argv.desc || "null"
                     , bot_enabled      : argv.bot_enabled
                     , stream_url       : argv.stream_url
                   };

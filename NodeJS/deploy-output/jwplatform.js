@@ -75,7 +75,7 @@ var jw = {
                 api.post('/v1/videos/create', vid_options, null, function(err, results){
 
                     if (err) {
-                        console.log(err) 
+                        log.error(err);
                     } else {
                         stream.key = results.video.key;
                         step();

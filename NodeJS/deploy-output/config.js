@@ -431,6 +431,7 @@ var configuration = {
         p.video.thumb         = args.poster_frame;
         p.video.thumb_ext     = args.poster_ext
         p.video.thumb_archive = JSON.parse((args.poster_archive === undefined) ? true : args.poster_archive);
+        p.video.asset_name    = args.asset_name;
         p.video.ext           = args.asset_ext;
         p.video.preview       = args.preview_info;
         p.video.player_key    = args.player_key;
