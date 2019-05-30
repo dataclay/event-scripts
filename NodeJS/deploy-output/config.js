@@ -211,6 +211,7 @@ var configuration = {
             log.info("\t\t" + pad("Stream Commenting", 25)        + " : " + p.video.comments             );
             log.info("\t\t" + pad("Stream Downloadable", 25)      + " : " + p.video.downloadable         );
             log.info("\t\t" + pad("Stream Overwrite", 25)         + " : " + p.video.overwrite            );
+            log.info("\t\t" + pad("Stream Player Key", 25)        + " : " + p.video.player_key           );
             log.info("\t\t" + pad("Stream API Key", 25)           + " : " + p.video.key                  );
             log.info("\t\t" + pad("Stream API Secret", 25)        + " : " + p.video.secret               );
             log.info("\t\t" + pad("Stream API user", 25)          + " : " + p.video.user                 );

@@ -100,7 +100,7 @@ try {
                     , asset_name       : argv.asset_name || null
                     , asset_ext        : argv.asset_ext
                     , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
-                    , player_key       : argv.player_key
+                    , player_key       : argv.player_key || null
                     , storage_type     : (argv.storage_service || enums.storage.types.NONE)
                     , storage_region   : argv.s3_region
                     , storage_bucket   : argv.s3_bucket

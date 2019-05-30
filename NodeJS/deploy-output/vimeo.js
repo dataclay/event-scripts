@@ -393,6 +393,99 @@ var vmo = {
 
         },
 
+        set_embed_preset : function(step) {
+
+            var   p             = config.params
+                , preset        = null
+                , preset_uri    = null
+                , preset_id     = null;
+
+            //console.log("Player key is [ " + p.video.player_key + " ] and is of type [ " + typeof p.video.player_key + " ] ");
+
+            if (p.video.player_key) {
+
+                async.series([
+
+                (next) => {
+
+                    var req_embeds = {
+                          method : "GET"
+                        , path   : "/me/presets"
+                    }
+
+                    api.request(req_embeds, (err, body, status_code, headers) => {
+
+                        if (err) {
+                            
+                            log.error(err);
+
+                        } else {
+
+                            preset      = body.data.find(x => x.name === p.video.player_key);
+                            preset_uri  = preset.uri.split('/');
+                            preset_id   = preset_uri[preset_uri.length-1];
+
+                            // log.info("\n\t\t%s\tFound Vimeo Player Preset [ %s ] with id [ %s ]"
+                            //         , emoji.get('film_frames')
+                            //         , preset.name
+                            //         , preset_id);
+
+                        }
+
+                        next();
+
+                    })
+
+                },
+
+                (next) => {
+
+                    var req_embed_set = {
+                          method : "PUT"
+                        , path   : "/videos/" + vmo.video.key + "/presets/" + preset_id 
+                    }
+
+                    console.log(req_embed_set);
+
+                    api.request(req_embed_set, (err, body, status_code, headers) => {
+
+                        console.log(status_code)
+
+                        if (err) {
+
+                            log.error(err);
+
+                        } else {
+
+                            log.info("\n\t\t%s\tSet Vimeo video with id [ %s ] to embed preset [ %s ]"
+                                    , emoji.get('film_frames')
+                                    , vmo.video.key
+                                    , preset.name);
+
+                        }
+
+                        next();
+
+                    })
+
+                } ], (err) => {
+
+                    log.info("\n\t\t%s\tDone setting Vimeo Embed Preset!"
+                            , emoji.get('film_frames'));
+
+                    step();
+
+                });
+
+            } else {
+
+                //no player exists so we move on
+                step();
+
+            }
+
+        },
+
         create : function(row, step) {
 
             var p = config.params,
@@ -438,10 +531,11 @@ var vmo = {
                             , path.parse(stream.upload).base);
 
                     async.series([
-                        vmo.video.get_details,
                         vmo.video.create_group,
                         vmo.video.add_to_group,
-                        vmo.video.set_poster
+                        vmo.video.set_poster,
+                        vmo.video.set_embed_preset,
+                        vmo.video.get_details
                     ], step);
 
                 });
@@ -468,10 +562,11 @@ var vmo = {
                             , path.parse(stream.upload).base);
 
                     async.series([
-                        vmo.video.get_details,
                         vmo.video.create_group,
                         vmo.video.add_to_group,
-                        vmo.video.set_poster
+                        vmo.video.set_poster,
+                        vmo.video.set_embed_preset,
+                        vmo.video.get_details
                     ], step);                
                     
                   },
