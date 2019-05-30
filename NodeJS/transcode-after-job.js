@@ -95,6 +95,12 @@ of your working directory for this code repository.
   
     --poster_format   The still image type for a poster image
                       Type: String, Default: "png"
+
+    --poster_scale    The spatial resolution of the poster image
+                      Type: Integer, Default: Spatial resolution of input
+
+    --poster_quality  The quality level for the poster image. Choice is 0-100
+                      Type: Integer, Default: 100
   
     --gif_start       Start time of the input for a preview clip
                       Type: Float, Default: 0
@@ -144,14 +150,16 @@ var   input_file       = path.resolve(argv.input),
       file_ext         = (argv.file_ext                  || '.mp4'    ),
       vcontainer       = (argv.container                 || 'mp4'     ),
       pixformat        = (argv.pixformat                 || 'yuv420p' ),
+
       poster_time      = (parseFloat(argv.poster)        || 0         ),
       poster_format    = (argv.poster_format             || 'png'     ),
+      poster_quality   = (String(argv.poster_quality)    || '100'     ),
+      poster_scale     = (parseInt(argv.poster_scale)    || null      ),
 
       gif_start        = (argv.gif_start                 || 0         ),
       gif_duration     = (argv.gif_duration              || 3         ),
       gif_fps          = (argv.gif_fps                   || 30        ),
       gif_scale        = (argv.gif_scale                 || 480       );
-
 
 if (process.platform == 'win32') {
     ffmpeg.setFfmpegPath(ffmpeg_win);
@@ -426,7 +434,7 @@ var poster = {
       poster.output_dest  = path.resolve(dest_loc, path.parse(poster.output).base);  
 
     }
-    
+     
     step();
 
   },
@@ -442,6 +450,45 @@ var poster = {
                 .on('start', poster.on_start)
                 //when extraction ends
                 .on('end', poster.on_end);
+
+      //Option to set quality level if poster format is JPG
+      if (poster_format.toLowerCase() === "jpg") 
+      {
+
+        let qstart      = 2;
+        let qend        = 31;
+        let input_start = 100;
+        let input_end   = 0;
+
+        //if (!poster_quality) poster_quality = 100;
+
+        var quality;
+
+        if (!poster_quality) 
+             poster_quality = 100
+        else 
+             poster_quality = parseInt(poster_quality);
+
+        //calculate value between 2-32 which corresponds to user input 100-0
+        //see the following SO question for more information
+        //https://stackoverflow.com/questions/10225403/how-can-i-extract-a-good-quality-jpeg-image-from-an-h264-video-file-with-ffmpeg
+
+        quality = qstart + ((qend - qstart) / (input_end - input_start)) * (poster_quality - input_start)
+
+        //console.log("POSTER QUALITY PERCENTAGE => " + poster_quality);
+        //console.log("FFMPEG POSTER QSCALE      => " + quality)
+
+        log.info("\n\t" + chalk.bold.white(pad("Poster Quality", spacer)) + "=>\t" + chalk.green(poster_quality));
+        log.info("\n\t" + chalk.bold.white(pad("Poster QScale", spacer))  + "=>\t" + chalk.green(quality));
+
+        poster.cmd.outputOption('-qscale:v ' + quality);
+
+      }
+
+      if (poster_scale) {
+        poster.cmd.videoFilter('scale=' + poster_scale +  ":-1");
+      }
+      
 
       step();
     
