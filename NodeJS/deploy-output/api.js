@@ -41,7 +41,7 @@ var queue = {
 
         axios.get(queue.get_api_domain() + '/jobs/' + config.params.data.key, req)
              .then(response => {
-                queue.job = response.data;
+                queue.job = response.data[0];
                 next(queue.job, complete);
              })
              .catch(error => {
