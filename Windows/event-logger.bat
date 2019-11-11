@@ -80,7 +80,7 @@ set log=%AEP_LOC%\events.log
 For /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
 For /f "tokens=1-2 delims=/:" %%a in ('time /t') do (set mytime=%%a%%b)
 
-echo --- %mydate% @ %mytime% [ TEMPLATER EVENT ] --- >> "%log%"
+echo --- %mydate% @ %mytime% [ TEMPLATER EVENT : %EVENT% ] --- >> "%log%"
 echo. >> "%log%"
 echo         Templater Log File : %TEMPLATER_LOG% >> "%log%"
 echo         Machine Name       : %MACHINE% >> "%log%"
@@ -96,58 +96,62 @@ echo. >> "%log%"
 
 if "%EVENT%" == "bot_pre_job" (
 
-echo         [ %EVENT% ] >> "%log%"
-echo         Job Data File      : %DATA_JOB% >> "%log%"
-echo         Output Asset Name  : %OUT_NAME% >> "%log%"
-echo         Output File Path   : %OUT_FILE% >> "%log%"
-echo         Output Directory   : %OUT_DIR%  >> "%log%"
+echo         Specific to [ %EVENT% ] event: >> "%log%"
+echo                 Job Data File      : %DATA_JOB% >> "%log%"
+echo                 Output Asset Name  : %OUT_NAME% >> "%log%"
+echo                 Output File Path   : %OUT_FILE% >> "%log%"
+echo                 Output Directory   : %OUT_DIR%  >> "%log%"
 echo. >> "%log%"
 
 )
 
 if "%EVENT%" == "bot_post_job" (
 
-echo         [ %EVENT% ] >> "%log%"
-echo         Job Data File      : %DATA_JOB% >> "%log%"
-echo         Output Asset Name  : %OUT_NAME% >> "%log%"
-echo         Output File Path   : %OUT_FILE% >> "%log%"
-echo         Output Directory   : %OUT_DIR%  >> "%log%"
+echo         Specific to [ %EVENT% ] event: >> "%log%"
+echo                 Job Data File      : %DATA_JOB% >> "%log%"
+echo                 Output Asset Name  : %OUT_NAME% >> "%log%"
+echo                 Output File Path   : %OUT_FILE% >> "%log%"
+echo                 Output Directory   : %OUT_DIR%  >> "%log%"
 echo. >> "%log%"
 
 )
 
 if "%EVENT%" == "bot_pre_layr" (
 
-echo         [ %EVENT% ] >> "%log%"
+echo         Specific to [ %EVENT% ] event: >> "%log%"
+echo                 NONE >> "%log%"
 echo. >> "%log%"
 
 )
 
 if "%EVENT%" == "bot_post_layr" (
 
-echo         [ %EVENT% ] >> "%log%"
+echo         Specific to [ %EVENT% ] event: >> "%log%"
+echo                 NONE >> "%log%"
 echo. >> "%log%"
 
 )
 
 if "%EVENT%" == "bot_pre_rndr" (
 
-echo         [ %EVENT% ] >> "%log%"
+echo         Specific to [ %EVENT% ] event: >> "%log%"
+echo                 NONE >> "%log%"
 echo. >> "%log%"
 
 )
 
 if "%EVENT%" == "bot_post_rndr" (
 
-echo         [ %EVENT% ] >> "%log%"
+echo         Specific to [ %EVENT% ] event: >> "%log%"
+echo                 NONE >> "%log%"
 echo. >> "%log%"
 
 )
 
 if "%EVENT%" == "bot_post_batch" (
 
-echo         [ %EVENT% ] >> "%log%"
-echo         Batch Data File    : "%DATA_BATCH%"
+echo         Speicifc to [ %EVENT% ] event: >> "%log%"
+echo                 Batch Data File    : "%DATA_BATCH%"
 echo. >> "%log%"
 
 )
