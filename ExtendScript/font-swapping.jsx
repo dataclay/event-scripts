@@ -1,15 +1,51 @@
 ﻿/*
-
++--------------------------------------------------------------------+
+|               ____        __             __                        |
+|              / __ \____ _/ /_____ ______/ /___ ___  __             |
+|             / / / / __ `/ __/ __ `/ ___/ / __ `/ / / /             |
+|            / /_/ / /_/ / /_/ /_/ / /__/ / /_/ / /_/ /              |
+|           /_____/\__,_/\__/\__,_/\___/_/\__,_/\__, /               |
+|           Automating Digital Production      /____/                |
+|                                                                    |
+|                                                                    |
+|   We believe that leveraging data in the design process should     |
+|   be a playful and rewarding art. Our products make this           |
+|   possible for digital content creators.                           |
+|                                                                    |
+|   |email                      |web                  |twitter       |
+|   |support@dataclay.com       |dataclay.com         |@dataclay     |
+|                                                                    |
+|   This code is provided to you for your personal or commercial     |
+|   use.  However, you must abide by the terms of the MIT            |
+|   License: https://opensource.org/licenses/MIT                     |
+|                                                                    |
+|                                                                    |
+|                Copyright 2013-2019 Dataclay, LLC                   |
+|                  Licensed under the MIT License                    |
+|                                                                    |
++--------------------------------------------------------------------+
+    
     Written by Jon Christoffersen / jon@dataclay.com
     Based on a script by Shane Murphy @ prender.co
-    Released open-source by Dataclay, LLC
+
+This code makes use of the Templater ExtendScript API documented here:
+
+    http://support.dataclay.com/content/how_to/bot/event_scripts/templater_extendscript_api_reference.htm
+
+Follow these steps to use this script:
+
+1. Register this script file on "Before Update" Event in Templater Preferences ExtendScript Setup.
+-  Font key/column in data source must match the name of a text layer that is tagged  with the Templater Settings effect, adding a "--font" tag at the end of the name 
+-- example a text layer named "text-1" would have a font control column/key in the data source called "text-1--font"
+-  Font name in data source must be the Postscript Name
+
+2. Open an After Effects project that is mapped to a data source using Templater.
+
+3. Open the main Templater panel.  Iterate through jobs in the data source using Templater's "Preview" feature.
+
+4. Inspect the `templater.log` file and note all the messages this code writes to that file.
 
 */
-
-/// Register on "Before Update" Event in Templater Preferences ExtendScript Setup
-/// Font key/column in data source must match the name of a text layer that is tagged  with the Templater Settings effect, adding a "--font" tag at the end of the name 
-/// -- example a text layer named "text-1" would have a font control column/key in the data source called "text-1--font"
-/// Font name in data source must be the Postscript Name
 
 // Logging messages
 var textLabel= "FONT CHANGE";

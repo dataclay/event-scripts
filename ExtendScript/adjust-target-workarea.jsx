@@ -28,7 +28,7 @@
 This code makes use of the Templater ExtendScript API which is 
 documented at the following address:
 
-http://support.dataclay.com/content/how_to/cli/templater_extendscript_api_reference.htm
+http://support.dataclay.com/content/how_to/bot/event_scripts/templater_extendscript_api_reference.htm
 
 Follow these steps to use this script:
 
