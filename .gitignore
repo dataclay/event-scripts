@@ -2,7 +2,7 @@
 node_modules
 *.monopic
 /.vscode/launch.json
-/Extendscript/launch.json
+/ExtendScript/launch.json
 /NodeJS/deploy-output/deploy-err.log
 /NodeJS/deploy-output/deploy-out.log
 /NodeJS/transcode_err.log
