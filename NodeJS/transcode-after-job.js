@@ -1,4 +1,4 @@
-/*
+  /*
 +--------------------------------------------------------------------+
 |               ____        __             __                        |
 |              / __ \____ _/ /_____ ______/ /___ ___  __             |
@@ -68,6 +68,9 @@ of your working directory for this code repository.
   
     --vbit            The bitrate for the transcoded output
                       Type: Integer, Default: 2048
+
+    --dimensions      The spatial resolution of the output
+                      Type: String, Default: undefined
   
     --acodec          The audio encoder you want to use
                       Type: String, Default: 'ac3'
@@ -150,6 +153,7 @@ var   input_file       = path.resolve(argv.input),
       file_ext         = (argv.file_ext                  || '.mp4'    ),
       vcontainer       = (argv.container                 || 'mp4'     ),
       pixformat        = (argv.pixformat                 || 'yuv420p' ),
+      dimensions       = (argv.dimensions                || undefined ),
 
       poster_time      = (parseFloat(argv.poster)        || 0         ),
       poster_format    = (argv.poster_format             || 'png'     ),
@@ -282,10 +286,13 @@ const log = winston.createLogger({
                    //setup completion behavior
                    .on('end', transcode.on_complete)
 
+      if (dimensions)
+        transcode.cmd.size(dimensions);
+      
       if (transcode.input.type === file_types.SEQUENCE) {
         transcode.cmd.inputOption("-framerate 30");
         transcode.cmd.inputOption("-pattern_type glob");
-      } 
+      }
 
       step();
 
