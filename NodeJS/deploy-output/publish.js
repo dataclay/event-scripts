@@ -147,12 +147,13 @@ try {
       var transcode = spawnSync('/Users/arie/.nvm/versions/node/v12.13.1/bin/node'
                               , [
                                     '/Users/arie/Dev/event-scripts/NodeJS/transcode-after-job.js',
-                                    '--input', user_conf.input_file,
-                                    '--outdir', user_conf.outputdir,
-                                    '--outname', user_conf.outname,
-                                    '--dest', user_conf.dest_loc,
-                                    '--dimensions', user_conf.dimensions,
-                                    '--skip_preview', user_conf.skip_preview
+                                    '--input'           , user_conf.input_file,
+                                    '--outdir'          , user_conf.outputdir,
+                                    '--outname'         , user_conf.outname,
+                                    '--dest'            , user_conf.dest_loc,
+                                    '--dimensions'      , user_conf.dimensions,
+                                    '--skip_preview'    , user_conf.skip_preview,
+                                    '--poster'          , user_conf.poster_time
                                 ]
                               , {
                                       cwd      : process.cwd()
