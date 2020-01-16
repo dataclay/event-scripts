@@ -227,6 +227,7 @@ var configuration = {
             log.info("\t\t" + pad("Poster Frame", 25)             + " : " + p.video.thumb                );
             log.info("\t\t" + pad("Poster Extension", 25)         + " : " + p.video.thumb_ext            );
             log.info("\t\t" + pad("Poster Archive", 25)           + " : " + p.video.thumb_archive        );
+            log.info("\t\t" + pad("Clip Archive", 25)             + " : " + p.video.clip_archive         );
             log.info("\t\t" + pad("Assets", 25)                   + " : " + p.batch.assets               );
             log.info("\t\t" + pad("Start", 25)                    + " : " + p.batch.start                );
             log.info("\t\t" + pad("End", 25)                      + " : " + p.batch.end                  );
@@ -392,56 +393,57 @@ var configuration = {
             }
 
         }
-
-        p.user.name           = args.user || "Unknown";
-        p.user.dclay_user     = args.dclay_user || null;
-        p.user.dclay_pass     = args.dclay_pass || null;
-
-        p.data.type           = args.data_type || enums.data.types.GOOGLE;
-        p.data.url            = args.data_uri;
-        p.data.collection     = args.data_collection;
-        p.data.sheet_key      = args.sheet_key;
-        p.data.bot_enabled    = args.bot_enabled;
-        p.data.key            = args.data_key;
+      
+        p.user.name                 = args.user || "Unknown";
+        p.user.dclay_user           = args.dclay_user || null;
+        p.user.dclay_pass           = args.dclay_pass || null;
+      
+        p.data.type                 = args.data_type || enums.data.types.GOOGLE;
+        p.data.url                  = args.data_uri;
+        p.data.collection           = args.data_collection;
+        p.data.sheet_key            = args.sheet_key;
+        p.data.bot_enabled          = args.bot_enabled;
+        p.data.key                  = args.data_key;
+              
+        p.fields.index              = args.data_index || null;
+        p.fields.output             = { name : enums.data.fields.OUTPUT,     pos : null, letter : null };
+        p.fields.download           = { name : enums.data.fields.S3_LINK,    pos : null, letter : null };
+        p.fields.dl_poster          = { name : enums.data.fields.S3_POSTER,  pos : null, letter : null };
+        p.fields.dl_preview         = { name : enums.data.fields.S3_PREVIEW, pos : null, letter : null };
+        p.fields.stream             = { name : enums.data.fields.STREAM,     pos : null, letter : null };
+        p.fields.bcast              = { name : enums.data.fields.BCAST,      pos : null, letter : null };
+        p.fields.embed              = { name : enums.data.fields.EMBED,      pos : null, letter : null };
+        p.fields.preview            = { name : enums.data.fields.PREV,       pos : null, letter : null };
+        p.fields.url                = { name : enums.data.fields.URL,        pos : null, letter : null };
         
-        p.fields.index        = args.data_index || null;
-        p.fields.output       = { name : enums.data.fields.OUTPUT,     pos : null, letter : null };
-        p.fields.download     = { name : enums.data.fields.S3_LINK,    pos : null, letter : null };
-        p.fields.dl_poster    = { name : enums.data.fields.S3_POSTER,  pos : null, letter : null };
-        p.fields.dl_preview   = { name : enums.data.fields.S3_PREVIEW, pos : null, letter : null };
-        p.fields.stream       = { name : enums.data.fields.STREAM,     pos : null, letter : null };
-        p.fields.bcast        = { name : enums.data.fields.BCAST,      pos : null, letter : null };
-        p.fields.embed        = { name : enums.data.fields.EMBED,      pos : null, letter : null };
-        p.fields.preview      = { name : enums.data.fields.PREV,       pos : null, letter : null };
-        p.fields.url          = { name : enums.data.fields.URL,        pos : null, letter : null };
-        
-        p.batch.start         = args.start_row;
-        p.batch.end           = args.end_row;
-        p.batch.assets        = args.asset_loc;
-
-        p.video.service       = args.stream_service;
-        p.video.authorize     = args.stream_authorize;
-        p.video.group         = args.stream_group;
-        p.video.privacy       = args.stream_privacy;
-        p.video.comments      = args.stream_comments;
-        p.video.downloadable  = args.stream_download;
-        p.video.title         = args.title || enums.defaults.VIDEO_TITLE;
-        p.video.desc          = args.desc;
-        p.video.broadcast     = args.broadcast;
-        p.video.stream_url    = args.stream_url;
-        p.video.thumb         = args.poster_frame;
-        p.video.thumb_ext     = args.poster_ext
-        p.video.thumb_archive = JSON.parse((args.poster_archive === undefined) ? true : args.poster_archive);
-        p.video.asset_name    = args.asset_name;
-        p.video.ext           = args.asset_ext;
-        p.video.preview       = args.preview_info;
-        p.video.player_key    = args.player_key;
-        p.video.overwrite     = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);
- 
-        p.storage.type        = args.storage_type;
-        p.storage.region      = args.storage_region;
-        p.storage.bucket      = args.storage_bucket;
-        p.storage.folder      = args.storage_folder || enums.defaults.STORAGE_FOLDER;
+        p.batch.start               = args.start_row;
+        p.batch.end                 = args.end_row;
+        p.batch.assets              = args.asset_loc;
+      
+        p.video.service             = args.stream_service;
+        p.video.authorize           = args.stream_authorize;
+        p.video.group               = args.stream_group;
+        p.video.privacy             = args.stream_privacy;
+        p.video.comments            = args.stream_comments;
+        p.video.downloadable        = args.stream_download;
+        p.video.title               = args.title || enums.defaults.VIDEO_TITLE;
+        p.video.desc                = args.desc;
+        p.video.broadcast           = args.broadcast;
+        p.video.stream_url          = args.stream_url;
+        p.video.thumb               = args.poster_frame;
+        p.video.thumb_ext           = args.poster_ext;
+        p.video.thumb_archive       = JSON.parse((args.poster_archive    === undefined) ? true : args.poster_archive    );
+        p.video.skip_clip_archive   = JSON.parse((args.skip_clip_archive === undefined) ? true : args.skip_clip_archive );
+        p.video.asset_name          = args.asset_name;
+        p.video.ext                 = args.asset_ext;
+        p.video.preview             = args.preview_info;
+        p.video.player_key          = args.player_key;
+        p.video.overwrite           = JSON.parse((args.stream_overwrite === undefined) ? true : args.stream_overwrite);
+       
+        p.storage.type              = args.storage_type;
+        p.storage.region            = args.storage_region;
+        p.storage.bucket            = args.storage_bucket;
+        p.storage.folder            = args.storage_folder || enums.defaults.STORAGE_FOLDER;
 
         extend(true, configuration.params, p);
 
