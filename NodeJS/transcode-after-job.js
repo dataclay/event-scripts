@@ -117,6 +117,9 @@ of your working directory for this code repository.
     --gif_scale       The extension of the file for the clip
                       Type: Integer, Default: 480
 
+    --skip_preview    Flag to turn off preview extraction
+                      Type: Boolean, Default: false
+
 */
 
 //Constants
@@ -146,14 +149,15 @@ var   input_file       = path.resolve(argv.input),
       output           = path.resolve(path.join(argv.outdir, argv.outname)),
       dest_loc         = path.resolve(argv.dest),
       remove_orig      = ((argv.cleanup ? JSON.parse(argv.cleanup) : null) || false    ),
-      vcodec           = (argv.vcodec                    || 'libx264' ),
-      vbit             = (parseInt(argv.vbit)            || 2048      ),
-      acodec           = (argv.acodec                    || 'ac3'     ),
-      abit             = (argv.abit                      || '128k'    ),
-      file_ext         = (argv.file_ext                  || '.mp4'    ),
-      vcontainer       = (argv.container                 || 'mp4'     ),
-      pixformat        = (argv.pixformat                 || 'yuv420p' ),
-      dimensions       = (argv.dimensions                || undefined ),
+      vcodec           = (argv.vcodec                          || 'libx264' ),
+      vbit             = (parseInt(argv.vbit)                  || 2048      ),
+      acodec           = (argv.acodec                          || 'ac3'     ),
+      abit             = (argv.abit                            || '128k'    ),
+      file_ext         = (argv.file_ext                        || '.mp4'    ),
+      vcontainer       = (argv.container                       || 'mp4'     ),
+      pixformat        = (argv.pixformat                       || 'yuv420p' ),
+      dimensions       = (argv.dimensions                      || undefined ),
+      skip_preview     = ((argv.skip_preview ? JSON.parse(argv.skip_preview) : null) || false ),
 
       poster_time      = (parseFloat(argv.poster)        || 0         ),
       poster_format    = (argv.poster_format             || 'png'     ),
@@ -643,6 +647,11 @@ var poster = {
         log.info("\n\t" + chalk.bold.white(pad("Skipping Clip", spacer)) + "=>\t" + chalk.green("Cannot get a clip from a still image."));
         step();
 
+    } else if (skip_preview) {
+
+      log.info("\n\t" + chalk.bold.white(pad("Skipping Clip", spacer)) + "=>\t" + chalk.green("Skipping preview via command config."));
+      step();
+
     } else {
 
         clip.done = step;
@@ -654,13 +663,17 @@ var poster = {
 
   archive : (step) => {
 
-    if (clip.output !== clip.output_dest) {
+    if (!skip_preview) {
 
-      utils.copy(clip.output, clip.output_dest);
+      if (clip.output !== clip.output_dest) {
 
-      if (remove_orig) 
-        utils.delete(clip.output);
+        utils.copy(clip.output, clip.output_dest);
 
+        if (remove_orig) 
+          utils.delete(clip.output);
+
+      }
+      
     }
 
     step();
@@ -838,6 +851,7 @@ async.series([
   ], (err) => {
 
     log.info("\n\t" + chalk.bold.white(pad("Completed",spacer) + "=>\t") + chalk.bold.red("Exiting!"));
+    process.exit();
 
     if (err) {
       log.error(err.message);
