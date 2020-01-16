@@ -97,6 +97,7 @@ try {
                     , poster_frame     : argv.poster_frame
                     , poster_archive   : argv.poster_archive
                     , poster_ext       : argv.poster_ext || "png"
+                    , skip_clip_archive : ((argv.skip_clip_archive ? JSON.parse(argv.skip_clip_archive) : null) || false )
                     , asset_name       : argv.asset_name || null
                     , asset_ext        : argv.asset_ext
                     , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
