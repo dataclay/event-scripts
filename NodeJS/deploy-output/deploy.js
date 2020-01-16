@@ -174,6 +174,7 @@ var deploy = {
 
         stream.upload = deploy.video_file;
         stream.thumb  = deploy.poster_file;
+        
         stream.clip   = deploy.preview_file;
 
         if (!p.video.overwrite && row[p.fields.stream.name]) {
@@ -199,10 +200,23 @@ var deploy = {
                                 , file: deploy.poster_file
                                 , step: step}),
 
-                  (step) => deploy.archive_asset({
-                                  name: 'preview'
-                                , file: deploy.preview_file
-                                , step: step}),
+                  (step) => {
+
+                    if (p.video.skip_clip_archive) {
+
+                      log.info("\n\t\t%s\tSkipping archival of gif clip."
+                              , emoji.get("package"));
+                      step();
+
+                    } else {
+
+                      deploy.archive_asset({
+                              name: 'preview'
+                            , file: deploy.preview_file
+                            , step: step});
+                    }
+
+                  },
 
                   (step) => {
 
@@ -296,6 +310,10 @@ var deploy = {
         log.error(err);
         throw err; 
       }
+
+      // log.info("\n\t\t%s\tArchiving asset %s"
+      //         , emoji.get('ok_hand')
+      //         , file_data.toString());
 
       let base64data = new Buffer(file_data, 'binary');
 
