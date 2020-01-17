@@ -77,7 +77,7 @@ try {
                     , stream_comments  : argv.stream_comments
                     , stream_download  : argv.stream_download
                     , stream_overwrite : argv.stream_overwrite
-                    , data_type        : argv.data_type || enums.data.types.GOOGLE
+                    , data_type        : argv.data_type                                              || enums.data.types.GOOGLE
                     , user             : argv.author
                     , data_collection  : argv.worksheet
                     , sheet_key        : argv.sheet_key
@@ -91,19 +91,19 @@ try {
                     , asset_loc        : argv.asset_loc
                     , poster_frame     : argv.poster_frame
                     , poster_archive   : argv.poster_archive
-                    , poster_ext       : argv.poster_ext || "png"
+                    , poster_ext       : argv.poster_ext                                             || "png"
                     , skip_clip_archive : ((argv.skip_clip_archive ? JSON.parse(argv.skip_clip_archive) : null) || false )
-                    , asset_name       : argv.asset_name || null
+                    , asset_name       : argv.asset_name                                             || null
                     , asset_ext        : argv.asset_ext
                     , preview_info     : { domain : argv.domain_cell, route : argv.route_cell, player_key : argv.player_cell }
-                    , player_key       : argv.player_key || null
-                    , storage_type     : (argv.storage_service || enums.storage.types.NONE)
+                    , player_key       : argv.player_key                                             || null
+                    , storage_type     : (argv.storage_service                                       || enums.storage.types.NONE)
                     , storage_region   : argv.s3_region
                     , storage_bucket   : argv.s3_bucket
                     , storage_folder   : argv.s3_folder
                     , broadcast        : argv.broadcast
                     , title            : argv.title
-                    , desc             : argv.desc || "null"
+                    , desc             : argv.desc                                                   || "null"
                     , bot_enabled      : argv.bot_enabled
                     , stream_url       : argv.stream_url
 
