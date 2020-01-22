@@ -146,7 +146,7 @@ try {
         //function to spawn `transcode-after-job.js` using captured settings above
       var transcode = spawn('node'
                               , [
-                                    '/Users/arie/Dev/event-scripts/NodeJS/transcode-after-job.js',
+                                    path.resolve(__dirname, '..', 'transcode-after-job.js'),
                                     '--input'           , user_conf.input_file,
                                     '--outdir'          , user_conf.outputdir,
                                     '--outname'         , user_conf.outname,
@@ -173,7 +173,7 @@ try {
         //function to call on deployment app with setting from interface
         var publish = spawn('node'
                               , [
-                                    '/Users/arie/Dev/event-scripts/NodeJS/deploy-output/app.js'
+                                    path.resolve(__dirname, 'app.js')
                                     , '--data_uri'          , user_conf.data_uri
                                     , '--vmocreds_file'     , user_conf.vmocreds
                                     , '--awscreds_file'     , user_conf.awscreds
