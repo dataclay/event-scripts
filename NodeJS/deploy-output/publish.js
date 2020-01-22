@@ -51,7 +51,7 @@ var log               = require('./logger'),
     pad               = require('pad'),
     argv              = require('minimist')(process.argv.slice(2));
 
-const { spawnSync } = require('child_process');
+const { spawn } = require('child_process');
 
 log.info("\n\n------- Publishing After Effects output on [ " + moment().format('MMMM Do YYYY, h:mm:ss A') + " ] ----------------")
 
@@ -122,29 +122,29 @@ try {
                     , pixformat        : (argv.pixformat                                             || 'yuv420p' )
                     , dimensions       : (argv.dimensions                                            || undefined )
                     , skip_preview     : ((argv.skip_preview ? JSON.parse(argv.skip_preview) : null) || false     )
-              
+
                     , poster_time      : (parseFloat(argv.poster)                                    || 0         )
                     , poster_format    : (argv.poster_format                                         || 'png'     )
                     , poster_quality   : (String(argv.poster_quality)                                || '100'     )
                     , poster_scale     : (parseInt(argv.poster_scale)                                || null      )
-                                           
+
                     , gif_start        : (argv.gif_start                                             || 0         )
                     , gif_duration     : (argv.gif_duration                                          || 3         )
                     , gif_fps          : (argv.gif_fps                                               || 30        )
                     , gif_scale        : (argv.gif_scale                                             || 480       )
-      
+
                 }
 
                 log.info('\n\tPublishing Configuration\n\n%o', user_conf);
 
-                step();   
-      
-    }, 
+                step();
+
+    },
 
     (step) => {
 
         //function to spawn `transcode-after-job.js` using captured settings above
-      var transcode = spawnSync('/Users/arie/.nvm/versions/node/v12.13.1/bin/node'
+      var transcode = spawn('node'
                               , [
                                     '/Users/arie/Dev/event-scripts/NodeJS/transcode-after-job.js',
                                     '--input'           , user_conf.input_file,
@@ -164,14 +164,14 @@ try {
                                 }
                             );
 
-        step();
-        
+        transcode.on('exit', (code) => {step()});
+
     },
 
     (step) => {
 
         //function to call on deployment app with setting from interface
-        var publish = spawnSync('/Users/arie/.nvm/versions/node/v12.13.1/bin/node'
+        var publish = spawn('node'
                               , [
                                     '/Users/arie/Dev/event-scripts/NodeJS/deploy-output/app.js'
                                     , '--data_uri'          , user_conf.data_uri
@@ -205,7 +205,7 @@ try {
                                 }
                             );
 
-        step();
+        publish.on('exit', (code) => {step()});
 
     }
 
@@ -213,8 +213,8 @@ try {
 
     log.info('\n\t[ FINISHED PUBLISHING! ]');
     process.exit();
-    
-    if (err) 
+
+    if (err)
         log.error(err);
 
   }) //END PUBLISHING APP ENTRY
