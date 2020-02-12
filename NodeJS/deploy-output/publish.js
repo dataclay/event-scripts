@@ -164,8 +164,11 @@ try {
                                 }
                             );
 
-        transcode.on('exit', (code) => {step()});
-
+      transcode.on('exit', (code) => {
+        console.log("Exiting transcode process with code [" + code + "]");
+        step();
+      });
+        
     },
 
     (step) => {

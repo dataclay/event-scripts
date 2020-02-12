@@ -30,7 +30,7 @@ var gsheet = {
   auth      :  function(step) {
       var creds = require(config.params.auth.google.creds);
           gsheet.doc.useServiceAccountAuth(creds, step);
-  },
+  },  
 
   store_url : function(step) {
 
@@ -38,7 +38,7 @@ var gsheet = {
 
       gsheet.worksheet.getCells({
          'min-row' : gsheet.row.row_idx
-        ,'max-row' : gsheet.row.row_idx
+        ,'max-row' : gsheet.row.row_idx 
         ,'min-col' : p.fields.download.pos
         ,'max-col' : p.fields.download.pos
         ,'return-empty' : true
@@ -53,17 +53,17 @@ var gsheet = {
           log.info("\n\t\t%s\tDownload @ %s"
                   , emoji.get('floppy_disk')
                   , dl_link);
-
+            
         } else {
 
           dl_link = "Unavailable";
 
         }
-
+            
         gsheet.row.s3_url = dl_link;
 
         c.setValue(dl_link, step);
-
+        
       });
 
   },
@@ -75,7 +75,7 @@ var gsheet = {
             var sheet;
 
             log.info("\t\t" + pad('Google Document',25) + ' : [ ' + info.title + ' ] by ' + info.author.email);
-
+            
             if (!config.params.data.collection) {
               log.error(enums.errors.absent_collection);
               throw new Error(enums.errors.absent_collection);
@@ -85,13 +85,13 @@ var gsheet = {
 
               if (info.worksheets[i].title == config.params.data.collection) {
                 sheet = info.worksheets[i];
-                break;
+                break;  
               }
-
+              
             }
-
+            
             log.info("\t\t" + pad('Worksheet', 25) + ' : [ ' + sheet.title + ' ] | ' + sheet.rowCount + ' Rows, ' + sheet.colCount + ' Columns');
-
+            
             gsheet.worksheet = sheet;
 
             step();
@@ -145,9 +145,9 @@ var gsheet = {
                   ,'max-row' : gsheet.row.row_idx
                   ,'min-col' : config.params.fields.stream.pos
                   ,'max-col' : config.params.fields.stream.pos
-                  ,'return-empty' : true
+                  ,'return-empty' : true 
                 }, function(err, cells) {
-
+                      
                       var c = cells[0],
                           stream_key = null;
 
@@ -173,18 +173,18 @@ var gsheet = {
                             log.info("\n\t\t%s\tBroadcast status [ %s ]"
                                     , emoji.get('studio_microphone')
                                     , enums.stream.status.CREATED);
-
+                            
                             log.info("\n\t\t%s\t[ %s ] staged to [ %s ]"
                                     , emoji.get('timer_clock')
                                     , gsheet.row[config.params.fields.output.name]
                                     , config.params.video.service);
-
+                            
                             step();
 
                           });
 
                         })
-
+                      
                       });
 
                 });
@@ -193,12 +193,12 @@ var gsheet = {
 
           ], (err, results) => {
 
-            step();
+            step();  
 
           });
 
     })
-
+  
   },
 
   print_col : function(col) {
@@ -234,7 +234,7 @@ var gsheet = {
         if (Object.keys(enums.data.fields).some((key) => {
             return enums.data.fields[key] === c.value
         })) {
-
+          
           for (var name in f) {
 
             if (f[name].name === c.value && (name !== 'index')) {
@@ -242,7 +242,7 @@ var gsheet = {
                 f[name].letter = gsheet.column_to_letter(c.col);
                 gsheet.print_col(f[name]);
             }
-
+            
           }
 
         }
@@ -255,7 +255,7 @@ var gsheet = {
     });
 
     return deferred.promise;
-
+  
   },
 
   store_embed_script : function(step) {
@@ -274,7 +274,7 @@ var gsheet = {
     }, (err, cells) => {
 
         if (err) { log.error(err); throw err }
-
+        
         var c = cells[0];
 
         c.setValue(stream.embed(gsheet.row), step);
@@ -296,7 +296,7 @@ var gsheet = {
     }, (err, cells) => {
 
         if (err) { log.error(err); throw err }
-
+        
         var c = cells[0];
 
         c.setValue(stream.preview(gsheet.row), step);
@@ -318,7 +318,7 @@ var gsheet = {
     }, (err, cells) => {
 
         if (err) { log.error(err); throw err }
-
+        
         var c = cells[0];
 
         c.setValue(stream.url(), step);
@@ -331,20 +331,31 @@ var gsheet = {
 
     var p = config.params;
 
-    gsheet.row[p.fields.download.name   ] = aws.S3_URL.video   || 'Unavailable';
-    gsheet.row[p.fields.dl_poster.name  ] = aws.S3_URL.poster  || 'Unavailable';
-    gsheet.row[p.fields.dl_preview.name ] = aws.S3_URL.preview || 'Unavailable';
-    gsheet.row[p.fields.bcast.name      ] = enums.stream.status.CREATED;
-    gsheet.row[p.fields.stream.name     ] = stream.key;
-    gsheet.row[p.fields.preview.name    ] = stream.preview();
-    gsheet.row[p.fields.embed.name      ] = stream.embed();
-    gsheet.row[p.fields.url.name        ] = stream.url();
+    try {
 
-    // log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
-    //         , emoji.get('rocket')
-    //         , gsheet.row);
+      gsheet.row[p.fields.download.name   ] = aws.S3_URL.video   || 'Unavailable';
+      gsheet.row[p.fields.dl_poster.name  ] = aws.S3_URL.poster  || 'Unavailable';
+      gsheet.row[p.fields.dl_preview.name ] = aws.S3_URL.preview || 'Unavailable';
+      gsheet.row[p.fields.bcast.name      ] = enums.stream.status.CREATED;
+      gsheet.row[p.fields.stream.name     ] = stream.key;
+      gsheet.row[p.fields.preview.name    ] = stream.preview(); 
+      gsheet.row[p.fields.embed.name      ] = stream.embed();
+      gsheet.row[p.fields.url.name        ] = stream.url();
+    
 
+    log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
+            , emoji.get('rocket')
+            , gsheet.row);
+    
     gsheet.row.save(step);
+
+    } catch (err) {
+
+      log.error("\n\t\t%s\tThere was an error updating the Google Sheet with stream properties =>\n\n%o"
+                , emoji.get('exclamation')
+                , err);
+
+    }
 
   },
 
@@ -354,7 +365,7 @@ var gsheet = {
     log.info("\n\t[ DATASTORE ]\n");
 
     async.series([
-
+      
         //Create Google Spreadsheet object
         function (step) {
           gsheet.doc = new GoogleSpreadsheet(gsheet.parse_key(config.params.data.url));
