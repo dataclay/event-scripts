@@ -153,7 +153,8 @@ try {
                                     '--dest'            , user_conf.dest_loc,
                                     '--dimensions'      , user_conf.dimensions,
                                     '--skip_preview'    , user_conf.skip_preview,
-                                    '--poster'          , user_conf.poster_time
+                                    '--poster'          , user_conf.poster_time,
+                                    ((user_conf.remove_orig) ? '--cleanup' : '')
                                 ]
                               , {
                                       cwd      : process.cwd()

@@ -331,21 +331,29 @@ var gsheet = {
 
     var p = config.params;
 
-    gsheet.row[p.fields.download.name   ] = aws.S3_URL.video   || 'Unavailable';
-    gsheet.row[p.fields.dl_poster.name  ] = aws.S3_URL.poster  || 'Unavailable';
-    gsheet.row[p.fields.dl_preview.name ] = aws.S3_URL.preview || 'Unavailable';
-    gsheet.row[p.fields.bcast.name      ] = enums.stream.status.CREATED;
-    gsheet.row[p.fields.stream.name     ] = stream.key;
-    gsheet.row[p.fields.preview.name    ] = stream.preview();
-    gsheet.row[p.fields.embed.name      ] = stream.embed();
-    gsheet.row[p.fields.url.name        ] = stream.url();
+    try {
 
-    // log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
-    //         , emoji.get('rocket')
-    //         , gsheet.row);
+      gsheet.row[p.fields.download.name   ] = aws.S3_URL.video   || 'Unavailable';
+      gsheet.row[p.fields.dl_poster.name  ] = aws.S3_URL.poster  || 'Unavailable';
+      gsheet.row[p.fields.dl_preview.name ] = aws.S3_URL.preview || 'Unavailable';
+      gsheet.row[p.fields.bcast.name      ] = enums.stream.status.CREATED;
+      gsheet.row[p.fields.stream.name     ] = stream.key;
+      gsheet.row[p.fields.preview.name    ] = stream.preview();
+      gsheet.row[p.fields.embed.name      ] = stream.embed();
+      gsheet.row[p.fields.url.name        ] = stream.url();
 
-    gsheet.row.save(step);
+      // log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
+      //         , emoji.get('rocket')
+      //         , gsheet.row);
 
+      gsheet.row.save(step);
+
+    } catch (err) {
+
+      log.error("\nThere was an error updating the row in the Google Sheet\n\n%o", err);
+
+    }
+    
   },
 
   get : function(step) {

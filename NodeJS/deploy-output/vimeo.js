@@ -145,10 +145,20 @@ var vmo = {
                 //get all the user's albums
                 api.request(req_all_albums, function(error, body, status_code, headers) {
 
+                    if (error) {
+                        log.error(error.message)
+                        throw error;
+                    }
+
                     for (var i=0; i < body.data.length; i++) {
 
                         if (body.data[i]['name'] === config.params.video.group) {
                             vmo.video.group.uri = body.data[i]['uri'];
+
+                            log.info("\n\t\t%s\tGroup [ %s ] already created."
+                                , emoji.get('books')
+                                , vmo.video.group.name);
+
                             break;
                         }
 
