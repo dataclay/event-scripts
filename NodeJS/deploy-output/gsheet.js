@@ -338,16 +338,19 @@ var gsheet = {
       gsheet.row[p.fields.dl_preview.name ] = aws.S3_URL.preview || 'Unavailable';
       gsheet.row[p.fields.bcast.name      ] = enums.stream.status.CREATED;
       gsheet.row[p.fields.stream.name     ] = stream.key;
-      gsheet.row[p.fields.preview.name    ] = stream.preview(); 
+      gsheet.row[p.fields.preview.name    ] = stream.preview();
       gsheet.row[p.fields.embed.name      ] = stream.embed();
       gsheet.row[p.fields.url.name        ] = stream.url();
-    
+
+      // log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
+      //         , emoji.get('rocket')
+      //         , gsheet.row);
 
     log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
             , emoji.get('rocket')
             , gsheet.row);
     
-    gsheet.row.save(step);
+      gsheet.row.save(step);
 
     } catch (err) {
 
