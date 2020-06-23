@@ -10,3 +10,4 @@ node_modules
 /NodeJS/deploy-output/test-cmd.txt
 /NodeJS/deploy-output/registered-events.txt
 /NodeJS/deploy-output/dependencies.js
+/Tests
