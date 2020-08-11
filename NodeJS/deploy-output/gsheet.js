@@ -346,9 +346,8 @@ var gsheet = {
       //         , emoji.get('rocket')
       //         , gsheet.row);
 
-    log.info("\n\t\t%s\tUpdating entire row with data\n\n%o"
-            , emoji.get('rocket')
-            , gsheet.row);
+    log.info("\n\t\t%s\tUpdating entire row with data\n"
+            , emoji.get('rocket'));
     
       gsheet.row.save(step);
 
