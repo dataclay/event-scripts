@@ -189,13 +189,15 @@ try {
               sheet_query = {
                 offset  : (p.batch.start-1),
                 limit   : ((p.batch.end) - (p.batch.start))+1,
-                orderby : p.fields.index
+                //orderby : p.fields.index
               }
 
             }
 
             //Retrieve the rows needed to process
-            gsheet.worksheet.getRows(sheet_query, function( err, rows ){
+
+            log.info("Sheet query for getting rows\n\n%o", sheet_query);
+            gsheet.worksheet.getRows(sheet_query).then((rows, err) => {
 
                 if (err) {
                   log.error("\n\t\tThere was an error:\n\t\t\t%s\n\t\t\tUsing sheet query %j", err, sheet_query);
@@ -207,7 +209,7 @@ try {
                 } else {
                   deploy.single(rows[0], step);
                 }
-
+              
             });
 
        } else {  //API Data Source

@@ -205,21 +205,25 @@ try {
                                     , env      : process.env
                                     , stdio    : ['inherit', 'inherit', 'pipe']
                                     , encoding : 'utf-8'
-
                                 }
                             );
 
-        publish.on('exit', (code) => {step()});
+        publish.on('exit', (code) => {
+          console.log("Exiting publishing process with code [" + code + "]");
+          step()
+        });
 
     }
 
   ], (err) => {
 
+
+    if (err)
+      log.error(err);
+
     log.info('\n\t[ FINISHED PUBLISHING! ]');
     process.exit();
 
-    if (err)
-        log.error(err);
 
   }) //END PUBLISHING APP ENTRY
 

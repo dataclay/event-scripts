@@ -5,13 +5,14 @@ var log               = require('./logger'),
     URL               = require('url'),
     emoji             = require('node-emoji'),
     path              = require('path'),
-    GoogleSpreadsheet = require('google-spreadsheet'),
     Q                 = require('q'),
     config            = require('./config'),
     pad               = require('pad'),
     jw                = require('./jwplatform'),
     vmo               = require('./vimeo'),
     aws               = require('./aws');
+
+const {GoogleSpreadsheet} = require('google-spreadsheet');
 
 var gsheet = {
 
@@ -27,9 +28,16 @@ var gsheet = {
 
   },
 
-  auth      :  function(step) {
+  auth :  async function() {
+
       var creds = require(config.params.auth.google.creds);
-          gsheet.doc.useServiceAccountAuth(creds, step);
+      
+      try {
+        await gsheet.doc.useServiceAccountAuth(creds);
+      } catch (err) {
+        log.error("There was an issue authenticating with Google using a Service Account.");
+      }
+
   },  
 
   store_url : function(step) {
@@ -68,35 +76,41 @@ var gsheet = {
 
   },
 
-  select_sheet : function(step) {
+  select_sheet : async function() {
 
-    gsheet.doc.getInfo(function(err, info) {
+    try {
 
-            var sheet;
+      await gsheet.doc.loadInfo().then(() => {
+        
+        log.info("\t\t" + pad('Google Document',25) + ' : [ ' + gsheet.doc.title + ' ]');
 
-            log.info("\t\t" + pad('Google Document',25) + ' : [ ' + info.title + ' ] by ' + info.author.email);
-            
-            if (!config.params.data.collection) {
-              log.error(enums.errors.absent_collection);
-              throw new Error(enums.errors.absent_collection);
-            }
+        if (!config.params.data.collection) {
+          log.error(enums.errors.absent_collection);
+          throw new Error(enums.errors.absent_collection);
+        }
 
-            for (var i=0; i < info.worksheets.length; i++) {
+        for (var i=0; i < gsheet.doc.sheetCount; i++) {
 
-              if (info.worksheets[i].title == config.params.data.collection) {
-                sheet = info.worksheets[i];
-                break;  
-              }
-              
-            }
-            
-            log.info("\t\t" + pad('Worksheet', 25) + ' : [ ' + sheet.title + ' ] | ' + sheet.rowCount + ' Rows, ' + sheet.colCount + ' Columns');
-            
-            gsheet.worksheet = sheet;
+          if (gsheet.doc.sheetsByIndex[i].title == config.params.data.collection) {
+            sheet = gsheet.doc.sheetsByIndex[i];
+            break;  
+          }
+          
+        }
+        
+        log.info("\t\t" + pad('Worksheet Title', 25) + ' : [ ' + sheet.title + ' ] | ' + sheet.rowCount + ' Rows, ' + sheet.columnCount + ' Columns');
+        
+        gsheet.worksheet = sheet;
 
-            step();
+        return;
 
-    });
+      });
+
+    } catch (err) {
+
+      log.info("%s", err.message);
+
+    }
 
   },
 
@@ -206,40 +220,25 @@ var gsheet = {
     return;
   },
 
-  get_col_positions : function(step) {
+  get_col_positions : async function() {
 
-    var deferred = Q.defer();
-
-    gsheet.worksheet.getCells({
-      'min-row': 1,
-      'max-row': 1,
-      'min-col': 1,
-      'max-col': gsheet.worksheet.colCount,
-      'return-empty': true
-    }, function(err, cells) {
-
-      if (err) {
-        deferred.reject();
-      }
+    await gsheet.worksheet.loadHeaderRow().then(() => {
 
       log.info("\t\t" + pad("Column Positions", 25));
 
-      var f = config.params.fields;
+      for (var i=1; i <= gsheet.worksheet.headerValues.length; i++ ) {
 
-      for (var cell in cells) {
-
-        var c = cells[cell];
-
-        // if the column / property exists in the fields list, then set it
         if (Object.keys(enums.data.fields).some((key) => {
-            return enums.data.fields[key] === c.value
+            return enums.data.fields[key] === gsheet.worksheet.headerValues[i]
         })) {
-          
+
+          var f = config.params.fields;
+
           for (var name in f) {
 
-            if (f[name].name === c.value && (name !== 'index')) {
-                f[name].pos    = c.col;
-                f[name].letter = gsheet.column_to_letter(c.col);
+            if (f[name].name === gsheet.worksheet.headerValues[i] && (name !== 'index')) {
+                f[name].pos    = i+1;
+                f[name].letter = gsheet.column_to_letter(i+1);
                 gsheet.print_col(f[name]);
             }
             
@@ -249,12 +248,9 @@ var gsheet = {
 
       }
 
-      deferred.resolve();
-      step();
+      return;
 
-    });
-
-    return deferred.promise;
+    })
   
   },
 
@@ -388,7 +384,7 @@ var gsheet = {
       if (err) {
         deferred.reject();
       }
-
+      
       step();
 
     });
