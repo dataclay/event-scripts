@@ -32,7 +32,7 @@
     "archiver": "^2.1.1",
     "async": "^2.6.1",
     "aws-sdk": "^2.262.1",
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "bug-killer": "^4.4.4",
     "extend": "^3.0.2",
     "ffmpeg-on-progress": "^1.0.0",
