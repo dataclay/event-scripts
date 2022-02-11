@@ -31,7 +31,7 @@
   "dependencies": {
     "archiver": "^2.1.1",
     "async": "^2.6.1",
-    "aws-sdk": "^2.262.1",
+    "aws-sdk": "^2.814.0",
     "axios": "^0.18.1",
     "bug-killer": "^4.4.4",
     "extend": "^3.0.2",
