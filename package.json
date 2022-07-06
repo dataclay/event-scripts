@@ -44,7 +44,7 @@
     "https-proxy-agent": "^2.2.4",
     "jwplatform-api": "git+https://github.com/dataclay/jwplatform-api.git",
     "minimist": "^1.2.3",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "node-emoji": "^1.5.1",
     "node-uuid": "^1.4.7",
     "npm": "^6.14.6",
