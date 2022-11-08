@@ -55,7 +55,7 @@
     "q": "^1.4.1",
     "r-json": "^1.2.8",
     "readline-sync": "^1.4.9",
-    "sheetrock": "^1.1.4",
+    "sheetrock": "^1.2.0",
     "single-line-log": "^1.1.2",
     "sprintf-js": "^1.1.1",
     "uuid": "^3.3.2",
