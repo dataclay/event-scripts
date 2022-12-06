@@ -62,7 +62,7 @@
     "vimeo": "^2.1.0",
     "winston": "^3.1.0",
     "write-json": "^3.0.1",
-    "youtube-api": "^2.0.10"
+    "youtube-api": "^3.0.1"
   },
   "devDependencies": {
     "madge": "^4.0.1"
