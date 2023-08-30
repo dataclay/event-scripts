@@ -43,7 +43,7 @@
     "googleapis": "^39.1.0",
     "https-proxy-agent": "^2.2.4",
     "jwplatform-api": "git+https://github.com/dataclay/jwplatform-api.git",
-    "minimist": "^1.2.3",
+    "minimist": "^1.2.6",
     "moment": "^2.22.2",
     "node-emoji": "^1.5.1",
     "node-uuid": "^1.4.7",
