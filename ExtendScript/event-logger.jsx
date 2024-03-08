@@ -44,7 +44,8 @@ Follow these steps to use this script:
 
 */
 
-var message,
+var message, harvest, dl, dynamic_layer_names,
+    footage = {};
     job_props = {};
 
 //Log what event was just broadcast
@@ -66,10 +67,37 @@ if ($D.event() === 'bot_pre_data' ) {           //Handling pre-data event
     message = "Proceeding to re-version AEP for job [ " + $D.job.get('id') + " ]";
     $D.log.msg('JSX SCRIPT', message);
 
+} else if ($D.event() === 'bot_pre_dl') {      //Handling pre-dl event
+
+    dl = $D.download();
+    message = "Proceeding to download remote footage";
+    $D.log.msg('JSX SCRIPT', message, dl.to_console(true));
+
+} else if ($D.event() === 'bot_pre_ftg') {      //Handling pre-ftg event
+
+    footage.layer  = $D.footage.layer()  || null;
+    footage.source = $D.footage.source() || null;
+    footage.item   = $D.footage.item()   || null;
+
+    message = "Proceeding to process footage";
+    if (footage.layer) {
+        $D.log.msg('JSX SCRIPT', "Layer footage mapped to", footage.layer.name);
+        $D.log.msg('JSX SCRIPT', "Layer source", footage.layer.source.file.fsName);
+    }
+    
+    if (footage.source) {
+        $D.log.msg('JSX SCRIPT', "Path to footage source",  footage.source);
+    }
+    
+    if (footage.item) {
+        $D.log.msg('JSX SCRIPT', "Footage item ID in AE project", footage.item.id);
+    }
+    
+
 } else if ($D.event() === 'bot_pre_layr') {     //Handling pre-update event
 
-    var harvest = $D.harvest(),
-        dynamic_layer_names  = [];
+    harvest = $D.harvest();
+    dynamic_layer_names  = [];
 
     message = "Proceeding to update following layers for job [ " + $D.job.get('id') + " ]";
 
@@ -112,6 +140,33 @@ if ($D.event() === 'bot_pre_data' ) {           //Handling pre-data event
 
     message = "Re-versioning job [ " + $D.job.get('id') + " ] is now complete! File containing job information"
     $D.log.msg('JSX SCRIPT', message, $D.job.file().fsName);
+
+} else if ($D.event() === 'bot_post_dl') {
+
+    message = "After Footage Download Event!"
+    dl = $D.download();
+    $D.log.msg('JSX SCRIPT', message, dl.to_console(true));
+
+} else if ($D.event() === 'bot_post_ftg') {
+
+    message = "After Footage Processing Event!"
+    footage.layer  = $D.footage.layer()  || null;
+    footage.source = $D.footage.source() || null;
+    footage.item   = $D.footage.item()   || null;
+
+    message = "Proceeding to process footage";
+    if (footage.layer) {
+        $D.log.msg('JSX SCRIPT', "Layer footage mapped to", footage.layer.name);
+        $D.log.msg('JSX SCRIPT', "Layer source", footage.layer.source.file.fsName);
+    }
+    
+    if (footage.source) {
+        $D.log.msg('JSX SCRIPT', "Path to footage source",  footage.source);
+    }
+    
+    if (footage.item) {
+        $D.log.msg('JSX SCRIPT', "Footage item ID in AE project", footage.item.id);
+    }
 
 } else if ($D.event() === 'bot_post_batch') {
 
